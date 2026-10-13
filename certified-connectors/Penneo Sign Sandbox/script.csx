@@ -43,17 +43,30 @@ public class Script : ScriptBase
         }
 
         var returnFile = false;
+        string mediaType = null;
 
         if ("DownloadDocument".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
         {
             var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
             var format = query["format"];
-            // "pdf" remains accepted so flows saved before the file option keep returning the raw file.
-            returnFile = "file".Equals(format, StringComparison.OrdinalIgnoreCase)
-                || "pdf".Equals(format, StringComparison.OrdinalIgnoreCase);
 
-            // "format" is handled here. Penneo returns the base64 encoded JSON representation,
-            // and the bytes themselves say whether the file is a PDF or a ZIP.
+            if ("pdf".Equals(format, StringComparison.OrdinalIgnoreCase))
+            {
+                returnFile = true;
+                mediaType = "application/pdf";
+            }
+            else if ("zip".Equals(format, StringComparison.OrdinalIgnoreCase))
+            {
+                returnFile = true;
+                mediaType = "application/zip";
+            }
+            else if ("file".Equals(format, StringComparison.OrdinalIgnoreCase))
+            {
+                returnFile = true;
+            }
+
+            // "format" is handled here. Penneo returns the base64 encoded JSON representation.
+            // pdf and zip set that content type. file uses the bytes: %PDF or PK.
             this.Context.Request.RequestUri = RemoveQueryParameter(this.Context.Request.RequestUri, "format");
         }
 
@@ -61,7 +74,7 @@ public class Script : ScriptBase
 
         if (returnFile && response.IsSuccessStatusCode)
         {
-            response = await ConvertToFileResponse(response).ConfigureAwait(continueOnCapturedContext: false);
+            response = await ConvertToFileResponse(response, mediaType).ConfigureAwait(continueOnCapturedContext: false);
         }
 
         return response;
@@ -100,7 +113,7 @@ public class Script : ScriptBase
         this.Context.Request.Content = new StringContent(payload.ToString(Newtonsoft.Json.Formatting.None), Encoding.UTF8, "application/json");
     }
 
-    private async Task<HttpResponseMessage> ConvertToFileResponse(HttpResponseMessage response)
+    private async Task<HttpResponseMessage> ConvertToFileResponse(HttpResponseMessage response, string mediaType)
     {
         var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(continueOnCapturedContext: false);
 
@@ -130,7 +143,7 @@ public class Script : ScriptBase
         }
 
         response.Content = new ByteArrayContent(file);
-        response.Content.Headers.ContentType = new MediaTypeHeaderValue(MediaTypeFor(file));
+        response.Content.Headers.ContentType = new MediaTypeHeaderValue(mediaType ?? MediaTypeFor(file));
 
         return response;
     }
