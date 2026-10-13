@@ -9,7 +9,7 @@ To use this connector, you will need an active Penneo account.
 ## Supported Actions
 
 ### Create a new case file
-Creates a new case file in Penneo with the specified documents and signers. The case file will be created in Penneo, and a UUID and a payloadHash will be returned that can be used to check the creation status via the queue status endpoint.
+Creates a new case file in Penneo with the specified documents (PDF or ZIP) and signers. The case file will be created in Penneo, and a UUID and a payloadHash will be returned that can be used to check the creation status via the queue status endpoint. Case files created through this connector are marked with the origin `microsoft`.
 
 ### Check job status
 Retrieves the current status of a casefile by providing the job UUID and payloadHash. This endpoint is used to poll for job completion status after submitting a case file creation request. The endpoint is rate-limited to 20 requests per minute per uuid-payloadHash combination.
@@ -44,19 +44,20 @@ The connector has been configured to use OAuth with Authorization Code Grant. Us
 ### Creating a Case File
 
 1. **Prepare Your Documents**:
-   - Convert your PDF documents to base64 encoding
-   - Ensure documents are valid PDF files
+   - Convert your PDF or ZIP documents to base64 encoding
+   - Ensure documents are valid PDF or ZIP files. A ZIP is added as a single document and signed as an ASiC-E container; a signable ZIP requires QES signing methods
 
 2. **Configure Signers**:
    - Provide signer name and email (required)
    - Optionally provide role, language, signing order, etc.
    - Configure email notifications and custom email templates if needed
+   - Set `reminderInterval` (minimum 1 day) to override the company reminder interval, leave it empty to use the company default, or send `null` to disable reminders for the signer
 
 3. **Create the Case File**:
    - Use the "Create a new case file" action
    - Fill in the case file details:
      - Title
-     - Documents (base64 encoded PDFs)
+     - Documents (base64 encoded PDF or ZIP files)
      - Signers (with names and optional details)
      - Optional settings (expiration, language, visibility, etc.)
 
@@ -84,11 +85,11 @@ Note: You can check what each field does by checking https://penneo.readme.io/re
 
 2. **Asynchronous Processing**: Case file creation is asynchronous. You must use the job status endpoint to check completion rather than expecting immediate results.
 
-3. **Base64 Encoding**: Documents must be base64 encoded. Ensure proper encoding to avoid request failures(you can use base64 string function in the Power Platform to encode the binary PDF files).
+3. **Base64 Encoding**: Documents must be base64 encoded. Ensure proper encoding to avoid request failures(you can use base64 string function in the Power Platform to encode the binary PDF or ZIP files).
 
 4. **Production Environment**: This connector is configured for the Penneo production environment (`app.penneo.com`).
 
-5. **Document Size**: Large documents may take longer to process. Consider document size limits when encoding to base64.
+5. **Document Size**: Large documents may take longer to process. The request body is limited to 25 MB, which leaves about 18 MB for base64 encoded files.
 
 ## Deployment Instructions
 

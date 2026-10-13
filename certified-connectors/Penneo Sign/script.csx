@@ -1,10 +1,15 @@
 using System;
+using System.IO;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Web;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 public class Script : ScriptBase
 {
+    private const string CaseFileOrigin = "microsoft";
+
     private static readonly HashSet<string> LegacyAuthOperations = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
         "GetCaseFileDetails",
@@ -32,6 +37,11 @@ public class Script : ScriptBase
             }
         }
 
+        if ("CreateCaseFile".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+        {
+            await SetCaseFileOrigin().ConfigureAwait(continueOnCapturedContext: false);
+        }
+
         var returnPdf = false;
 
         if ("DownloadDocument".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
@@ -51,6 +61,39 @@ public class Script : ScriptBase
         }
 
         return response;
+    }
+
+    private async Task SetCaseFileOrigin()
+    {
+        if (this.Context.Request.Content == null)
+        {
+            return;
+        }
+
+        var body = await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(continueOnCapturedContext: false);
+
+        JObject payload;
+        try
+        {
+            // DateParseHandling.None keeps date-like strings (titles, metadata) byte-for-byte on re-serialization.
+            using (var reader = new JsonTextReader(new StringReader(body)) { DateParseHandling = DateParseHandling.None })
+            {
+                payload = JObject.Load(reader);
+            }
+        }
+        catch (JsonReaderException)
+        {
+            return;
+        }
+
+        if (!(payload["caseFile"] is JObject caseFile))
+        {
+            return;
+        }
+
+        caseFile["origin"] = CaseFileOrigin;
+
+        this.Context.Request.Content = new StringContent(payload.ToString(Formatting.None), Encoding.UTF8, "application/json");
     }
 
     private async Task<HttpResponseMessage> ConvertToPdfResponse(HttpResponseMessage response)
