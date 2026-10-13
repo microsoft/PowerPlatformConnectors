@@ -51,6 +51,7 @@ The connector has been configured to use OAuth with Authorization Code Grant. Us
     - Provide signer name and email (required)
     - Optionally provide role, language, signing order, etc.
     - Configure email notifications and custom email templates if needed
+    - To deliver via e-Boks instead of email, set `channel` to `eboks` and provide exactly one of `cpr` (10 digits) or `cvr` (8 digits, optional `:suffix`). Email is not needed for e-Boks. The customer must have e-Boks enabled (Configuration → Company → Communication Channels)
     - Set `reminderInterval` (minimum 1 day) to override the company reminder interval, leave it empty to use the company default, or send `null` to disable reminders for the signer
 
 3. **Create the Case File**:
