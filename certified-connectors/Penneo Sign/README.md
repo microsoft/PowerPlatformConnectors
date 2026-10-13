@@ -34,7 +34,7 @@ The available case file statuses are described below.
 Use status 5: 'completed' as trigger for starting getting the signed documents.
 
 ### Download document
-Downloads the content of a document from the Penneo. Use the `format` parameter to pick the response format: `json` (the default) returns the document as a base64 encoded string, `pdf` returns the raw PDF, `zip` returns the raw ZIP, and `file` returns the raw file with its own MIME type. With `file`, Penneo decides whether that file is a PDF or a ZIP. The raw file can be passed straight into actions such as "Create file". By default, the signed version of the document is returned; use the `signed` parameter to get the unsigned version instead. If your case file includes more documents ensure to loop over each document.
+Downloads the content of a document from the Penneo. Use the `format` parameter to pick the response format: `json` (the default) sends `Accept: application/json` and returns the document as a base64 encoded string. `default` (Default file type) sends no Accept header, so Penneo returns the file with its own content type, PDF or ZIP. The raw file can be passed straight into actions such as "Create file". By default, the signed version of the document is returned; use the `signed` parameter to get the unsigned version instead. If your case file includes more documents ensure to loop over each document.
 
 ## Obtaining Credentials
 
@@ -76,10 +76,8 @@ Note: You can check what each field does by checking https://penneo.readme.io/re
 
 2. **Download a document**:
     - Use the "Download document" action with the document id obtained from the case file details
-    - With the `json` format the response contains the document content as a base64 encoded string, which you can decode to retrieve the file
-    - With the `pdf` format the response is the PDF file itself, so it can be handed directly to a file action
-    - With the `zip` format the response is the ZIP file itself, so it can be handed directly to a file action
-    - With the `file` format the response is the file itself and the content type follows the document, PDF or ZIP
+    - With `json` the response contains the document content as a base64 encoded string
+    - With `default` the response is the file itself, PDF or ZIP, with the content type Penneo sends
 
 ## Known Issues and Limitations
 

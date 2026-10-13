@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Web;
 using Newtonsoft.Json;
@@ -42,42 +41,24 @@ public class Script : ScriptBase
             await SetCaseFileOrigin().ConfigureAwait(continueOnCapturedContext: false);
         }
 
-        var returnFile = false;
-        string mediaType = null;
-
         if ("DownloadDocument".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
         {
             var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
             var format = query["format"];
 
-            if ("pdf".Equals(format, StringComparison.OrdinalIgnoreCase))
-            {
-                returnFile = true;
-                mediaType = "application/pdf";
-            }
-            else if ("zip".Equals(format, StringComparison.OrdinalIgnoreCase))
-            {
-                returnFile = true;
-                mediaType = "application/zip";
-            }
-            else if ("file".Equals(format, StringComparison.OrdinalIgnoreCase))
-            {
-                returnFile = true;
-            }
-
-            // "format" is handled here. Penneo returns the base64 encoded JSON representation.
-            // pdf and zip set that content type. file uses the bytes: %PDF or PK.
+            // format is a connector choice, not a Penneo query parameter.
             this.Context.Request.RequestUri = RemoveQueryParameter(this.Context.Request.RequestUri, "format");
+
+            // json asks for the base64 JSON body. Anything else, including "default",
+            // sends no Accept header so Penneo returns the file with its own content type.
+            this.Context.Request.Headers.Remove("Accept");
+            if (string.IsNullOrEmpty(format) || "json".Equals(format, StringComparison.OrdinalIgnoreCase))
+            {
+                this.Context.Request.Headers.TryAddWithoutValidation("Accept", "application/json");
+            }
         }
 
-        var response = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
-
-        if (returnFile && response.IsSuccessStatusCode)
-        {
-            response = await ConvertToFileResponse(response, mediaType).ConfigureAwait(continueOnCapturedContext: false);
-        }
-
-        return response;
+        return await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
     }
 
     private async Task SetCaseFileOrigin()
@@ -111,74 +92,6 @@ public class Script : ScriptBase
         caseFile["origin"] = CaseFileOrigin;
 
         this.Context.Request.Content = new StringContent(payload.ToString(Newtonsoft.Json.Formatting.None), Encoding.UTF8, "application/json");
-    }
-
-    private async Task<HttpResponseMessage> ConvertToFileResponse(HttpResponseMessage response, string mediaType)
-    {
-        var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(continueOnCapturedContext: false);
-
-        string content;
-        try
-        {
-            content = (string)JObject.Parse(responseString)["content"];
-        }
-        catch (Exception)
-        {
-            return response;
-        }
-
-        if (string.IsNullOrEmpty(content))
-        {
-            return response;
-        }
-
-        byte[] file;
-        try
-        {
-            file = Convert.FromBase64String(content);
-        }
-        catch (FormatException)
-        {
-            return response;
-        }
-
-        response.Content = new ByteArrayContent(file);
-        response.Content.Headers.ContentType = new MediaTypeHeaderValue(mediaType ?? MediaTypeFor(file));
-
-        return response;
-    }
-
-    private static string MediaTypeFor(byte[] content)
-    {
-        if (StartsWithAscii(content, "%PDF"))
-        {
-            return "application/pdf";
-        }
-
-        if (StartsWithAscii(content, "PK"))
-        {
-            return "application/zip";
-        }
-
-        return "application/octet-stream";
-    }
-
-    private static bool StartsWithAscii(byte[] content, string prefix)
-    {
-        if (content == null || content.Length < prefix.Length)
-        {
-            return false;
-        }
-
-        for (var i = 0; i < prefix.Length; i++)
-        {
-            if (content[i] != (byte)prefix[i])
-            {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     private static Uri RemoveQueryParameter(Uri uri, string name)
