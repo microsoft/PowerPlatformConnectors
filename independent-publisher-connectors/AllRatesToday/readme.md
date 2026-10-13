@@ -13,7 +13,7 @@ An AllRatesToday account is required. Sign up for a free plan (no credit card ne
 1. Register at [allratestoday.com/register](https://allratestoday.com/register)
 2. Log in to your dashboard at [allratestoday.com/profile](https://allratestoday.com/profile)
 3. Copy your API key from the dashboard
-4. When creating a connection in Power Automate, paste your API key. The connector automatically sends it as a Bearer token in the Authorization header.
+4. When creating a connection, paste the API key on its own (for example `art_live_...`). Do not add the word `Bearer`; the connector adds it to the Authorization header for every operation.
 
 ## Supported Operations
 
