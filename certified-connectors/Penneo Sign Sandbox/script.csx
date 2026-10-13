@@ -42,22 +42,26 @@ public class Script : ScriptBase
             await SetCaseFileOrigin().ConfigureAwait(continueOnCapturedContext: false);
         }
 
-        var returnPdf = false;
+        var returnFile = false;
 
         if ("DownloadDocument".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
         {
             var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
-            returnPdf = "pdf".Equals(query["format"], StringComparison.OrdinalIgnoreCase);
+            var format = query["format"];
+            // "pdf" remains accepted so flows saved before the file option keep returning the raw file.
+            returnFile = "file".Equals(format, StringComparison.OrdinalIgnoreCase)
+                || "pdf".Equals(format, StringComparison.OrdinalIgnoreCase);
 
-            // "format" is handled here, Penneo always returns the base64 encoded JSON representation.
+            // "format" is handled here. Penneo returns the base64 encoded JSON representation,
+            // and the bytes themselves say whether the file is a PDF or a ZIP.
             this.Context.Request.RequestUri = RemoveQueryParameter(this.Context.Request.RequestUri, "format");
         }
 
         var response = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 
-        if (returnPdf && response.IsSuccessStatusCode)
+        if (returnFile && response.IsSuccessStatusCode)
         {
-            response = await ConvertToPdfResponse(response).ConfigureAwait(continueOnCapturedContext: false);
+            response = await ConvertToFileResponse(response).ConfigureAwait(continueOnCapturedContext: false);
         }
 
         return response;
@@ -96,7 +100,7 @@ public class Script : ScriptBase
         this.Context.Request.Content = new StringContent(payload.ToString(Newtonsoft.Json.Formatting.None), Encoding.UTF8, "application/json");
     }
 
-    private async Task<HttpResponseMessage> ConvertToPdfResponse(HttpResponseMessage response)
+    private async Task<HttpResponseMessage> ConvertToFileResponse(HttpResponseMessage response)
     {
         var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(continueOnCapturedContext: false);
 
@@ -115,20 +119,53 @@ public class Script : ScriptBase
             return response;
         }
 
-        byte[] pdf;
+        byte[] file;
         try
         {
-            pdf = Convert.FromBase64String(content);
+            file = Convert.FromBase64String(content);
         }
         catch (FormatException)
         {
             return response;
         }
 
-        response.Content = new ByteArrayContent(pdf);
-        response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/pdf");
+        response.Content = new ByteArrayContent(file);
+        response.Content.Headers.ContentType = new MediaTypeHeaderValue(MediaTypeFor(file));
 
         return response;
+    }
+
+    private static string MediaTypeFor(byte[] content)
+    {
+        if (StartsWithAscii(content, "%PDF"))
+        {
+            return "application/pdf";
+        }
+
+        if (StartsWithAscii(content, "PK"))
+        {
+            return "application/zip";
+        }
+
+        return "application/octet-stream";
+    }
+
+    private static bool StartsWithAscii(byte[] content, string prefix)
+    {
+        if (content == null || content.Length < prefix.Length)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < prefix.Length; i++)
+        {
+            if (content[i] != (byte)prefix[i])
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static Uri RemoveQueryParameter(Uri uri, string name)
