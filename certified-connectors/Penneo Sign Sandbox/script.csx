@@ -93,7 +93,7 @@ public class Script : ScriptBase
 
         caseFile["origin"] = CaseFileOrigin;
 
-        this.Context.Request.Content = new StringContent(payload.ToString(Formatting.None), Encoding.UTF8, "application/json");
+        this.Context.Request.Content = new StringContent(payload.ToString(Newtonsoft.Json.Formatting.None), Encoding.UTF8, "application/json");
     }
 
     private async Task<HttpResponseMessage> ConvertToPdfResponse(HttpResponseMessage response)
