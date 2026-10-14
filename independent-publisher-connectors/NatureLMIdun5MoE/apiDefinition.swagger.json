@@ -1,0 +1,102 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "NatureLM-Idun-5-MoE",
+    "description": "Azure AI Foundry Agent Service (OpenAI responses protocol) connector for a Foundry-hosted research agent. The connector is tenant-agnostic: supply your own Foundry resource, project, and agent names via the connection parameters.",
+    "version": "1.0.1",
+    "contact": {
+      "name": "Connector Support",
+      "url": "https://github.com/microsoft/PowerPlatformConnectors/issues"
+    }
+  },
+  "host": "your-foundry-resource.services.ai.azure.com",
+  "basePath": "/api/projects/your-project/agents/your-agent/endpoint/protocols/openai",
+  "schemes": ["https"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "paths": {
+    "/responses": {
+      "post": {
+        "operationId": "CreateResponse",
+        "summary": "Invoke the research agent",
+        "description": "Send a prompt to the agent via the OpenAI responses protocol. The 'model' field MUST be 'model-router'.",
+        "parameters": [
+          {
+            "name": "api-version",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "default": "2025-05-15-preview",
+            "x-ms-summary": "API version"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["model", "input"],
+              "properties": {
+                "model": {
+                  "type": "string",
+                  "description": "Must be 'model-router' (not the agent name).",
+                  "default": "model-router"
+                },
+                "input": {
+                  "type": "string",
+                  "description": "The user prompt to send to the agent."
+                },
+                "max_output_tokens": {
+                  "type": "integer",
+                  "default": 256
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Agent response (OpenAI responses schema).",
+            "schema": { "type": "object" }
+          },
+          "400": {
+            "description": "Invalid payload (e.g. model != model-router)."
+          }
+        }
+      }
+    }
+  },
+  "x-ms-parameterized-host": {
+    "hostTemplate": "{foundryResource}.services.ai.azure.com/api/projects/{projectName}/agents/{agentName}/endpoint/protocols/openai",
+    "useSchemePrefix": true,
+    "parameters": [
+      {
+        "name": "foundryResource",
+        "type": "string",
+        "x-ms-parameter-location": "client",
+        "defaultValue": "your-foundry-resource",
+        "required": true,
+        "description": "The Azure AI Foundry resource host name, e.g. contoso-resource.",
+        "x-ms-summary": "Foundry resource name"
+      },
+      {
+        "name": "projectName",
+        "type": "string",
+        "x-ms-parameter-location": "client",
+        "defaultValue": "your-project",
+        "required": true,
+        "description": "The Foundry project that hosts the agent.",
+        "x-ms-summary": "Foundry project name"
+      },
+      {
+        "name": "agentName",
+        "type": "string",
+        "x-ms-parameter-location": "client",
+        "defaultValue": "your-agent",
+        "required": true,
+        "description": "The Foundry agent exposed via the connector.",
+        "x-ms-summary": "Agent name"
+      }
+    ]
+  }
+}
