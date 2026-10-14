@@ -1,0 +1,1069 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Travis CI",
+    "description": "Travis CI is a hosted continuous integration service for building and testing code. Monitor builds and explore repositories, jobs, and branches.",
+    "version": "1.0",
+    "contact": {
+      "name": "Aaron Mah",
+      "url": "https://github.com/aaronmah",
+      "email": "aaronmah@microsoft.com"
+    }
+  },
+  "host": "api.travis-ci.com",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/build/{buildId}": {
+      "get": {
+        "operationId": "getBuild",
+        "summary": "Get Build",
+        "description": "Gets a single build by its numeric ID, including commit, branch, and job details.",
+        "tags": [
+          "Builds"
+        ],
+        "parameters": [
+          {
+            "name": "buildId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "x-ms-summary": "Build ID",
+            "x-ms-url-encoding": "single",
+            "description": "The numeric ID of the build."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The build details.",
+            "schema": {
+              "$ref": "#/definitions/Build"
+            }
+          }
+        }
+      }
+    },
+    "/repo/{repositorySlug}/builds": {
+      "get": {
+        "operationId": "listBuildsForRepo",
+        "summary": "List Builds for Repository",
+        "description": "Lists builds for a specific repository, with optional filtering by state, event type, and branch.",
+        "tags": [
+          "Builds"
+        ],
+        "parameters": [
+          {
+            "name": "repositorySlug",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Repository Slug",
+            "x-ms-url-encoding": "single",
+            "description": "Repository slug in owner/name format (e.g., myorg/my-repo)."
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "State",
+            "description": "Filter by build state.",
+            "enum": [
+              "created",
+              "started",
+              "passed",
+              "failed",
+              "errored",
+              "canceled"
+            ]
+          },
+          {
+            "name": "event_type",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Event Type",
+            "description": "Filter by event type.",
+            "enum": [
+              "push",
+              "pull_request",
+              "api",
+              "cron"
+            ]
+          },
+          {
+            "name": "branch.name",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Branch Name",
+            "description": "Filter by branch name."
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Sort By",
+            "x-ms-visibility": "advanced",
+            "description": "Sort field. Append :desc for descending order.",
+            "enum": [
+              "id",
+              "id:desc",
+              "created_at",
+              "created_at:desc",
+              "started_at",
+              "started_at:desc",
+              "finished_at",
+              "finished_at:desc",
+              "number",
+              "number:desc"
+            ]
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "x-ms-summary": "Limit",
+            "x-ms-visibility": "advanced",
+            "description": "Number of results per page (default 25, max 100)."
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "x-ms-summary": "Offset",
+            "x-ms-visibility": "advanced",
+            "description": "Number of results to skip for pagination."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of builds for the repository.",
+            "schema": {
+              "$ref": "#/definitions/BuildList"
+            }
+          }
+        }
+      }
+    },
+    "/repo/{repositorySlug}": {
+      "get": {
+        "operationId": "getRepository",
+        "summary": "Get Repository",
+        "description": "Gets details for a single repository, including its current build status.",
+        "tags": [
+          "Repositories"
+        ],
+        "parameters": [
+          {
+            "name": "repositorySlug",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Repository Slug",
+            "x-ms-url-encoding": "single",
+            "description": "Repository slug in owner/name format (e.g., myorg/my-repo)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The repository details.",
+            "schema": {
+              "$ref": "#/definitions/Repository"
+            }
+          }
+        }
+      }
+    },
+    "/repos": {
+      "get": {
+        "operationId": "listRepositories",
+        "summary": "List Repositories",
+        "description": "Lists repositories the authenticated user has access to, with optional filtering.",
+        "tags": [
+          "Repositories"
+        ],
+        "parameters": [
+          {
+            "name": "active",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "x-ms-summary": "Active",
+            "description": "Filter to active repositories only."
+          },
+          {
+            "name": "private",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "x-ms-summary": "Private",
+            "description": "Filter by private or public repositories."
+          },
+          {
+            "name": "starred",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "x-ms-summary": "Starred",
+            "description": "Filter to starred repositories only."
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Sort By",
+            "x-ms-visibility": "advanced",
+            "description": "Sort field for the results.",
+            "enum": [
+              "id",
+              "id:desc",
+              "owner_name",
+              "owner_name:desc",
+              "name",
+              "name:desc",
+              "active",
+              "active:desc",
+              "default_branch.last_build",
+              "default_branch.last_build:desc"
+            ]
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "x-ms-summary": "Limit",
+            "x-ms-visibility": "advanced",
+            "description": "Number of results per page (default 100)."
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "x-ms-summary": "Offset",
+            "x-ms-visibility": "advanced",
+            "description": "Number of results to skip for pagination."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of repositories.",
+            "schema": {
+              "$ref": "#/definitions/RepositoryList"
+            }
+          }
+        }
+      }
+    },
+    "/job/{jobId}": {
+      "get": {
+        "operationId": "getJob",
+        "summary": "Get Job",
+        "description": "Gets details for a single job within a build.",
+        "tags": [
+          "Jobs"
+        ],
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "x-ms-summary": "Job ID",
+            "x-ms-url-encoding": "single",
+            "description": "The numeric ID of the job."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The job details.",
+            "schema": {
+              "$ref": "#/definitions/Job"
+            }
+          }
+        }
+      }
+    },
+    "/job/{jobId}/log": {
+      "get": {
+        "operationId": "getJobLog",
+        "summary": "Get Job Log",
+        "description": "Gets the full text log for a job. Note: logs can be large; use for targeted debugging.",
+        "tags": [
+          "Jobs"
+        ],
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "x-ms-summary": "Job ID",
+            "x-ms-url-encoding": "single",
+            "description": "The numeric ID of the job whose log to retrieve."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The job log.",
+            "schema": {
+              "$ref": "#/definitions/JobLog"
+            }
+          }
+        }
+      }
+    },
+    "/build/{buildId}/jobs": {
+      "get": {
+        "operationId": "listJobsForBuild",
+        "summary": "List Jobs for Build",
+        "description": "Lists all jobs belonging to a specific build.",
+        "tags": [
+          "Jobs"
+        ],
+        "parameters": [
+          {
+            "name": "buildId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "x-ms-summary": "Build ID",
+            "x-ms-url-encoding": "single",
+            "description": "The numeric ID of the build."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of jobs for the build.",
+            "schema": {
+              "$ref": "#/definitions/JobList"
+            }
+          }
+        }
+      }
+    },
+    "/repo/{repositorySlug}/branch/{branchName}": {
+      "get": {
+        "operationId": "getBranch",
+        "summary": "Get Branch",
+        "description": "Gets a branch and its last build information for a repository.",
+        "tags": [
+          "Branches"
+        ],
+        "parameters": [
+          {
+            "name": "repositorySlug",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Repository Slug",
+            "x-ms-url-encoding": "single",
+            "description": "Repository slug in owner/name format (e.g., myorg/my-repo)."
+          },
+          {
+            "name": "branchName",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Branch Name",
+            "x-ms-url-encoding": "single",
+            "description": "Name of the branch (e.g., main, develop)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The branch details with last build information.",
+            "schema": {
+              "$ref": "#/definitions/Branch"
+            }
+          }
+        }
+      }
+    },
+    "/user": {
+      "get": {
+        "operationId": "getCurrentUser",
+        "summary": "Get Current User",
+        "description": "Gets the profile of the currently authenticated user.",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The authenticated user profile.",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Build": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Unique build ID.",
+          "x-ms-summary": "Build ID"
+        },
+        "number": {
+          "type": "string",
+          "description": "Incremental build number.",
+          "x-ms-summary": "Build Number"
+        },
+        "state": {
+          "type": "string",
+          "description": "Current build state (e.g., passed, failed, errored, canceled).",
+          "x-ms-summary": "State"
+        },
+        "duration": {
+          "type": "integer",
+          "description": "Build duration in seconds.",
+          "x-ms-summary": "Duration"
+        },
+        "event_type": {
+          "type": "string",
+          "description": "Event that triggered the build (e.g., push, pull_request, api, cron).",
+          "x-ms-summary": "Event Type"
+        },
+        "previous_state": {
+          "type": "string",
+          "description": "State of the previous build on the same branch.",
+          "x-ms-summary": "Previous State"
+        },
+        "pull_request_title": {
+          "type": "string",
+          "description": "Pull request title if the build was triggered by a PR.",
+          "x-ms-summary": "Pull Request Title"
+        },
+        "pull_request_number": {
+          "type": "integer",
+          "description": "Pull request number if the build was triggered by a PR.",
+          "x-ms-summary": "Pull Request Number"
+        },
+        "started_at": {
+          "type": "string",
+          "description": "Timestamp when the build started.",
+          "x-ms-summary": "Started At"
+        },
+        "finished_at": {
+          "type": "string",
+          "description": "Timestamp when the build finished.",
+          "x-ms-summary": "Finished At"
+        },
+        "repository": {
+          "type": "object",
+          "description": "The repository this build belongs to.",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "description": "Repository ID.",
+              "x-ms-summary": "Repository ID"
+            },
+            "name": {
+              "type": "string",
+              "description": "Repository name.",
+              "x-ms-summary": "Repository Name"
+            },
+            "slug": {
+              "type": "string",
+              "description": "Repository slug in owner/name format.",
+              "x-ms-summary": "Repository Slug"
+            }
+          }
+        },
+        "branch": {
+          "type": "object",
+          "description": "The branch this build ran on.",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Branch name.",
+              "x-ms-summary": "Branch Name"
+            }
+          }
+        },
+        "commit": {
+          "type": "object",
+          "description": "The commit that triggered this build.",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "description": "Commit record ID.",
+              "x-ms-summary": "Commit ID"
+            },
+            "sha": {
+              "type": "string",
+              "description": "Git commit SHA.",
+              "x-ms-summary": "Commit SHA"
+            },
+            "message": {
+              "type": "string",
+              "description": "Commit message.",
+              "x-ms-summary": "Commit Message"
+            },
+            "author_name": {
+              "type": "string",
+              "description": "Name of the commit author.",
+              "x-ms-summary": "Author Name"
+            },
+            "committed_at": {
+              "type": "string",
+              "description": "Timestamp when the commit was made.",
+              "x-ms-summary": "Committed At"
+            }
+          }
+        },
+        "created_by": {
+          "type": "object",
+          "description": "The user who created or triggered this build.",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "description": "User ID.",
+              "x-ms-summary": "User ID"
+            },
+            "login": {
+              "type": "string",
+              "description": "User login name.",
+              "x-ms-summary": "User Login"
+            }
+          }
+        }
+      }
+    },
+    "BuildList": {
+      "type": "object",
+      "properties": {
+        "builds": {
+          "type": "array",
+          "description": "The list of builds.",
+          "x-ms-summary": "Builds",
+          "items": {
+            "$ref": "#/definitions/Build"
+          }
+        },
+        "@pagination": {
+          "$ref": "#/definitions/Pagination"
+        }
+      }
+    },
+    "Repository": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Unique repository ID.",
+          "x-ms-summary": "Repository ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Repository name.",
+          "x-ms-summary": "Name"
+        },
+        "slug": {
+          "type": "string",
+          "description": "Repository slug in owner/name format.",
+          "x-ms-summary": "Slug"
+        },
+        "description": {
+          "type": "string",
+          "description": "Repository description.",
+          "x-ms-summary": "Description"
+        },
+        "github_language": {
+          "type": "string",
+          "description": "Primary programming language.",
+          "x-ms-summary": "Language"
+        },
+        "active": {
+          "type": "boolean",
+          "description": "Whether the repository is active on Travis CI.",
+          "x-ms-summary": "Active"
+        },
+        "private": {
+          "type": "boolean",
+          "description": "Whether the repository is private.",
+          "x-ms-summary": "Private"
+        },
+        "owner": {
+          "type": "object",
+          "description": "The repository owner.",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "description": "Owner ID.",
+              "x-ms-summary": "Owner ID"
+            },
+            "login": {
+              "type": "string",
+              "description": "Owner login name.",
+              "x-ms-summary": "Owner Login"
+            }
+          }
+        },
+        "default_branch": {
+          "type": "object",
+          "description": "The default branch of the repository.",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Default branch name.",
+              "x-ms-summary": "Default Branch Name"
+            },
+            "last_build": {
+              "type": "object",
+              "description": "The last build on the default branch.",
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "description": "Build ID.",
+                  "x-ms-summary": "Last Build ID"
+                },
+                "number": {
+                  "type": "string",
+                  "description": "Build number.",
+                  "x-ms-summary": "Last Build Number"
+                },
+                "state": {
+                  "type": "string",
+                  "description": "Build state.",
+                  "x-ms-summary": "Last Build State"
+                },
+                "duration": {
+                  "type": "integer",
+                  "description": "Build duration in seconds.",
+                  "x-ms-summary": "Last Build Duration"
+                },
+                "started_at": {
+                  "type": "string",
+                  "description": "When the build started.",
+                  "x-ms-summary": "Last Build Started At"
+                },
+                "finished_at": {
+                  "type": "string",
+                  "description": "When the build finished.",
+                  "x-ms-summary": "Last Build Finished At"
+                }
+              }
+            }
+          }
+        },
+        "starred": {
+          "type": "boolean",
+          "description": "Whether the repository is starred by the current user.",
+          "x-ms-summary": "Starred"
+        }
+      }
+    },
+    "RepositoryList": {
+      "type": "object",
+      "properties": {
+        "repositories": {
+          "type": "array",
+          "description": "The list of repositories.",
+          "x-ms-summary": "Repositories",
+          "items": {
+            "$ref": "#/definitions/Repository"
+          }
+        },
+        "@pagination": {
+          "$ref": "#/definitions/Pagination"
+        }
+      }
+    },
+    "Job": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Unique job ID.",
+          "x-ms-summary": "Job ID"
+        },
+        "number": {
+          "type": "string",
+          "description": "Job number within the build (e.g., 42.1).",
+          "x-ms-summary": "Job Number"
+        },
+        "state": {
+          "type": "string",
+          "description": "Current job state (e.g., passed, failed, errored).",
+          "x-ms-summary": "State"
+        },
+        "started_at": {
+          "type": "string",
+          "description": "Timestamp when the job started.",
+          "x-ms-summary": "Started At"
+        },
+        "finished_at": {
+          "type": "string",
+          "description": "Timestamp when the job finished.",
+          "x-ms-summary": "Finished At"
+        },
+        "allow_failure": {
+          "type": "boolean",
+          "description": "Whether this job is allowed to fail without failing the build.",
+          "x-ms-summary": "Allow Failure"
+        },
+        "queue": {
+          "type": "string",
+          "description": "The queue this job ran on.",
+          "x-ms-summary": "Queue"
+        },
+        "build": {
+          "type": "object",
+          "description": "The build this job belongs to.",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "description": "Build ID.",
+              "x-ms-summary": "Build ID"
+            }
+          }
+        },
+        "repository": {
+          "type": "object",
+          "description": "The repository this job belongs to.",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "description": "Repository ID.",
+              "x-ms-summary": "Repository ID"
+            },
+            "slug": {
+              "type": "string",
+              "description": "Repository slug.",
+              "x-ms-summary": "Repository Slug"
+            }
+          }
+        },
+        "commit": {
+          "type": "object",
+          "description": "The commit associated with this job.",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "description": "Commit record ID.",
+              "x-ms-summary": "Commit ID"
+            },
+            "sha": {
+              "type": "string",
+              "description": "Git commit SHA.",
+              "x-ms-summary": "Commit SHA"
+            },
+            "message": {
+              "type": "string",
+              "description": "Commit message.",
+              "x-ms-summary": "Commit Message"
+            }
+          }
+        },
+        "owner": {
+          "type": "object",
+          "description": "The owner of the repository.",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "description": "Owner ID.",
+              "x-ms-summary": "Owner ID"
+            },
+            "login": {
+              "type": "string",
+              "description": "Owner login.",
+              "x-ms-summary": "Owner Login"
+            }
+          }
+        },
+        "stage": {
+          "type": "object",
+          "description": "The build stage this job belongs to.",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "description": "Stage ID.",
+              "x-ms-summary": "Stage ID"
+            },
+            "name": {
+              "type": "string",
+              "description": "Stage name.",
+              "x-ms-summary": "Stage Name"
+            }
+          }
+        }
+      }
+    },
+    "JobList": {
+      "type": "object",
+      "properties": {
+        "jobs": {
+          "type": "array",
+          "description": "The list of jobs.",
+          "x-ms-summary": "Jobs",
+          "items": {
+            "$ref": "#/definitions/Job"
+          }
+        }
+      }
+    },
+    "JobLog": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Log record ID.",
+          "x-ms-summary": "Log ID"
+        },
+        "content": {
+          "type": "string",
+          "description": "Full text content of the job log.",
+          "x-ms-summary": "Log Content"
+        },
+        "log_parts": {
+          "type": "array",
+          "description": "Individual parts of the log.",
+          "x-ms-summary": "Log Parts",
+          "items": {
+            "type": "object",
+            "properties": {
+              "content": {
+                "type": "string",
+                "description": "Text content of this log part.",
+                "x-ms-summary": "Content"
+              },
+              "number": {
+                "type": "integer",
+                "description": "Sequence number of this log part.",
+                "x-ms-summary": "Part Number"
+              },
+              "final": {
+                "type": "boolean",
+                "description": "Whether this is the final log part.",
+                "x-ms-summary": "Is Final"
+              }
+            }
+          }
+        }
+      }
+    },
+    "Branch": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Branch name.",
+          "x-ms-summary": "Branch Name"
+        },
+        "default_branch": {
+          "type": "boolean",
+          "description": "Whether this is the default branch.",
+          "x-ms-summary": "Is Default Branch"
+        },
+        "exists_on_github": {
+          "type": "boolean",
+          "description": "Whether the branch exists on GitHub.",
+          "x-ms-summary": "Exists on GitHub"
+        },
+        "last_build": {
+          "type": "object",
+          "description": "The last build on this branch.",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "description": "Build ID.",
+              "x-ms-summary": "Last Build ID"
+            },
+            "number": {
+              "type": "string",
+              "description": "Build number.",
+              "x-ms-summary": "Last Build Number"
+            },
+            "state": {
+              "type": "string",
+              "description": "Build state.",
+              "x-ms-summary": "Last Build State"
+            },
+            "duration": {
+              "type": "integer",
+              "description": "Build duration in seconds.",
+              "x-ms-summary": "Last Build Duration"
+            },
+            "started_at": {
+              "type": "string",
+              "description": "When the build started.",
+              "x-ms-summary": "Last Build Started At"
+            },
+            "finished_at": {
+              "type": "string",
+              "description": "When the build finished.",
+              "x-ms-summary": "Last Build Finished At"
+            }
+          }
+        },
+        "repository": {
+          "type": "object",
+          "description": "The repository this branch belongs to.",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "description": "Repository ID.",
+              "x-ms-summary": "Repository ID"
+            },
+            "name": {
+              "type": "string",
+              "description": "Repository name.",
+              "x-ms-summary": "Repository Name"
+            },
+            "slug": {
+              "type": "string",
+              "description": "Repository slug.",
+              "x-ms-summary": "Repository Slug"
+            }
+          }
+        }
+      }
+    },
+    "User": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Unique user ID.",
+          "x-ms-summary": "User ID"
+        },
+        "login": {
+          "type": "string",
+          "description": "User login name.",
+          "x-ms-summary": "Login"
+        },
+        "name": {
+          "type": "string",
+          "description": "User display name.",
+          "x-ms-summary": "Name"
+        },
+        "github_id": {
+          "type": "integer",
+          "description": "Associated GitHub user ID.",
+          "x-ms-summary": "GitHub ID"
+        },
+        "avatar_url": {
+          "type": "string",
+          "description": "URL of the user avatar.",
+          "x-ms-summary": "Avatar URL"
+        },
+        "is_syncing": {
+          "type": "boolean",
+          "description": "Whether the user is currently syncing with GitHub.",
+          "x-ms-summary": "Is Syncing"
+        },
+        "synced_at": {
+          "type": "string",
+          "description": "Timestamp of the last sync with GitHub.",
+          "x-ms-summary": "Synced At"
+        },
+        "email": {
+          "type": "string",
+          "description": "User email address.",
+          "x-ms-summary": "Email"
+        }
+      }
+    },
+    "Pagination": {
+      "type": "object",
+      "description": "Pagination information for the result set.",
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "description": "Maximum number of results per page.",
+          "x-ms-summary": "Limit"
+        },
+        "offset": {
+          "type": "integer",
+          "description": "Number of results skipped.",
+          "x-ms-summary": "Offset"
+        },
+        "count": {
+          "type": "integer",
+          "description": "Total number of results available.",
+          "x-ms-summary": "Count"
+        },
+        "is_first": {
+          "type": "boolean",
+          "description": "Whether this is the first page.",
+          "x-ms-summary": "Is First Page"
+        },
+        "is_last": {
+          "type": "boolean",
+          "description": "Whether this is the last page.",
+          "x-ms-summary": "Is Last Page"
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization"
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Builds",
+      "description": "Operations for managing Travis CI builds."
+    },
+    {
+      "name": "Repositories",
+      "description": "Operations for exploring Travis CI repositories."
+    },
+    {
+      "name": "Jobs",
+      "description": "Operations for viewing build jobs and logs."
+    },
+    {
+      "name": "Branches",
+      "description": "Operations for viewing branch build status."
+    },
+    {
+      "name": "Users",
+      "description": "Operations for the authenticated user."
+    }
+  ],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.travis-ci.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.travis-ci.com/legal/privacy-policy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "IT Operations"
+    }
+  ]
+}
