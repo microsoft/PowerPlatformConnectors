@@ -1,0 +1,1182 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Wavelength",
+    "version": "1.0",
+    "description": "Wavelength turns call transcripts, meeting notes, and process descriptions into editable process flow diagrams. Use this connector to create flows from text, find and read flows, export and summarize flows, post flows to chat channels, and start a workflow when a flow changes.",
+    "contact": {
+      "name": "Wavelength support",
+      "url": "https://wavelengthflow.com",
+      "email": "support@wavelengthflow.com"
+    }
+  },
+  "host": "wavelengthflow.com",
+  "basePath": "/api",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/flows": {
+      "get": {
+        "operationId": "ListFlows",
+        "summary": "List flows",
+        "description": "Lists the saved flows of the signed-in user, with the most recent change first.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Title contains",
+            "description": "Text to match in the flow title. The match ignores case.",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "folder_id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Folder",
+            "description": "The folder to list flows from.",
+            "x-ms-visibility": "advanced",
+            "x-ms-dynamic-values": {
+              "operationId": "ListFolders",
+              "value-collection": "folders",
+              "value-path": "id",
+              "value-title": "name"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "default": 20,
+            "minimum": 1,
+            "maximum": 100,
+            "x-ms-summary": "Maximum count",
+            "description": "The maximum number of flows to return, from 1 to 100.",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was successful.",
+            "schema": {
+              "$ref": "#/definitions/FlowList"
+            }
+          },
+          "400": {
+            "description": "The request was not valid or the tool returned an error.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "The access token is not valid or expired."
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreateFlowFromText",
+        "summary": "Create a flow from text",
+        "description": "Creates and saves a process flow from a transcript, call notes, or a description of a process.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "text"
+              ],
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "x-ms-summary": "Text",
+                  "description": "The transcript, call notes, or process description to turn into a flow.",
+                  "x-ms-visibility": "important"
+                },
+                "title": {
+                  "type": "string",
+                  "x-ms-summary": "Title",
+                  "description": "The title of the flow. If you leave it empty, the first line of the text becomes the title.",
+                  "x-ms-visibility": "important"
+                },
+                "direction": {
+                  "type": "string",
+                  "enum": [
+                    "vertical",
+                    "horizontal"
+                  ],
+                  "default": "vertical",
+                  "x-ms-summary": "Layout direction",
+                  "description": "The layout direction. Vertical goes from top to bottom. Horizontal goes from left to right.",
+                  "x-ms-visibility": "advanced"
+                },
+                "folder_id": {
+                  "type": "string",
+                  "x-ms-summary": "Folder",
+                  "description": "The folder to save the flow in.",
+                  "x-ms-visibility": "advanced",
+                  "x-ms-dynamic-values": {
+                    "operationId": "ListFolders",
+                    "value-collection": "folders",
+                    "value-path": "id",
+                    "value-title": "name"
+                  }
+                },
+                "team_id": {
+                  "type": "string",
+                  "x-ms-summary": "Team ID",
+                  "description": "The ID of the team to assign the flow to.",
+                  "x-ms-visibility": "advanced"
+                },
+                "org_id": {
+                  "type": "string",
+                  "x-ms-summary": "Organization ID",
+                  "description": "The ID of the organization to save the flow in.",
+                  "x-ms-visibility": "advanced"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was successful.",
+            "schema": {
+              "$ref": "#/definitions/CreatedFlow"
+            }
+          },
+          "400": {
+            "description": "The request was not valid or the tool returned an error.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "The access token is not valid or expired."
+          }
+        }
+      }
+    },
+    "/search/flows": {
+      "get": {
+        "operationId": "SearchFlows",
+        "summary": "Search flows",
+        "description": "Searches the saved flows of the signed-in user by title, step labels, and transcript text.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Search text",
+            "description": "The text to search for. Use at least 2 characters.",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "default": 20,
+            "minimum": 1,
+            "maximum": 50,
+            "x-ms-summary": "Maximum count",
+            "description": "The maximum number of matches to return, from 1 to 50.",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was successful.",
+            "schema": {
+              "$ref": "#/definitions/SearchResult"
+            }
+          },
+          "400": {
+            "description": "The request was not valid or the tool returned an error.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "The access token is not valid or expired."
+          }
+        }
+      }
+    },
+    "/flows/{flow_id}": {
+      "get": {
+        "operationId": "GetFlow",
+        "summary": "Get a flow",
+        "description": "Gets the steps, links, Mermaid diagram, and open link of one saved flow.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "flow_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Flow ID",
+            "description": "The ID of the flow.",
+            "x-ms-visibility": "important",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "ListFlows",
+              "parameters": {
+                "limit": {
+                  "value": 100
+                }
+              },
+              "value-collection": "flows",
+              "value-path": "id",
+              "value-title": "title"
+            }
+          },
+          {
+            "name": "include_transcript",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "default": false,
+            "x-ms-summary": "Include transcript",
+            "description": "Set to Yes to include the full transcript in the result.",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was successful.",
+            "schema": {
+              "$ref": "#/definitions/FlowDetail"
+            }
+          },
+          "400": {
+            "description": "The request was not valid or the tool returned an error.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "The access token is not valid or expired."
+          }
+        }
+      }
+    },
+    "/flows/{flow_id}/export": {
+      "get": {
+        "operationId": "ExportFlow",
+        "summary": "Export a flow",
+        "description": "Exports one saved flow as Mermaid, SVG, draw.io XML, or JSON text.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "flow_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Flow ID",
+            "description": "The ID of the flow.",
+            "x-ms-visibility": "important",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "ListFlows",
+              "parameters": {
+                "limit": {
+                  "value": 100
+                }
+              },
+              "value-collection": "flows",
+              "value-path": "id",
+              "value-title": "title"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "mermaid",
+              "svg",
+              "drawio",
+              "json"
+            ],
+            "default": "mermaid",
+            "x-ms-summary": "Export format",
+            "description": "The export format.",
+            "x-ms-visibility": "important"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was successful.",
+            "schema": {
+              "$ref": "#/definitions/ExportResult"
+            }
+          },
+          "400": {
+            "description": "The request was not valid or the tool returned an error.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "The access token is not valid or expired."
+          }
+        }
+      }
+    },
+    "/flows/{flow_id}/summary": {
+      "get": {
+        "operationId": "SummarizeFlow",
+        "summary": "Summarize a flow",
+        "description": "Writes a recap email, a statement of work outline, or a list of systems in scope from one saved flow.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "flow_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Flow ID",
+            "description": "The ID of the flow.",
+            "x-ms-visibility": "important",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "ListFlows",
+              "parameters": {
+                "limit": {
+                  "value": 100
+                }
+              },
+              "value-collection": "flows",
+              "value-path": "id",
+              "value-title": "title"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "recap_email",
+              "sow_outline",
+              "systems_in_scope"
+            ],
+            "default": "systems_in_scope",
+            "x-ms-summary": "Summary format",
+            "description": "The summary format. The systems_in_scope format does not use AI.",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "audience",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Audience",
+            "description": "The reader of the recap email or the outline, for example the client CFO.",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was successful.",
+            "schema": {
+              "$ref": "#/definitions/SummaryResult"
+            }
+          },
+          "400": {
+            "description": "The request was not valid or the tool returned an error.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "The access token is not valid or expired."
+          }
+        }
+      }
+    },
+    "/flows/{flow_id}/send": {
+      "post": {
+        "operationId": "SendFlowToChannel",
+        "summary": "Send a flow to a channel",
+        "description": "Posts a flow summary and link to a Slack, Microsoft Teams, Google Chat, or Discord channel, or to a webhook that the user set up.",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "flow_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Flow ID",
+            "description": "The ID of the flow.",
+            "x-ms-visibility": "important",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "ListFlows",
+              "parameters": {
+                "limit": {
+                  "value": 100
+                }
+              },
+              "value-collection": "flows",
+              "value-path": "id",
+              "value-title": "title"
+            }
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "channel_id"
+              ],
+              "properties": {
+                "channel_id": {
+                  "type": "string",
+                  "x-ms-summary": "Channel",
+                  "description": "The channel to post to.",
+                  "x-ms-visibility": "important",
+                  "x-ms-dynamic-values": {
+                    "operationId": "ListChannels",
+                    "value-collection": "channels",
+                    "value-path": "channel_id",
+                    "value-title": "label"
+                  }
+                },
+                "summary_lines": {
+                  "type": "array",
+                  "maxItems": 15,
+                  "items": {
+                    "type": "string"
+                  },
+                  "x-ms-summary": "Summary lines",
+                  "description": "The summary lines to send in place of the default summary. You can send up to 15 lines.",
+                  "x-ms-visibility": "advanced"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was successful.",
+            "schema": {
+              "$ref": "#/definitions/SendResult"
+            }
+          },
+          "400": {
+            "description": "The request was not valid or the tool returned an error.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "The access token is not valid or expired."
+          }
+        }
+      }
+    },
+    "/channels": {
+      "get": {
+        "operationId": "ListChannels",
+        "summary": "List channels",
+        "description": "Lists the chat channels and webhooks that the user set up.",
+        "x-ms-visibility": "internal",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The request was successful.",
+            "schema": {
+              "$ref": "#/definitions/ChannelList"
+            }
+          },
+          "400": {
+            "description": "The request was not valid or the tool returned an error.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "The access token is not valid or expired."
+          }
+        }
+      }
+    },
+    "/folders": {
+      "get": {
+        "operationId": "ListFolders",
+        "summary": "List folders",
+        "description": "Lists the folders of the signed-in user.",
+        "x-ms-visibility": "internal",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The request was successful.",
+            "schema": {
+              "$ref": "#/definitions/FolderList"
+            }
+          },
+          "400": {
+            "description": "The request was not valid or the tool returned an error.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "The access token is not valid or expired."
+          }
+        }
+      }
+    },
+    "/trigger/flows": {
+      "get": {
+        "operationId": "OnFlowChanged",
+        "summary": "When a flow is created or updated",
+        "description": "Starts when a flow is created or changed. The trigger checks for changes at a fixed interval.",
+        "x-ms-visibility": "important",
+        "x-ms-trigger": "batch",
+        "x-ms-trigger-hint": "To see it work, create or edit a flow in the app.",
+        "parameters": [
+          {
+            "name": "folder_id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Folder",
+            "description": "Only start for flows in this folder.",
+            "x-ms-visibility": "advanced",
+            "x-ms-dynamic-values": {
+              "operationId": "ListFolders",
+              "value-collection": "folders",
+              "value-path": "id",
+              "value-title": "name"
+            }
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Changed after",
+            "description": "The trigger state. The trigger sets this value.",
+            "x-ms-visibility": "internal"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One or more flows changed.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/FlowListItem"
+              }
+            }
+          },
+          "202": {
+            "description": "No flows changed since the last check."
+          },
+          "401": {
+            "description": "The access token is not valid or expired."
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "FlowListItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Flow ID",
+          "description": "The ID of the flow."
+        },
+        "title": {
+          "type": "string",
+          "x-ms-summary": "Flow title",
+          "description": "The title of the flow."
+        },
+        "updated_at": {
+          "type": "string",
+          "x-ms-summary": "Updated at",
+          "description": "The date and time of the last change to the flow.",
+          "format": "date-time"
+        },
+        "folder_id": {
+          "type": "string",
+          "x-ms-summary": "Folder ID",
+          "description": "The ID of the folder that holds the flow. The value is empty when the flow is not in a folder.",
+          "x-nullable": true
+        },
+        "is_public": {
+          "type": "boolean",
+          "x-ms-summary": "Is public",
+          "description": "True when the flow has a public read-only link."
+        },
+        "shared": {
+          "type": "boolean",
+          "x-ms-summary": "Shared with me",
+          "description": "True when another user owns the flow."
+        },
+        "role": {
+          "type": "string",
+          "x-ms-summary": "My role",
+          "description": "The role of the user on the flow: owner, team, editor, or viewer."
+        },
+        "open_url": {
+          "type": "string",
+          "x-ms-summary": "Open URL",
+          "description": "The link that opens the flow in the app.",
+          "format": "uri"
+        }
+      }
+    },
+    "FlowList": {
+      "type": "object",
+      "properties": {
+        "flows": {
+          "type": "array",
+          "x-ms-summary": "Flows",
+          "description": "The list of flows.",
+          "items": {
+            "$ref": "#/definitions/FlowListItem"
+          }
+        }
+      }
+    },
+    "SearchMatch": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Flow ID",
+          "description": "The ID of the flow."
+        },
+        "title": {
+          "type": "string",
+          "x-ms-summary": "Flow title",
+          "description": "The title of the flow."
+        },
+        "updated_at": {
+          "type": "string",
+          "x-ms-summary": "Updated at",
+          "description": "The date and time of the last change to the flow.",
+          "format": "date-time"
+        },
+        "folder_id": {
+          "type": "string",
+          "x-ms-summary": "Folder ID",
+          "description": "The ID of the folder that holds the flow.",
+          "x-nullable": true
+        },
+        "shared": {
+          "type": "boolean",
+          "x-ms-summary": "Shared with me",
+          "description": "True when another user owns the flow."
+        },
+        "matched_in": {
+          "type": "array",
+          "x-ms-summary": "Matched in",
+          "description": "The parts of the flow that match: title, nodes, or transcript.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "matched_nodes": {
+          "type": "array",
+          "x-ms-summary": "Matched steps",
+          "description": "The steps that match the query.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "x-ms-summary": "Step ID",
+                "description": "The ID of the step."
+              },
+              "label": {
+                "type": "string",
+                "x-ms-summary": "Step label",
+                "description": "The label of the step."
+              },
+              "type": {
+                "type": "string",
+                "x-ms-summary": "Step type",
+                "description": "The type of the step, for example start, actor, system, data, or decision."
+              }
+            }
+          }
+        },
+        "transcript_snippet": {
+          "type": "string",
+          "x-ms-summary": "Transcript snippet",
+          "description": "A short part of the transcript that matches the query.",
+          "x-nullable": true
+        },
+        "open_url": {
+          "type": "string",
+          "x-ms-summary": "Open URL",
+          "description": "The link that opens the flow in the app.",
+          "format": "uri"
+        }
+      }
+    },
+    "SearchResult": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "x-ms-summary": "Query",
+          "description": "The search query."
+        },
+        "total": {
+          "type": "integer",
+          "x-ms-summary": "Total matches",
+          "description": "The number of matches.",
+          "format": "int32"
+        },
+        "matches": {
+          "type": "array",
+          "x-ms-summary": "Matches",
+          "description": "The flows that match the query.",
+          "items": {
+            "$ref": "#/definitions/SearchMatch"
+          }
+        }
+      }
+    },
+    "FlowNode": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Step ID",
+          "description": "The ID of the step."
+        },
+        "label": {
+          "type": "string",
+          "x-ms-summary": "Step label",
+          "description": "The label of the step."
+        },
+        "type": {
+          "type": "string",
+          "x-ms-summary": "Step type",
+          "description": "The type of the step, for example start, end, actor, task, system, data, or decision."
+        },
+        "owner": {
+          "type": "string",
+          "x-ms-summary": "Step owner",
+          "description": "The owner of the step."
+        },
+        "note": {
+          "type": "string",
+          "x-ms-summary": "Step note",
+          "description": "The note on the step."
+        },
+        "status": {
+          "type": "string",
+          "x-ms-summary": "Step status",
+          "description": "The conditional formatting status of the step: warning or error."
+        }
+      }
+    },
+    "FlowEdge": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "string",
+          "x-ms-summary": "Source step ID",
+          "description": "The ID of the step where the link starts."
+        },
+        "target": {
+          "type": "string",
+          "x-ms-summary": "Target step ID",
+          "description": "The ID of the step where the link ends."
+        },
+        "source_label": {
+          "type": "string",
+          "x-ms-summary": "Source step label",
+          "description": "The label of the step where the link starts."
+        },
+        "target_label": {
+          "type": "string",
+          "x-ms-summary": "Target step label",
+          "description": "The label of the step where the link ends."
+        },
+        "label": {
+          "type": "string",
+          "x-ms-summary": "Link label",
+          "description": "The label of the link."
+        },
+        "kind": {
+          "type": "string",
+          "x-ms-summary": "Link kind",
+          "description": "The kind of link, for example sequence or conditional."
+        },
+        "ai_guessed": {
+          "type": "boolean",
+          "x-ms-summary": "AI guessed",
+          "description": "True when the AI guessed the link."
+        }
+      }
+    },
+    "FlowDetail": {
+      "type": "object",
+      "properties": {
+        "flow_id": {
+          "type": "string",
+          "x-ms-summary": "Flow ID",
+          "description": "The ID of the flow."
+        },
+        "title": {
+          "type": "string",
+          "x-ms-summary": "Flow title",
+          "description": "The title of the flow."
+        },
+        "folder_id": {
+          "type": "string",
+          "x-ms-summary": "Folder ID",
+          "description": "The ID of the folder that holds the flow.",
+          "x-nullable": true
+        },
+        "is_owner": {
+          "type": "boolean",
+          "x-ms-summary": "Is owner",
+          "description": "True when the user owns the flow."
+        },
+        "my_role": {
+          "type": "string",
+          "x-ms-summary": "My role",
+          "description": "The role of the user on the flow."
+        },
+        "owner": {
+          "type": "string",
+          "x-ms-summary": "Owner email",
+          "description": "The email address of the flow owner."
+        },
+        "is_public": {
+          "type": "boolean",
+          "x-ms-summary": "Is public",
+          "description": "True when the flow has a public read-only link."
+        },
+        "public_url": {
+          "type": "string",
+          "x-ms-summary": "Public URL",
+          "description": "The public read-only link of the flow.",
+          "x-nullable": true
+        },
+        "nodes": {
+          "type": "array",
+          "x-ms-summary": "Steps",
+          "description": "The steps of the flow.",
+          "items": {
+            "$ref": "#/definitions/FlowNode"
+          }
+        },
+        "edges": {
+          "type": "array",
+          "x-ms-summary": "Links",
+          "description": "The links between the steps.",
+          "items": {
+            "$ref": "#/definitions/FlowEdge"
+          }
+        },
+        "mermaid": {
+          "type": "string",
+          "x-ms-summary": "Mermaid diagram",
+          "description": "The flow as a Mermaid flowchart string."
+        },
+        "transcript_chars": {
+          "type": "integer",
+          "x-ms-summary": "Transcript length",
+          "description": "The number of characters in the transcript.",
+          "format": "int32"
+        },
+        "transcript": {
+          "type": "string",
+          "x-ms-summary": "Transcript",
+          "description": "The full transcript. The value is set only when Include transcript is Yes."
+        },
+        "open_url": {
+          "type": "string",
+          "x-ms-summary": "Open URL",
+          "description": "The link that opens the flow in the app.",
+          "format": "uri"
+        }
+      }
+    },
+    "CreatedFlow": {
+      "type": "object",
+      "properties": {
+        "flow_id": {
+          "type": "string",
+          "x-ms-summary": "Flow ID",
+          "description": "The ID of the new flow."
+        },
+        "title": {
+          "type": "string",
+          "x-ms-summary": "Flow title",
+          "description": "The title of the new flow."
+        },
+        "node_count": {
+          "type": "integer",
+          "x-ms-summary": "Step count",
+          "description": "The number of steps in the new flow.",
+          "format": "int32"
+        },
+        "edge_count": {
+          "type": "integer",
+          "x-ms-summary": "Link count",
+          "description": "The number of links in the new flow.",
+          "format": "int32"
+        },
+        "node_labels": {
+          "type": "array",
+          "x-ms-summary": "Step labels",
+          "description": "A short list of step labels in the new flow.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "open_url": {
+          "type": "string",
+          "x-ms-summary": "Open URL",
+          "description": "The link that opens the new flow in the app.",
+          "format": "uri"
+        }
+      }
+    },
+    "ExportResult": {
+      "type": "object",
+      "properties": {
+        "flow_id": {
+          "type": "string",
+          "x-ms-summary": "Flow ID",
+          "description": "The ID of the flow."
+        },
+        "format": {
+          "type": "string",
+          "x-ms-summary": "Export format",
+          "description": "The export format."
+        },
+        "content": {
+          "type": "string",
+          "x-ms-summary": "Export content",
+          "description": "The exported flow as text. JSON exports are a JSON string."
+        }
+      }
+    },
+    "SummaryResult": {
+      "type": "object",
+      "properties": {
+        "flow_id": {
+          "type": "string",
+          "x-ms-summary": "Flow ID",
+          "description": "The ID of the flow."
+        },
+        "format": {
+          "type": "string",
+          "x-ms-summary": "Summary format",
+          "description": "The summary format."
+        },
+        "text": {
+          "type": "string",
+          "x-ms-summary": "Summary text",
+          "description": "The summary text in Markdown."
+        }
+      }
+    },
+    "SendResult": {
+      "type": "object",
+      "properties": {
+        "flow_id": {
+          "type": "string",
+          "x-ms-summary": "Flow ID",
+          "description": "The ID of the flow."
+        },
+        "channel_id": {
+          "type": "string",
+          "x-ms-summary": "Channel ID",
+          "description": "The ID of the channel."
+        },
+        "sent": {
+          "type": "boolean",
+          "x-ms-summary": "Sent",
+          "description": "True when the destination accepted the message."
+        },
+        "status": {
+          "type": "integer",
+          "x-ms-summary": "Destination status code",
+          "description": "The HTTP status code that the destination returned.",
+          "format": "int32"
+        },
+        "link": {
+          "type": "string",
+          "x-ms-summary": "Flow link",
+          "description": "The link to the flow in the message."
+        }
+      }
+    },
+    "ChannelList": {
+      "type": "object",
+      "properties": {
+        "channels": {
+          "type": "array",
+          "x-ms-summary": "Channels",
+          "description": "The chat channels and webhooks of the user.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "channel_id": {
+                "type": "string",
+                "x-ms-summary": "Channel ID",
+                "description": "The ID of the channel."
+              },
+              "label": {
+                "type": "string",
+                "x-ms-summary": "Channel label",
+                "description": "The label of the channel."
+              },
+              "kind": {
+                "type": "string",
+                "x-ms-summary": "Channel kind",
+                "description": "The kind of channel, for example slack, teams, google_chat, discord, or webhook."
+              },
+              "kind_name": {
+                "type": "string",
+                "x-ms-summary": "Channel kind name",
+                "description": "The display name of the channel kind."
+              },
+              "last_sent_at": {
+                "type": "string",
+                "x-ms-summary": "Last sent at",
+                "description": "The date and time of the last message.",
+                "x-nullable": true
+              },
+              "last_status": {
+                "type": "integer",
+                "x-ms-summary": "Last status code",
+                "description": "The HTTP status code of the last message.",
+                "format": "int32",
+                "x-nullable": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "FolderList": {
+      "type": "object",
+      "properties": {
+        "folders": {
+          "type": "array",
+          "x-ms-summary": "Folders",
+          "description": "The folders of the user.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "x-ms-summary": "Folder ID",
+                "description": "The ID of the folder."
+              },
+              "name": {
+                "type": "string",
+                "x-ms-summary": "Folder name",
+                "description": "The name of the folder."
+              },
+              "team_id": {
+                "type": "string",
+                "x-ms-summary": "Team ID",
+                "description": "The ID of the team that owns the folder.",
+                "x-nullable": true
+              },
+              "flow_count": {
+                "type": "integer",
+                "x-ms-summary": "Flow count",
+                "description": "The number of flows in the folder.",
+                "format": "int32"
+              }
+            }
+          }
+        }
+      }
+    },
+    "Error": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string",
+              "x-ms-summary": "Error code",
+              "description": "The error code."
+            },
+            "message": {
+              "type": "string",
+              "x-ms-summary": "Error message",
+              "description": "The error message."
+            }
+          }
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "oauth2-auth": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://mcp.wavelengthflow.com/authorize",
+      "tokenUrl": "https://mcp.wavelengthflow.com/token",
+      "scopes": {
+        "flows": "Read and write your Wavelength flows."
+      }
+    }
+  },
+  "security": [
+    {
+      "oauth2-auth": [
+        "flows"
+      ]
+    }
+  ],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://wavelengthflow.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://wavelengthflow.com/privacy.html"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Productivity;Collaboration"
+    }
+  ]
+}
