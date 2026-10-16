@@ -1,0 +1,506 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Firecrawl",
+    "version": "1.0",
+    "description": "Browser automation, code execution, search, and large-scale web crawling connector powered by Firecrawl.",
+    "contact": {
+      "name": "Anil Goud Gunda",
+      "url": "https://firecrawl.dev"
+    }
+  },
+  "host": "api.firecrawl.dev",
+  "basePath": "/v2",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://firecrawl.dev"
+    },
+    {
+      "propertyName": "Publisher",
+      "propertyValue": "Independent Publisher"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://firecrawl.dev/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Data"
+    }
+  ],
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization"
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "paths": {
+    "/interact": {
+      "post": {
+        "summary": "Create Interact Session",
+        "description": "Start a standalone Interact browser session that you can drive with code execution.",
+        "operationId": "CreateBrowserSession",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ttl": {
+                  "type": "integer",
+                  "default": 300,
+                  "minimum": 30,
+                  "maximum": 3600,
+                  "x-ms-summary": "Session Lifetime (Seconds)",
+                  "description": "Total session lifetime in seconds (30-3600)."
+                },
+                "activityTtl": {
+                  "type": "integer",
+                  "default": 300,
+                  "minimum": 10,
+                  "maximum": 3600,
+                  "x-ms-summary": "Inactivity Timeout (Seconds)",
+                  "description": "Seconds of inactivity before the session is automatically destroyed (10-3600)."
+                },
+                "streamWebView": {
+                  "type": "boolean",
+                  "default": true,
+                  "x-ms-summary": "Stream Web View",
+                  "description": "Whether to stream a live view of the browser session."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Interact session created successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "x-ms-summary": "Success Status"
+                },
+                "id": {
+                  "type": "string",
+                  "x-ms-summary": "Session ID",
+                  "description": "Unique session identifier needed to execute code blocks."
+                },
+                "cdpUrl": {
+                  "type": "string",
+                  "x-ms-summary": "CDP Proxy URL",
+                  "description": "WebSocket URL for native Chrome DevTools Protocol access."
+                },
+                "liveViewUrl": {
+                  "type": "string",
+                  "x-ms-summary": "Live View URL",
+                  "description": "URL to watch the session running in real time."
+                },
+                "interactiveLiveViewUrl": {
+                  "type": "string",
+                  "x-ms-summary": "Interactive Live View URL",
+                  "description": "URL to directly click, type, or scroll in the session live."
+                },
+                "expiresAt": {
+                  "type": "string",
+                  "x-ms-summary": "Expiration Timestamp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/interact/{sessionId}/execute": {
+      "post": {
+        "summary": "Run Code",
+        "description": "Run Playwright, Puppeteer, or agent-browser scripts inside an active standalone Interact session.",
+        "operationId": "ExecuteBrowserCode",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Session ID",
+            "description": "The target Interact session ID.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "code"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "x-ms-summary": "Script Code",
+                  "description": "Code execution payload (1-100,000 characters)."
+                },
+                "language": {
+                  "type": "string",
+                  "enum": [
+                    "python",
+                    "node",
+                    "bash"
+                  ],
+                  "default": "node",
+                  "x-ms-summary": "Runtime Language",
+                  "description": "Language engine to execute the script."
+                },
+                "timeout": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 300,
+                  "x-ms-summary": "Execution Timeout",
+                  "description": "Execution limit boundary in seconds (1-300)."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Code executed successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "x-ms-summary": "Execution Status"
+                },
+                "stdout": {
+                  "type": "string",
+                  "x-ms-summary": "Standard Output",
+                  "description": "Raw terminal output returned from script execution."
+                },
+                "result": {
+                  "type": "string",
+                  "x-ms-summary": "Result Object",
+                  "description": "Direct response payload values evaluated by the code string."
+                },
+                "stderr": {
+                  "type": "string",
+                  "x-ms-summary": "Standard Error Output"
+                },
+                "exitCode": {
+                  "type": "integer",
+                  "x-ms-summary": "Process Exit Code"
+                },
+                "killed": {
+                  "type": "boolean",
+                  "x-ms-summary": "Timeout Termination Status"
+                },
+                "error": {
+                  "type": "string",
+                  "x-ms-summary": "Exception Error Log"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/interact/{sessionId}": {
+      "delete": {
+        "summary": "Close Session",
+        "description": "Destroy a standalone Interact session and release its browser resources to stop billing.",
+        "operationId": "CloseBrowserSession",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Session ID",
+            "description": "The target Interact session ID to close.",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Session closed successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "x-ms-summary": "Success Status"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crawl": {
+      "post": {
+        "summary": "Start Crawl",
+        "description": "Initiate an asynchronous crawl on a website. Returns a Crawl ID to retrieve data later.",
+        "operationId": "StartCrawl",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-ms-summary": "Target URL",
+                  "description": "The base URL to start crawling from."
+                },
+                "limit": {
+                  "type": "integer",
+                  "default": 100,
+                  "x-ms-summary": "Page Limit",
+                  "description": "Maximum number of pages to crawl."
+                },
+                "maxDiscoveryDepth": {
+                  "type": "integer",
+                  "x-ms-summary": "Max Discovery Depth",
+                  "description": "Maximum depth to crawl based on discovery order."
+                },
+                "crawlEntireDomain": {
+                  "type": "boolean",
+                  "default": false,
+                  "x-ms-summary": "Crawl Entire Domain",
+                  "description": "True: crawls all internal links. False: only crawls deeper child paths."
+                },
+                "scrapeOptions": {
+                  "type": "object",
+                  "x-ms-summary": "Scrape Options",
+                  "properties": {
+                    "formats": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "x-ms-summary": "Output Formats",
+                      "description": "Formats to return. Example: [\"markdown\"]"
+                    }
+                  }
+                }
+              },
+              "required": [
+                "url"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Crawl started successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "id": {
+                  "type": "string",
+                  "x-ms-summary": "Crawl ID"
+                },
+                "url": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crawl/{crawlId}": {
+      "get": {
+        "summary": "Get Crawl Results",
+        "description": "Check the status of a crawl and retrieve the scraped data if completed.",
+        "operationId": "GetCrawlResults",
+        "parameters": [
+          {
+            "name": "crawlId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Crawl ID",
+            "description": "The ID returned by the Start Crawl action.",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Crawl status and data retrieved",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "x-ms-summary": "Crawl Status",
+                  "description": "Will be 'scraping', 'completed', or 'failed'."
+                },
+                "total": {
+                  "type": "integer",
+                  "x-ms-summary": "Pages Found"
+                },
+                "data": {
+                  "type": "array",
+                  "x-ms-summary": "Scraped Pages Array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "markdown": {
+                        "type": "string",
+                        "description": "The scraped markdown content."
+                      },
+                      "html": {
+                        "type": "string"
+                      },
+                      "metadata": {
+                        "type": "object",
+                        "properties": {
+                          "title": {
+                            "type": "string"
+                          },
+                          "sourceURL": {
+                            "type": "string"
+                          },
+                          "statusCode": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/search": {
+      "post": {
+        "summary": "Search and Scrape",
+        "description": "Search the web and optionally scrape the full markdown of the search results.",
+        "operationId": "SearchAndScrape",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "query": {
+                  "type": "string",
+                  "x-ms-summary": "Search Query",
+                  "description": "The search query."
+                },
+                "limit": {
+                  "type": "integer",
+                  "default": 10,
+                  "x-ms-summary": "Result Limit",
+                  "description": "Maximum number of results to return (1-100)."
+                },
+                "location": {
+                  "type": "string",
+                  "x-ms-summary": "Location",
+                  "description": "Location for search results."
+                },
+                "country": {
+                  "type": "string",
+                  "default": "US",
+                  "x-ms-summary": "Country Code",
+                  "description": "ISO country code for geo-targeting."
+                },
+                "scrapeOptions": {
+                  "type": "object",
+                  "x-ms-summary": "Scrape Options",
+                  "properties": {
+                    "formats": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "x-ms-summary": "Output Formats",
+                      "description": "Formats to return. Example: [\"markdown\"]"
+                    }
+                  }
+                }
+              },
+              "required": [
+                "query"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search successful",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "web": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "title": {
+                            "type": "string",
+                            "description": "Title from search result."
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "Description from search result."
+                          },
+                          "url": {
+                            "type": "string",
+                            "description": "URL of the search result."
+                          },
+                          "markdown": {
+                            "type": "string",
+                            "description": "The scraped markdown content if scrapeOptions was provided."
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
