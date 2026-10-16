@@ -1,0 +1,1148 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0",
+    "title": "TPSClear",
+    "description": "TPSClear screens UK phone numbers against the Telephone Preference Service (TPS) and Corporate TPS (CTPS) registers before an outbound calling campaign. Screen up to 200 numbers in one call, keep your own suppression and consent lists, fetch past screening records as audit evidence, and read your usage.",
+    "contact": {
+      "name": "Steffen Hoyemsvoll",
+      "url": "https://tpsclear.co.uk",
+      "email": "steffen@tpsclear.co.uk"
+    }
+  },
+  "host": "api.tpsclear.co.uk",
+  "basePath": "/v1",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/screen": {
+      "post": {
+        "summary": "Screen phone numbers",
+        "description": "Screens up to 200 UK phone numbers against the TPS and CTPS registers and your own suppression and consent lists, and returns a status per number. Each distinct valid UK number is one chargeable check. The record ID for the call is returned in the X-Request-Id response header when the record was stored.",
+        "operationId": "ScreenPhoneNumbers",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "x-ms-summary": "Screening Request",
+            "description": "The phone numbers to screen and an optional campaign reference.",
+            "schema": {
+              "$ref": "#/definitions/ScreenRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One result per number supplied, in the order supplied.",
+            "headers": {
+              "X-Request-Id": {
+                "type": "string",
+                "description": "The record ID of this screening call, present when the record was stored. Pass it to Get a screening record to fetch the stored evidence later."
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/ScreenResponse"
+            }
+          },
+          "400": {
+            "description": "The request was malformed, had no phone numbers, had more than 1,000 numbers, or carried an invalid campaign reference.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "The API key is missing, malformed, revoked, or unknown.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "402": {
+            "description": "The account behind the key is not active, the CRM account the key belongs to has no active TPSClear subscription, or the account has not enough prepaid credits for this request.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "The key lacks the scope this action needs (insufficient_scope), or was used from an address outside its IP allowlist (ip_not_allowed), or screening is switched off in the TPSClear settings of the connected CRM account (screening_switched_off).",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "429": {
+            "description": "A limit was reached. The error field is rate_limited when a retry after the Retry-After header will succeed, and allowance_reached or daily_cap_reached when a retry will not.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "503": {
+            "description": "The service could not complete the request. Retry later.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/screen/{id}": {
+      "get": {
+        "summary": "Get a screening record",
+        "description": "Fetches a past screening call by its record ID, with the per number results as they were at the time of the call. This is the audit evidence to quote if a call is ever questioned.",
+        "operationId": "GetScreeningRecord",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Record ID",
+            "x-ms-visibility": "important",
+            "description": "The record ID from the X-Request-Id response header of a Screen phone numbers call."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The stored screening record.",
+            "schema": {
+              "$ref": "#/definitions/ScreeningRecord"
+            }
+          },
+          "401": {
+            "description": "The API key is missing, malformed, revoked, or unknown.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "402": {
+            "description": "The account behind the key is not active, or the CRM account the key belongs to has no active TPSClear subscription.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "The key lacks the scope this action needs (insufficient_scope), or was used from an address outside its IP allowlist (ip_not_allowed).",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "No screening record with that ID exists on this account.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "429": {
+            "description": "Too many requests on this key. Retry after the Retry-After header.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "503": {
+            "description": "The service could not complete the request. Retry later.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/usage": {
+      "get": {
+        "summary": "Get usage",
+        "description": "Returns the current fair use window for the key and rolling 30 day totals for the account. Read only and never counts as a check, so it is also used to test the connection.",
+        "operationId": "GetUsage",
+        "x-ms-visibility": "important",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Usage for the key and the account.",
+            "schema": {
+              "$ref": "#/definitions/Usage"
+            }
+          },
+          "401": {
+            "description": "The API key is missing, malformed, revoked, or unknown.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "402": {
+            "description": "The account behind the key is not active, or the CRM account the key belongs to has no active TPSClear subscription.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "The key lacks the scope this action needs (insufficient_scope), or was used from an address outside its IP allowlist (ip_not_allowed).",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "429": {
+            "description": "Too many requests on this key. Retry after the Retry-After header.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "503": {
+            "description": "The service could not complete the request. Retry later.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/suppressions": {
+      "get": {
+        "summary": "List suppressed numbers",
+        "description": "Returns the total size of your suppression list and its 100 most recent entries. A number on this list comes back from Screen phone numbers with the status suppressed, is not screened against the registers and is not charged.",
+        "operationId": "ListSuppressions",
+        "x-ms-visibility": "important",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The list total and the most recent entries.",
+            "schema": {
+              "$ref": "#/definitions/SuppressionList"
+            }
+          },
+          "401": {
+            "description": "The API key is missing, malformed, revoked, or unknown.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "402": {
+            "description": "The account behind the key is not active, or the CRM account the key belongs to has no active TPSClear subscription.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "The key lacks the scope this action needs (insufficient_scope), or was used from an address outside its IP allowlist (ip_not_allowed).",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "429": {
+            "description": "Too many requests on this key. Retry after the Retry-After header.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "503": {
+            "description": "The service could not complete the request. Retry later.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add numbers to the suppression list",
+        "description": "Adds up to 10,000 numbers to your suppression list, each with an optional reason and the date and time of the opt out. Numbers already on the list are ignored rather than duplicated. List changes are free and need a live key.",
+        "operationId": "AddSuppressions",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "x-ms-summary": "Entries",
+            "description": "The numbers to add, each with an optional reason and date and time.",
+            "schema": {
+              "$ref": "#/definitions/ListAddRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "How many numbers were added, already listed or invalid, and the new list total.",
+            "schema": {
+              "$ref": "#/definitions/ListImportResult"
+            }
+          },
+          "400": {
+            "description": "The request was malformed, had no entries, had more than 10,000 entries, or would take the list past 100,000 numbers.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "The API key is missing, malformed, revoked, or unknown.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "402": {
+            "description": "The account behind the key is not active, or the CRM account the key belongs to has no active TPSClear subscription.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "A test key cannot change suppression or consent lists (test_key_read_only); use a live key. Also answered when the key lacks the scope this action needs (insufficient_scope) or was used from an address outside its IP allowlist (ip_not_allowed).",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "413": {
+            "description": "The request body is larger than 2,000,000 bytes. Send the entries in smaller batches.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "429": {
+            "description": "Too many requests on this key. Retry after the Retry-After header.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "503": {
+            "description": "The service could not complete the request. Retry later.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remove a number from the suppression list",
+        "description": "Takes one number off your suppression list, with an optional note recording why. List changes are free and need a live key.",
+        "operationId": "RemoveSuppression",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "number",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Phone Number",
+            "x-ms-visibility": "important",
+            "description": "The UK phone number to take off the suppression list, in any common format."
+          },
+          {
+            "name": "note",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Note",
+            "x-ms-visibility": "advanced",
+            "description": "Why the number came off the list. Stored with the change."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Whether a number was removed.",
+            "schema": {
+              "$ref": "#/definitions/ListRemoveResult"
+            }
+          },
+          "400": {
+            "description": "No number was supplied or it is not a valid UK phone number.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "The API key is missing, malformed, revoked, or unknown.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "402": {
+            "description": "The account behind the key is not active, or the CRM account the key belongs to has no active TPSClear subscription.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "A test key cannot change suppression or consent lists (test_key_read_only); use a live key. Also answered when the key lacks the scope this action needs (insufficient_scope) or was used from an address outside its IP allowlist (ip_not_allowed).",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "429": {
+            "description": "Too many requests on this key. Retry after the Retry-After header.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "503": {
+            "description": "The service could not complete the request. Retry later.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/consents": {
+      "get": {
+        "summary": "List consented numbers",
+        "description": "Returns the total size of your consent list and its 100 most recent entries. A number on this list comes back from Screen phone numbers with the status consented, is not screened against the registers and is not charged, unless it is also on the suppression list, in which case the opt out wins.",
+        "operationId": "ListConsents",
+        "x-ms-visibility": "advanced",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The list total and the most recent entries.",
+            "schema": {
+              "$ref": "#/definitions/ConsentList"
+            }
+          },
+          "401": {
+            "description": "The API key is missing, malformed, revoked, or unknown.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "402": {
+            "description": "The account behind the key is not active, or the CRM account the key belongs to has no active TPSClear subscription.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "The key lacks the scope this action needs (insufficient_scope), or was used from an address outside its IP allowlist (ip_not_allowed).",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "429": {
+            "description": "Too many requests on this key. Retry after the Retry-After header.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "503": {
+            "description": "The service could not complete the request. Retry later.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add numbers to the consent list",
+        "description": "Adds up to 10,000 numbers you hold consent to call, each with an optional reason (put your consent evidence here) and the date and time consent was given. Numbers already on the list are ignored rather than duplicated. List changes are free and need a live key.",
+        "operationId": "AddConsents",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "x-ms-summary": "Entries",
+            "description": "The numbers to add, each with an optional reason and date and time.",
+            "schema": {
+              "$ref": "#/definitions/ListAddRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "How many numbers were added, already listed or invalid, and the new list total.",
+            "schema": {
+              "$ref": "#/definitions/ListImportResult"
+            }
+          },
+          "400": {
+            "description": "The request was malformed, had no entries, had more than 10,000 entries, or would take the list past 100,000 numbers.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "The API key is missing, malformed, revoked, or unknown.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "402": {
+            "description": "The account behind the key is not active, or the CRM account the key belongs to has no active TPSClear subscription.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "A test key cannot change suppression or consent lists (test_key_read_only); use a live key. Also answered when the key lacks the scope this action needs (insufficient_scope) or was used from an address outside its IP allowlist (ip_not_allowed).",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "413": {
+            "description": "The request body is larger than 2,000,000 bytes. Send the entries in smaller batches.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "429": {
+            "description": "Too many requests on this key. Retry after the Retry-After header.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "503": {
+            "description": "The service could not complete the request. Retry later.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remove a number from the consent list",
+        "description": "Takes one number off your consent list when consent is withdrawn, with an optional note recording why. List changes are free and need a live key.",
+        "operationId": "RemoveConsent",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "number",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Phone Number",
+            "x-ms-visibility": "important",
+            "description": "The UK phone number to take off the consent list, in any common format."
+          },
+          {
+            "name": "note",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Note",
+            "x-ms-visibility": "advanced",
+            "description": "Why the number came off the list. Stored with the change."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Whether a number was removed.",
+            "schema": {
+              "$ref": "#/definitions/ListRemoveResult"
+            }
+          },
+          "400": {
+            "description": "No number was supplied or it is not a valid UK phone number.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "The API key is missing, malformed, revoked, or unknown.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "402": {
+            "description": "The account behind the key is not active, or the CRM account the key belongs to has no active TPSClear subscription.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "A test key cannot change suppression or consent lists (test_key_read_only); use a live key. Also answered when the key lacks the scope this action needs (insufficient_scope) or was used from an address outside its IP allowlist (ip_not_allowed).",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "429": {
+            "description": "Too many requests on this key. Retry after the Retry-After header.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "503": {
+            "description": "The service could not complete the request. Retry later.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "ScreenRequest": {
+      "type": "object",
+      "required": [
+        "phoneNumbers"
+      ],
+      "properties": {
+        "phoneNumbers": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 200,
+          "x-ms-summary": "Phone Numbers",
+          "x-ms-visibility": "important",
+          "description": "Up to 200 UK phone numbers in any common format, for example 020 7946 0018 or +44 20 7946 0018. Each distinct valid UK number is one chargeable check. A number repeated in the request is charged once and every copy gets its verdict. Numbers that are not valid UK numbers are not charged and come back as unknown.",
+          "items": {
+            "type": "string",
+            "x-ms-summary": "Phone Number",
+            "description": "A UK phone number."
+          }
+        },
+        "campaignRef": {
+          "type": "string",
+          "maxLength": 120,
+          "x-ms-summary": "Campaign Reference",
+          "x-ms-visibility": "advanced",
+          "description": "Optional audit tag stored on the screening record, for example Autumn outbound. Up to 120 characters of letters, digits, spaces and basic punctuation. Echoed back in the response when supplied."
+        }
+      }
+    },
+    "ScreenResponse": {
+      "type": "object",
+      "properties": {
+        "results": {
+          "type": "array",
+          "x-ms-summary": "Results",
+          "description": "One result per number supplied, in the order supplied.",
+          "items": {
+            "$ref": "#/definitions/ScreenResult"
+          }
+        },
+        "campaignRef": {
+          "type": "string",
+          "x-ms-summary": "Campaign Reference",
+          "description": "The campaign reference that was sent with the request. Present only when one was supplied."
+        }
+      }
+    },
+    "ScreenResult": {
+      "type": "object",
+      "properties": {
+        "phoneNumber": {
+          "type": "string",
+          "x-ms-summary": "Phone Number",
+          "description": "The number as screened, in international format, or the input echoed back when it could not be read."
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "clean",
+            "tps-listed",
+            "ctps-listed",
+            "unknown",
+            "suppressed",
+            "consented"
+          ],
+          "x-ms-summary": "Status",
+          "description": "The verdict for the number. Only clean means the number was screened and is on neither register. Suppressed means it is on your own suppression list and consented means it is on your own consent list, so it was not screened and not charged. Unknown covers a number that is not a valid UK line and a register check that failed, and is never safe to treat as clean."
+        },
+        "tpsListed": {
+          "type": "boolean",
+          "x-ms-summary": "TPS Listed",
+          "description": "True when the number is on the Telephone Preference Service register."
+        },
+        "ctpsListed": {
+          "type": "boolean",
+          "x-ms-summary": "CTPS Listed",
+          "description": "True when the number is on the Corporate Telephone Preference Service register."
+        },
+        "checkedAt": {
+          "type": "string",
+          "format": "date-time",
+          "x-ms-summary": "Checked At",
+          "description": "When the check was made, in UTC. Registers change daily, so screen again before a campaign if the check is 27 or more days old."
+        }
+      }
+    },
+    "ScreeningRecord": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Record ID",
+          "description": "The record ID of the screening call."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "x-ms-summary": "Created At",
+          "description": "When the screening call was made, in UTC."
+        },
+        "environment": {
+          "type": "string",
+          "enum": [
+            "test",
+            "live"
+          ],
+          "x-ms-summary": "Environment",
+          "description": "Whether the call was made with a test key, against fixture data, or a live key, against register data."
+        },
+        "lookups": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Lookups",
+          "description": "How many distinct valid UK numbers the call screened, which is the number of chargeable checks."
+        },
+        "campaignRef": {
+          "type": "string",
+          "x-ms-summary": "Campaign Reference",
+          "description": "The campaign reference sent with the call, or null when none was.",
+          "x-nullable": true
+        },
+        "providerFailures": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Failed Checks",
+          "description": "Distinct numbers that came back unknown because the register check failed. These are not chargeable."
+        },
+        "summary": {
+          "$ref": "#/definitions/RecordSummary"
+        },
+        "results": {
+          "type": "array",
+          "x-ms-summary": "Results",
+          "description": "The per number results as they were at the time of the call.",
+          "items": {
+            "$ref": "#/definitions/ScreenResult"
+          }
+        }
+      }
+    },
+    "RecordSummary": {
+      "type": "object",
+      "x-ms-summary": "Summary",
+      "description": "Counts of each verdict in the call.",
+      "properties": {
+        "clean": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Clean",
+          "description": "Numbers on neither register."
+        },
+        "tpsListed": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "TPS Listed Count",
+          "description": "Numbers on the TPS register."
+        },
+        "ctpsListed": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "CTPS Listed Count",
+          "description": "Numbers on the CTPS register."
+        },
+        "unknown": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Unknown Count",
+          "description": "Numbers that were not valid UK lines or whose register check failed."
+        },
+        "suppressed": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Suppressed Count",
+          "description": "Numbers on your own suppression list."
+        },
+        "consented": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Consented Count",
+          "description": "Numbers on your own consent list. Absent on records made before October 2026."
+        }
+      }
+    },
+    "Usage": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "object",
+          "x-ms-summary": "Key",
+          "description": "The key that made the call.",
+          "properties": {
+            "last4": {
+              "type": "string",
+              "x-ms-summary": "Key Last 4",
+              "description": "The last four characters of the key."
+            },
+            "name": {
+              "type": "string",
+              "x-ms-summary": "Key Name",
+              "description": "The name given to the key when it was created, or null when it has none.",
+              "x-nullable": true
+            }
+          }
+        },
+        "environment": {
+          "type": "string",
+          "enum": [
+            "test",
+            "live"
+          ],
+          "x-ms-summary": "Environment",
+          "description": "Whether this is a test key, which screens against fixture data for free, or a live key."
+        },
+        "plan": {
+          "type": "string",
+          "x-ms-summary": "Plan",
+          "description": "The plan the key belongs to."
+        },
+        "window": {
+          "type": "object",
+          "x-ms-summary": "Current Window",
+          "description": "The fair use lookup budget for the key in the current window.",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "format": "int32",
+              "x-ms-summary": "Window Limit",
+              "description": "Lookups allowed in the window."
+            },
+            "windowSecs": {
+              "type": "integer",
+              "format": "int32",
+              "x-ms-summary": "Window Seconds",
+              "description": "Length of the window in seconds."
+            },
+            "used": {
+              "type": "integer",
+              "format": "int32",
+              "x-ms-summary": "Used",
+              "description": "Lookups used so far in the window."
+            },
+            "remaining": {
+              "type": "integer",
+              "format": "int32",
+              "x-ms-summary": "Remaining",
+              "description": "Lookups left in the window."
+            },
+            "reset": {
+              "type": "integer",
+              "format": "int64",
+              "x-ms-summary": "Reset",
+              "description": "When the window resets, as Unix time in seconds."
+            }
+          }
+        },
+        "last30d": {
+          "type": "object",
+          "x-ms-summary": "Last 30 Days",
+          "description": "Rolling 30 day totals for the whole account.",
+          "properties": {
+            "calls": {
+              "type": "integer",
+              "format": "int32",
+              "x-ms-summary": "Calls",
+              "description": "Screening calls made in the last 30 days."
+            },
+            "lookups": {
+              "type": "integer",
+              "format": "int32",
+              "x-ms-summary": "Lookups",
+              "description": "Numbers screened in the last 30 days."
+            },
+            "approximate": {
+              "type": "boolean",
+              "x-ms-summary": "Approximate",
+              "description": "Present and true when the lookup total hit its row cap and undercounts."
+            }
+          }
+        }
+      }
+    },
+    "ListEntry": {
+      "type": "object",
+      "properties": {
+        "phoneNumber": {
+          "type": "string",
+          "x-ms-summary": "Phone Number",
+          "description": "The number, in international format."
+        },
+        "note": {
+          "type": "string",
+          "x-ms-summary": "Note",
+          "description": "The reason recorded when the number was added, or null when none was.",
+          "x-nullable": true
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "x-ms-summary": "Created At",
+          "description": "When the number was added to the list, in UTC."
+        },
+        "occurredAt": {
+          "type": "string",
+          "format": "date-time",
+          "x-ms-summary": "Occurred At",
+          "description": "When the opt out or consent happened, in UTC. Equal to Created At when no date was supplied."
+        }
+      }
+    },
+    "SuppressionList": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Total On List",
+          "description": "The full size of the suppression list."
+        },
+        "suppressions": {
+          "type": "array",
+          "x-ms-summary": "Suppressions",
+          "description": "The 100 most recent entries, newest first.",
+          "items": {
+            "$ref": "#/definitions/ListEntry"
+          }
+        }
+      }
+    },
+    "ConsentList": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Total On List",
+          "description": "The full size of the consent list."
+        },
+        "consents": {
+          "type": "array",
+          "x-ms-summary": "Consents",
+          "description": "The 100 most recent entries, newest first.",
+          "items": {
+            "$ref": "#/definitions/ListEntry"
+          }
+        }
+      }
+    },
+    "ListAddRequest": {
+      "type": "object",
+      "required": [
+        "entries"
+      ],
+      "properties": {
+        "entries": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10000,
+          "x-ms-summary": "Entries",
+          "x-ms-visibility": "important",
+          "description": "Up to 10,000 numbers to add, each with an optional reason and date and time.",
+          "items": {
+            "$ref": "#/definitions/NewListEntry"
+          }
+        }
+      }
+    },
+    "NewListEntry": {
+      "type": "object",
+      "required": [
+        "number"
+      ],
+      "properties": {
+        "number": {
+          "type": "string",
+          "x-ms-summary": "Phone Number",
+          "x-ms-visibility": "important",
+          "description": "A UK phone number in any common format."
+        },
+        "reason": {
+          "type": "string",
+          "maxLength": 500,
+          "x-ms-summary": "Reason",
+          "description": "Why the number is on the list, up to 500 characters. For a consent entry, put the consent evidence here."
+        },
+        "datetime": {
+          "type": "string",
+          "x-ms-summary": "Date And Time",
+          "x-ms-visibility": "advanced",
+          "description": "When the opt out or consent happened, as ISO 8601 (2026-09-18T11:02:00Z) or UK day first (18/09/2026 12:02). A time with no zone is UK time. Defaults to now. Future dates and dates before 2000 are rejected."
+        }
+      }
+    },
+    "ListImportResult": {
+      "type": "object",
+      "properties": {
+        "ok": {
+          "type": "boolean",
+          "x-ms-summary": "OK",
+          "description": "True when the request was accepted."
+        },
+        "added": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Added",
+          "description": "Numbers added to the list."
+        },
+        "alreadyListed": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Already Listed",
+          "description": "Valid numbers that were already on the list."
+        },
+        "invalidCount": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Invalid Count",
+          "description": "Entries rejected because the number or date could not be read."
+        },
+        "total": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Total On List",
+          "description": "The size of the list after this request."
+        },
+        "invalid": {
+          "type": "array",
+          "x-ms-summary": "Invalid Entries",
+          "description": "The raw values of the first rejected entries.",
+          "items": {
+            "type": "string",
+            "x-ms-summary": "Invalid Entry",
+            "description": "The raw value as sent."
+          }
+        },
+        "invalidRows": {
+          "type": "array",
+          "x-ms-summary": "Invalid Rows",
+          "description": "The first rejected entries with their position and the reason.",
+          "items": {
+            "$ref": "#/definitions/InvalidRow"
+          }
+        }
+      }
+    },
+    "InvalidRow": {
+      "type": "object",
+      "properties": {
+        "line": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Line",
+          "description": "The one based position of the entry in the request."
+        },
+        "value": {
+          "type": "string",
+          "x-ms-summary": "Value",
+          "description": "The raw value as sent."
+        },
+        "reason": {
+          "type": "string",
+          "x-ms-summary": "Rejection Reason",
+          "description": "Why the entry was rejected."
+        }
+      }
+    },
+    "ListRemoveResult": {
+      "type": "object",
+      "properties": {
+        "ok": {
+          "type": "boolean",
+          "x-ms-summary": "OK",
+          "description": "True when the request was accepted."
+        },
+        "removed": {
+          "type": "boolean",
+          "x-ms-summary": "Removed",
+          "description": "True when the number was on the list and has been removed, false when it was not on the list."
+        }
+      }
+    },
+    "Error": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string",
+          "x-ms-summary": "Error Code",
+          "description": "A stable error code, for example rate_limited, allowance_reached, daily_cap_reached, insufficient_credits, insufficient_scope, ip_not_allowed or test_key_read_only."
+        },
+        "message": {
+          "type": "string",
+          "x-ms-summary": "Message",
+          "description": "A human readable explanation of the error."
+        },
+        "required": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Credits Required",
+          "description": "With insufficient_credits, the credits the request needed."
+        },
+        "balance": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Credit Balance",
+          "description": "With insufficient_credits, the credits on the account."
+        },
+        "limit": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Window Limit",
+          "description": "With rate_limited on Screen phone numbers, the lookups allowed in the window."
+        },
+        "remaining": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Window Remaining",
+          "description": "With rate_limited on Screen phone numbers, the lookups left in the window."
+        },
+        "reset": {
+          "type": "integer",
+          "format": "int64",
+          "x-ms-summary": "Window Reset",
+          "description": "With rate_limited on Screen phone numbers, when the window resets, as Unix time in seconds."
+        },
+        "cap": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Daily Cap",
+          "description": "With daily_cap_reached, the numbers the account can screen a day."
+        },
+        "retryAfter": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Retry After",
+          "description": "With rate_limited or daily_cap_reached, the seconds to wait before retrying."
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization"
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "tags": [],
+  "x-ms-capabilities": {
+    "testConnection": {
+      "operationId": "GetUsage"
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://tpsclear.co.uk"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://tpsclear.co.uk/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Sales and CRM;Communication"
+    }
+  ]
+}
