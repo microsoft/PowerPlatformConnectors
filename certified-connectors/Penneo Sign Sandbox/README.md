@@ -9,7 +9,7 @@ To use this connector, you will need an active Penneo Sandbox account.
 ## Supported Actions
 
 ### Create a new case file
-Creates a new case file in Penneo with the specified documents and signers. The case file will be created in Penneo, and a UUID and a payloadHash will be returned that can be used to check the creation status via the queue status endpoint.
+Creates a new case file in Penneo with the specified documents (PDF or ZIP) and signers. The case file will be created in Penneo, and a UUID and a payloadHash will be returned that can be used to check the creation status via the queue status endpoint. Case files created through this connector are marked with the origin `microsoft`.
 
 ### Check job status
 Retrieves the current status of a casefile by providing the job UUID and payloadHash. This endpoint is used to poll for job completion status after submitting a case file creation request. The endpoint is rate-limited to 20 requests per minute per uuid-payloadHash combination.
@@ -34,7 +34,7 @@ The available case file statuses are described below.
 Use status 5: 'completed' as trigger for starting getting the signed documents.
 
 ### Download document
-Downloads the content of a document from the Penneo. Use the `format` parameter to pick the response format: `json` (the default) returns the document as a base64 encoded string, `pdf` returns the raw file content that can be passed straight into actions such as "Create file". By default, the signed version of the document is returned; use the `signed` parameter to get the unsigned version instead. If your case file includes more documents ensure to loop over each document.
+Downloads the content of a document from the Penneo. Use the `format` parameter to pick the response format: `json` (the default) sends `Accept: application/json` and returns the document as a base64 encoded string. `default` (Default file type) sends no Accept header, so Penneo returns the file with its own content type, PDF or ZIP. The raw file can be passed straight into actions such as "Create file". By default, the signed version of the document is returned; use the `signed` parameter to get the unsigned version instead. If your case file includes more documents ensure to loop over each document.
 
 ## Obtaining Credentials
 
@@ -44,19 +44,21 @@ The connector has been configured to use OAuth with Authorization Code Grant. Us
 ### Creating a Case File
 
 1. **Prepare Your Documents**:
-    - Convert your PDF documents to base64 encoding
-    - Ensure documents are valid PDF files
+    - Convert your PDF or ZIP documents to base64 encoding
+    - Ensure documents are valid PDF or ZIP files. A ZIP is added as a single document and signed as an ASiC-E container; a signable ZIP requires QES signing methods
 
 2. **Configure Signers**:
     - Provide signer name and email (required)
     - Optionally provide role, language, signing order, etc.
     - Configure email notifications and custom email templates if needed
+    - To deliver via e-Boks instead of email, set `channel` to `eboks` and provide exactly one of `cpr` (10 digits) or `cvr` (8 digits, optional `:suffix`). Email is not needed for e-Boks. The customer must have e-Boks enabled (Configuration → Company → Communication Channels)
+    - Set `reminderInterval` (minimum 1 day) to override the company reminder interval, leave it empty to use the company default, or send `null` to disable reminders for the signer
 
 3. **Create the Case File**:
     - Use the "Create a new case file" action
     - Fill in the case file details:
         - Title
-        - Documents (base64 encoded PDFs)
+        - Documents (base64 encoded PDF or ZIP files)
         - Signers (with names and optional details)
         - Optional settings (expiration, language, visibility, etc.)
 
@@ -75,8 +77,8 @@ Note: You can check what each field does by checking https://penneo.readme.io/re
 
 2. **Download a document**:
     - Use the "Download document" action with the document id obtained from the case file details
-    - With the `json` format the response contains the document content as a base64 encoded string, which you can decode to retrieve the PDF file
-    - With the `pdf` format the response is the PDF file itself, so it can be handed directly to a file action
+    - With `json` the response contains the document content as a base64 encoded string
+    - With `default` the response is the file itself, PDF or ZIP, with the content type Penneo sends
 
 ## Known Issues and Limitations
 
@@ -84,11 +86,11 @@ Note: You can check what each field does by checking https://penneo.readme.io/re
 
 2. **Asynchronous Processing**: Case file creation is asynchronous. You must use the job status endpoint to check completion rather than expecting immediate results.
 
-3. **Base64 Encoding**: Documents must be base64 encoded. Ensure proper encoding to avoid request failures(you can use base64 string function in the Power Platform to encode the binary PDF files).
+3. **Base64 Encoding**: Documents must be base64 encoded. Ensure proper encoding to avoid request failures(you can use base64 string function in the Power Platform to encode the binary PDF or ZIP files).
 
 4. **Sandbox Environment**: This connector is configured for the Penneo sandbox environment (`sandbox.penneo.com`).
 
-5. **Document Size**: Large documents may take longer to process. Consider document size limits when encoding to base64.
+5. **Document Size**: Large documents may take longer to process. The request body is limited to 25 MB, which leaves about 18 MB for base64 encoded files.
 
 ## Deployment Instructions
 
