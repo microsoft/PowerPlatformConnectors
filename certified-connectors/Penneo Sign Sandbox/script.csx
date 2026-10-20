@@ -1,10 +1,14 @@
 using System;
-using System.Net.Http.Headers;
+using System.IO;
+using System.Text;
 using System.Web;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 public class Script : ScriptBase
 {
+    private const string CaseFileOrigin = "microsoft";
+
     private static readonly HashSet<string> LegacyAuthOperations = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
         "GetCaseFileDetails",
@@ -32,60 +36,62 @@ public class Script : ScriptBase
             }
         }
 
-        var returnPdf = false;
+        if ("CreateCaseFile".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+        {
+            await SetCaseFileOrigin().ConfigureAwait(continueOnCapturedContext: false);
+        }
 
         if ("DownloadDocument".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
         {
             var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
-            returnPdf = "pdf".Equals(query["format"], StringComparison.OrdinalIgnoreCase);
+            var format = query["format"];
 
-            // "format" is handled here, Penneo always returns the base64 encoded JSON representation.
+            // format is a connector choice, not a Penneo query parameter.
             this.Context.Request.RequestUri = RemoveQueryParameter(this.Context.Request.RequestUri, "format");
+
+            // json asks for the base64 JSON body. Anything else, including "default",
+            // sends no Accept header so Penneo returns the file with its own content type.
+            this.Context.Request.Headers.Remove("Accept");
+            if (string.IsNullOrEmpty(format) || "json".Equals(format, StringComparison.OrdinalIgnoreCase))
+            {
+                this.Context.Request.Headers.TryAddWithoutValidation("Accept", "application/json");
+            }
         }
 
-        var response = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
-
-        if (returnPdf && response.IsSuccessStatusCode)
-        {
-            response = await ConvertToPdfResponse(response).ConfigureAwait(continueOnCapturedContext: false);
-        }
-
-        return response;
+        return await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
     }
 
-    private async Task<HttpResponseMessage> ConvertToPdfResponse(HttpResponseMessage response)
+    private async Task SetCaseFileOrigin()
     {
-        var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(continueOnCapturedContext: false);
+        if (this.Context.Request.Content == null)
+        {
+            return;
+        }
 
-        string content;
+        var body = await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(continueOnCapturedContext: false);
+
+        JObject payload;
         try
         {
-            content = (string)JObject.Parse(responseString)["content"];
+            // DateParseHandling.None keeps date-like strings (titles, metadata) byte-for-byte on re-serialization.
+            using (var reader = new JsonTextReader(new StringReader(body)) { DateParseHandling = DateParseHandling.None })
+            {
+                payload = JObject.Load(reader);
+            }
         }
-        catch (Exception)
+        catch (JsonReaderException)
         {
-            return response;
+            return;
         }
 
-        if (string.IsNullOrEmpty(content))
+        if (!(payload["caseFile"] is JObject caseFile))
         {
-            return response;
+            return;
         }
 
-        byte[] pdf;
-        try
-        {
-            pdf = Convert.FromBase64String(content);
-        }
-        catch (FormatException)
-        {
-            return response;
-        }
+        caseFile["origin"] = CaseFileOrigin;
 
-        response.Content = new ByteArrayContent(pdf);
-        response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/pdf");
-
-        return response;
+        this.Context.Request.Content = new StringContent(payload.ToString(Newtonsoft.Json.Formatting.None), Encoding.UTF8, "application/json");
     }
 
     private static Uri RemoveQueryParameter(Uri uri, string name)
