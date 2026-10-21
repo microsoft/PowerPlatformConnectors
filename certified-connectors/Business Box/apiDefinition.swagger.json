@@ -1,0 +1,1560 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Business Box",
+    "description": "Business Box is online booking software for small businesses in Japan. Connect it to list event types and open times, create and cancel bookings, send single use booking links, and start flows the moment a booking is created, rescheduled or cancelled.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Business Box support",
+      "url": "https://marubox.jp/support",
+      "email": "support@marubox.jp"
+    }
+  },
+  "host": "api.marubox.jp",
+  "basePath": "/v1",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/me": {
+      "get": {
+        "operationId": "GetCurrentAccount",
+        "summary": "Get the connected account",
+        "description": "Returns the Business Box account the API key belongs to and the permissions the key carries.",
+        "x-ms-visibility": "advanced",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The account.",
+            "schema": {
+              "$ref": "#/definitions/Account"
+            }
+          },
+          "401": {
+            "description": "The API key is missing, unknown or revoked."
+          },
+          "429": {
+            "description": "Too many requests. Wait for the number of seconds in the Retry-After header."
+          }
+        }
+      }
+    },
+    "/event-types": {
+      "get": {
+        "operationId": "ListEventTypes",
+        "summary": "List event types",
+        "description": "Lists the event types customers can book, in the order they appear in Business Box.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "active",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Active Only",
+            "description": "Set to true to return only active event types, or false to return only inactive ones.",
+            "x-ms-visibility": "advanced",
+            "enum": [
+              "true",
+              "false"
+            ],
+            "default": "true"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "x-ms-summary": "Limit",
+            "description": "The maximum number of items to return, from 1 to 100.",
+            "x-ms-visibility": "advanced",
+            "default": 50,
+            "minimum": 1,
+            "maximum": 100,
+            "format": "int32"
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Cursor",
+            "description": "The Next Cursor value from the previous page.",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of event types.",
+            "schema": {
+              "$ref": "#/definitions/EventTypeList"
+            }
+          },
+          "400": {
+            "description": "The request was invalid. The error code is validation_failed or bad_request."
+          },
+          "401": {
+            "description": "The API key is missing, unknown or revoked."
+          },
+          "403": {
+            "description": "The API key does not carry the scope this operation needs."
+          },
+          "429": {
+            "description": "Too many requests. Wait for the number of seconds in the Retry-After header."
+          }
+        }
+      }
+    },
+    "/event-types/{id}/slots": {
+      "get": {
+        "operationId": "ListAvailableStartTimes",
+        "summary": "List available start times",
+        "description": "Lists the start times that can be booked for an event type, after availability, calendar conflicts, buffers, notice and daily limits are applied. The range can span at most 31 days.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Event Type",
+            "description": "The event type to check.",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "ListEventTypes",
+              "parameters": {
+                "active": "true",
+                "limit": 100
+              },
+              "value-collection": "items",
+              "value-path": "id",
+              "value-title": "name"
+            },
+            "x-ms-dynamic-list": {
+              "operationId": "ListEventTypes",
+              "parameters": {
+                "active": {
+                  "value": "true"
+                },
+                "limit": {
+                  "value": 100
+                }
+              },
+              "itemsPath": "items",
+              "itemValuePath": "id",
+              "itemTitlePath": "name"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "From Date",
+            "description": "The first date to check, in YYYY-MM-DD format.",
+            "format": "date"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "To Date",
+            "description": "The last date to check, in YYYY-MM-DD format. At most 31 days after From Date.",
+            "format": "date"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The available start times.",
+            "schema": {
+              "$ref": "#/definitions/Slots"
+            }
+          },
+          "400": {
+            "description": "The request was invalid. The error code is validation_failed or bad_request."
+          },
+          "401": {
+            "description": "The API key is missing, unknown or revoked."
+          },
+          "403": {
+            "description": "The API key does not carry the scope this operation needs."
+          },
+          "404": {
+            "description": "The resource was not found."
+          },
+          "429": {
+            "description": "Too many requests. Wait for the number of seconds in the Retry-After header."
+          }
+        }
+      }
+    },
+    "/bookings": {
+      "get": {
+        "operationId": "ListBookings",
+        "summary": "List bookings",
+        "description": "Lists bookings, newest first by default. Held and awaiting payment bookings are excluded unless you filter by those statuses.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Status",
+            "description": "Comma separated statuses to include: confirmed, cancelled, completed, no_show, held, awaiting_payment."
+          },
+          {
+            "name": "eventTypeId",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Event Type",
+            "description": "Only return bookings for this event type.",
+            "x-ms-dynamic-values": {
+              "operationId": "ListEventTypes",
+              "parameters": {
+                "active": "true",
+                "limit": 100
+              },
+              "value-collection": "items",
+              "value-path": "id",
+              "value-title": "name"
+            },
+            "x-ms-dynamic-list": {
+              "operationId": "ListEventTypes",
+              "parameters": {
+                "active": {
+                  "value": "true"
+                },
+                "limit": {
+                  "value": 100
+                }
+              },
+              "itemsPath": "items",
+              "itemValuePath": "id",
+              "itemTitlePath": "name"
+            }
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Customer Email",
+            "description": "Only return bookings made by this email address.",
+            "format": "email"
+          },
+          {
+            "name": "startFrom",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Start From",
+            "description": "Only return bookings that start at or after this time, in ISO 8601 UTC.",
+            "x-ms-visibility": "advanced",
+            "format": "date-time"
+          },
+          {
+            "name": "startTo",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Start To",
+            "description": "Only return bookings that start before this time, in ISO 8601 UTC.",
+            "x-ms-visibility": "advanced",
+            "format": "date-time"
+          },
+          {
+            "name": "updatedSince",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Updated Since",
+            "description": "Only return bookings changed at or after this time, in ISO 8601 UTC.",
+            "x-ms-visibility": "advanced",
+            "format": "date-time"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Sort Order",
+            "description": "The sort order: -createdAt (newest first), start, -start or -updatedAt.",
+            "x-ms-visibility": "advanced",
+            "enum": [
+              "-createdAt",
+              "start",
+              "-start",
+              "-updatedAt"
+            ],
+            "default": "-createdAt"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "x-ms-summary": "Limit",
+            "description": "The maximum number of items to return, from 1 to 100.",
+            "x-ms-visibility": "advanced",
+            "default": 50,
+            "minimum": 1,
+            "maximum": 100,
+            "format": "int32"
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Cursor",
+            "description": "The Next Cursor value from the previous page.",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of bookings.",
+            "schema": {
+              "$ref": "#/definitions/BookingList"
+            }
+          },
+          "400": {
+            "description": "The request was invalid. The error code is validation_failed or bad_request."
+          },
+          "401": {
+            "description": "The API key is missing, unknown or revoked."
+          },
+          "403": {
+            "description": "The API key does not carry the scope this operation needs."
+          },
+          "429": {
+            "description": "Too many requests. Wait for the number of seconds in the Retry-After header."
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreateBooking",
+        "summary": "Create a booking",
+        "description": "Books a time for a customer, as adding a booking by hand in Business Box does. The customer is emailed a confirmation unless Send Confirmation is false. No card payment is taken. A time that is no longer free fails with error slot_unavailable.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "The booking to create.",
+            "schema": {
+              "type": "object",
+              "required": [
+                "eventTypeId",
+                "start",
+                "booker"
+              ],
+              "properties": {
+                "eventTypeId": {
+                  "type": "string",
+                  "x-ms-summary": "Event Type",
+                  "description": "The event type to book.",
+                  "x-ms-dynamic-values": {
+                    "operationId": "ListEventTypes",
+                    "parameters": {
+                      "active": "true",
+                      "limit": 100
+                    },
+                    "value-collection": "items",
+                    "value-path": "id",
+                    "value-title": "name"
+                  },
+                  "x-ms-dynamic-list": {
+                    "operationId": "ListEventTypes",
+                    "parameters": {
+                      "active": {
+                        "value": "true"
+                      },
+                      "limit": {
+                        "value": 100
+                      }
+                    },
+                    "itemsPath": "items",
+                    "itemValuePath": "id",
+                    "itemTitlePath": "name"
+                  }
+                },
+                "start": {
+                  "type": "string",
+                  "x-ms-summary": "Start Time",
+                  "description": "The start time in ISO 8601 UTC. Use a time from List available start times.",
+                  "format": "date-time"
+                },
+                "booker": {
+                  "type": "object",
+                  "required": [
+                    "name",
+                    "email",
+                    "timezone"
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "x-ms-summary": "Customer Name",
+                      "description": "The full name of the customer.",
+                      "maxLength": 120
+                    },
+                    "email": {
+                      "type": "string",
+                      "x-ms-summary": "Customer Email",
+                      "description": "The email address of the customer.",
+                      "format": "email",
+                      "maxLength": 254
+                    },
+                    "phone": {
+                      "type": "string",
+                      "x-ms-summary": "Customer Phone",
+                      "description": "The phone number of the customer.",
+                      "maxLength": 40,
+                      "x-ms-visibility": "advanced"
+                    },
+                    "locale": {
+                      "type": "string",
+                      "x-ms-summary": "Customer Language",
+                      "description": "The language for emails to the customer: en or ja.",
+                      "enum": [
+                        "en",
+                        "ja"
+                      ],
+                      "default": "ja",
+                      "x-ms-visibility": "advanced"
+                    },
+                    "timezone": {
+                      "type": "string",
+                      "x-ms-summary": "Customer Time Zone",
+                      "description": "The IANA time zone of the customer, for example Asia/Tokyo.",
+                      "default": "Asia/Tokyo"
+                    }
+                  }
+                },
+                "notes": {
+                  "type": "string",
+                  "x-ms-summary": "Notes",
+                  "description": "Notes to add to the booking.",
+                  "maxLength": 2000,
+                  "x-ms-visibility": "advanced"
+                },
+                "notify": {
+                  "type": "boolean",
+                  "x-ms-summary": "Send Confirmation",
+                  "description": "Whether to email the customer a confirmation.",
+                  "default": true,
+                  "x-ms-visibility": "advanced"
+                }
+              }
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Idempotency Key",
+            "description": "A unique value, such as a GUID, that makes retries safe. A repeated request with the same key returns the first result instead of creating a duplicate.",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The booking was created.",
+            "schema": {
+              "$ref": "#/definitions/Booking"
+            }
+          },
+          "400": {
+            "description": "The request was invalid. The error code is validation_failed or bad_request."
+          },
+          "401": {
+            "description": "The API key is missing, unknown or revoked."
+          },
+          "403": {
+            "description": "The API key does not carry the scope this operation needs."
+          },
+          "404": {
+            "description": "The resource was not found."
+          },
+          "409": {
+            "description": "The request conflicts with the current state, for example the time is no longer free."
+          },
+          "429": {
+            "description": "Too many requests. Wait for the number of seconds in the Retry-After header."
+          }
+        }
+      }
+    },
+    "/bookings/{id}": {
+      "get": {
+        "operationId": "GetBooking",
+        "summary": "Get a booking",
+        "description": "Gets one booking by its ID.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Booking ID",
+            "description": "The ID of the booking.",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The booking.",
+            "schema": {
+              "$ref": "#/definitions/Booking"
+            }
+          },
+          "401": {
+            "description": "The API key is missing, unknown or revoked."
+          },
+          "403": {
+            "description": "The API key does not carry the scope this operation needs."
+          },
+          "404": {
+            "description": "The resource was not found."
+          },
+          "429": {
+            "description": "Too many requests. Wait for the number of seconds in the Retry-After header."
+          }
+        }
+      }
+    },
+    "/bookings/{id}/cancel": {
+      "post": {
+        "operationId": "CancelBooking",
+        "summary": "Cancel a booking",
+        "description": "Cancels a booking as Business Box does: the customer is emailed, and a paid booking is refunded in full. Cancelling a booking that is already cancelled returns it unchanged.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Booking ID",
+            "description": "The ID of the booking to cancel.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "description": "Optional cancellation details.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "x-ms-summary": "Message to Customer",
+                  "description": "A message included in the cancellation email to the customer.",
+                  "maxLength": 1000
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The cancelled booking.",
+            "schema": {
+              "$ref": "#/definitions/Booking"
+            }
+          },
+          "400": {
+            "description": "The request was invalid. The error code is validation_failed or bad_request."
+          },
+          "401": {
+            "description": "The API key is missing, unknown or revoked."
+          },
+          "403": {
+            "description": "The API key does not carry the scope this operation needs."
+          },
+          "404": {
+            "description": "The resource was not found."
+          },
+          "409": {
+            "description": "The request conflicts with the current state, for example the time is no longer free."
+          },
+          "429": {
+            "description": "Too many requests. Wait for the number of seconds in the Retry-After header."
+          }
+        }
+      }
+    },
+    "/invites": {
+      "post": {
+        "operationId": "CreateInviteLink",
+        "summary": "Create a single use booking link",
+        "description": "Creates a booking link that works once and then stops. Use it to reply to an enquiry. It works for public and invite only event types.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "The link to create.",
+            "schema": {
+              "type": "object",
+              "required": [
+                "eventTypeId"
+              ],
+              "properties": {
+                "eventTypeId": {
+                  "type": "string",
+                  "x-ms-summary": "Event Type",
+                  "description": "The event type the link books.",
+                  "x-ms-dynamic-values": {
+                    "operationId": "ListEventTypes",
+                    "parameters": {
+                      "active": "true",
+                      "limit": 100
+                    },
+                    "value-collection": "items",
+                    "value-path": "id",
+                    "value-title": "name"
+                  },
+                  "x-ms-dynamic-list": {
+                    "operationId": "ListEventTypes",
+                    "parameters": {
+                      "active": {
+                        "value": "true"
+                      },
+                      "limit": {
+                        "value": 100
+                      }
+                    },
+                    "itemsPath": "items",
+                    "itemValuePath": "id",
+                    "itemTitlePath": "name"
+                  }
+                },
+                "name": {
+                  "type": "string",
+                  "x-ms-summary": "Invitee Name",
+                  "description": "The name to prefill on the booking form.",
+                  "maxLength": 120
+                },
+                "email": {
+                  "type": "string",
+                  "x-ms-summary": "Invitee Email",
+                  "description": "The email address to prefill on the booking form.",
+                  "format": "email",
+                  "maxLength": 254
+                },
+                "expiresInDays": {
+                  "type": "integer",
+                  "x-ms-summary": "Expires in Days",
+                  "description": "The number of days the link stays valid, from 1 to 90.",
+                  "format": "int32",
+                  "minimum": 1,
+                  "maximum": 90,
+                  "default": 14,
+                  "x-ms-visibility": "advanced"
+                }
+              }
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Idempotency Key",
+            "description": "A unique value, such as a GUID, that makes retries safe. A repeated request with the same key returns the first result instead of creating a duplicate.",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The link was created.",
+            "schema": {
+              "$ref": "#/definitions/Invite"
+            }
+          },
+          "400": {
+            "description": "The request was invalid. The error code is validation_failed or bad_request."
+          },
+          "401": {
+            "description": "The API key is missing, unknown or revoked."
+          },
+          "403": {
+            "description": "The API key does not carry the scope this operation needs."
+          },
+          "404": {
+            "description": "The resource was not found."
+          },
+          "429": {
+            "description": "Too many requests. Wait for the number of seconds in the Retry-After header."
+          }
+        }
+      }
+    },
+    "/webhooks": {
+      "x-ms-notification-content": {
+        "description": "A booking event.",
+        "schema": {
+          "$ref": "#/definitions/BookingEvent"
+        }
+      },
+      "post": {
+        "operationId": "OnBookingEvent",
+        "summary": "When a booking event occurs",
+        "description": "This operation triggers when a booking is created, rescheduled, cancelled or marked as a no show. Choose the events to receive.",
+        "x-ms-trigger": "single",
+        "x-ms-trigger-hint": "To see it work, make a test booking on your Business Box booking page.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "The subscription to create.",
+            "schema": {
+              "type": "object",
+              "required": [
+                "url",
+                "events",
+                "description"
+              ],
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal",
+                  "x-ms-summary": "Callback URL",
+                  "description": "The address Business Box delivers events to."
+                },
+                "events": {
+                  "type": "array",
+                  "x-ms-summary": "Events",
+                  "description": "The booking events that start the flow. Choose * to receive every event, including events added later.",
+                  "x-ms-visibility": "important",
+                  "items": {
+                    "type": "string",
+                    "x-ms-summary": "Event",
+                    "description": "A booking event type.",
+                    "enum": [
+                      "booking.created",
+                      "booking.rescheduled",
+                      "booking.cancelled",
+                      "booking.no_show",
+                      "*"
+                    ]
+                  }
+                },
+                "description": {
+                  "type": "string",
+                  "x-ms-visibility": "internal",
+                  "default": "Microsoft Power Platform",
+                  "x-ms-summary": "Subscription Label",
+                  "description": "The label shown for this subscription in Business Box."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The subscription was created.",
+            "schema": {
+              "$ref": "#/definitions/WebhookSubscription"
+            }
+          },
+          "400": {
+            "description": "The request was invalid. The error code is validation_failed or bad_request."
+          },
+          "401": {
+            "description": "The API key is missing, unknown or revoked."
+          },
+          "403": {
+            "description": "The API key does not carry the scope this operation needs."
+          },
+          "429": {
+            "description": "Too many requests. Wait for the number of seconds in the Retry-After header."
+          }
+        }
+      }
+    },
+    "/webhooks/{id}": {
+      "delete": {
+        "operationId": "DeleteWebhook",
+        "summary": "Delete a webhook subscription",
+        "description": "Deletes a webhook subscription. The platform calls this when a flow that uses the trigger is turned off or deleted.",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Subscription ID",
+            "description": "The ID of the webhook subscription.",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The subscription was deleted, or did not exist."
+          },
+          "401": {
+            "description": "The API key is missing, unknown or revoked."
+          },
+          "403": {
+            "description": "The API key does not carry the scope this operation needs."
+          },
+          "429": {
+            "description": "Too many requests. Wait for the number of seconds in the Retry-After header."
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Booking": {
+      "type": "object",
+      "description": "A booking in Business Box.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Booking ID",
+          "description": "The unique identifier of the booking."
+        },
+        "status": {
+          "type": "string",
+          "x-ms-summary": "Status",
+          "description": "The booking status: held, awaiting_payment, confirmed, cancelled, completed or no_show.",
+          "enum": [
+            "held",
+            "awaiting_payment",
+            "confirmed",
+            "cancelled",
+            "completed",
+            "no_show"
+          ]
+        },
+        "start": {
+          "type": "string",
+          "x-ms-summary": "Start Time",
+          "description": "The start time of the booking in ISO 8601 UTC."
+        },
+        "end": {
+          "type": "string",
+          "x-ms-summary": "End Time",
+          "description": "The end time of the booking in ISO 8601 UTC."
+        },
+        "hostTimezone": {
+          "type": "string",
+          "x-ms-summary": "Host Time Zone",
+          "description": "The IANA time zone of the host, for example Asia/Tokyo."
+        },
+        "eventType": {
+          "type": "object",
+          "x-ms-summary": "Event Type",
+          "description": "The event type that was booked.",
+          "properties": {
+            "id": {
+              "type": "string",
+              "x-ms-summary": "Event Type ID",
+              "description": "The unique identifier of the event type."
+            },
+            "name": {
+              "type": "string",
+              "x-ms-summary": "Event Type Name",
+              "description": "The name of the event type in the host language."
+            },
+            "nameI18n": {
+              "type": "object",
+              "x-ms-summary": "Event Type Names",
+              "description": "The event type names in each supported language.",
+              "properties": {
+                "en": {
+                  "type": "string",
+                  "x-ms-summary": "English",
+                  "description": "The English text."
+                },
+                "ja": {
+                  "type": "string",
+                  "x-ms-summary": "Japanese",
+                  "description": "The Japanese text."
+                }
+              }
+            },
+            "slug": {
+              "type": "string",
+              "x-ms-summary": "Event Type Slug",
+              "description": "The URL slug of the event type."
+            }
+          }
+        },
+        "booker": {
+          "type": "object",
+          "x-ms-summary": "Customer",
+          "description": "The person who made the booking.",
+          "properties": {
+            "name": {
+              "type": "string",
+              "x-ms-summary": "Customer Name",
+              "description": "The full name of the customer."
+            },
+            "email": {
+              "type": "string",
+              "x-ms-summary": "Customer Email",
+              "description": "The email address of the customer."
+            },
+            "phone": {
+              "type": "string",
+              "x-ms-summary": "Customer Phone",
+              "description": "The phone number of the customer, if given.",
+              "x-nullable": true
+            },
+            "locale": {
+              "type": "string",
+              "x-ms-summary": "Customer Language",
+              "description": "The language of the customer: en or ja.",
+              "enum": [
+                "en",
+                "ja"
+              ]
+            },
+            "timezone": {
+              "type": "string",
+              "x-ms-summary": "Customer Time Zone",
+              "description": "The IANA time zone of the customer."
+            }
+          }
+        },
+        "answers": {
+          "type": "array",
+          "x-ms-summary": "Answers",
+          "description": "The answers the customer gave to the booking questions.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "questionId": {
+                "type": "string",
+                "x-ms-summary": "Question ID",
+                "description": "The unique identifier of the question."
+              },
+              "label": {
+                "type": "string",
+                "x-ms-summary": "Question",
+                "description": "The question label in the host language."
+              },
+              "labelI18n": {
+                "type": "object",
+                "x-ms-summary": "Question Labels",
+                "description": "The question labels in each supported language.",
+                "properties": {
+                  "en": {
+                    "type": "string",
+                    "x-ms-summary": "English",
+                    "description": "The English text."
+                  },
+                  "ja": {
+                    "type": "string",
+                    "x-ms-summary": "Japanese",
+                    "description": "The Japanese text."
+                  }
+                }
+              },
+              "value": {
+                "type": "string",
+                "x-ms-summary": "Answer",
+                "description": "The answer as text. Checkbox answers are true or false."
+              }
+            }
+          }
+        },
+        "bookerNotes": {
+          "type": "string",
+          "x-ms-summary": "Customer Notes",
+          "description": "Notes the customer added to the booking.",
+          "x-nullable": true
+        },
+        "location": {
+          "type": "object",
+          "x-ms-summary": "Location",
+          "description": "Where the meeting takes place.",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "x-ms-summary": "Location Type",
+              "description": "The location type: google_meet, teams, zoom, phone, in_person or custom."
+            },
+            "direction": {
+              "type": "string",
+              "x-ms-summary": "Phone Direction",
+              "description": "For phone meetings, who calls whom: host_calls or booker_calls."
+            },
+            "hostPhone": {
+              "type": "string",
+              "x-ms-summary": "Host Phone",
+              "description": "For phone meetings, the phone number of the host."
+            },
+            "address": {
+              "type": "string",
+              "x-ms-summary": "Address",
+              "description": "For in person meetings, the address."
+            },
+            "text": {
+              "type": "object",
+              "x-ms-summary": "Custom Location Text",
+              "description": "The custom location text in each supported language.",
+              "properties": {
+                "en": {
+                  "type": "string",
+                  "x-ms-summary": "English",
+                  "description": "The English text."
+                },
+                "ja": {
+                  "type": "string",
+                  "x-ms-summary": "Japanese",
+                  "description": "The Japanese text."
+                }
+              }
+            }
+          }
+        },
+        "joinUrl": {
+          "type": "string",
+          "x-ms-summary": "Join URL",
+          "description": "The video meeting link, when the location is an online meeting.",
+          "x-nullable": true
+        },
+        "source": {
+          "type": "string",
+          "x-ms-summary": "Source",
+          "description": "How the booking was made: public, manual or reschedule.",
+          "enum": [
+            "public",
+            "manual",
+            "reschedule"
+          ]
+        },
+        "payment": {
+          "x-ms-summary": "Payment",
+          "description": "Payment details. Empty for free event types.",
+          "properties": {
+            "amount": {
+              "type": "integer",
+              "x-ms-summary": "Amount",
+              "description": "The price in minor currency units. JPY has no minor unit, so 5000 is 5,000 yen.",
+              "format": "int64"
+            },
+            "currency": {
+              "type": "string",
+              "x-ms-summary": "Currency",
+              "description": "The ISO 4217 currency code, for example jpy."
+            },
+            "status": {
+              "type": "string",
+              "x-ms-summary": "Payment Status",
+              "description": "The payment status: unpaid, paid, refunded, partially_refunded or failed.",
+              "enum": [
+                "unpaid",
+                "paid",
+                "refunded",
+                "partially_refunded",
+                "failed"
+              ]
+            },
+            "refundedAmount": {
+              "type": "integer",
+              "x-ms-summary": "Refunded Amount",
+              "description": "The refunded amount in minor currency units.",
+              "format": "int64"
+            },
+            "receiptUrl": {
+              "type": "string",
+              "x-ms-summary": "Receipt URL",
+              "description": "A link to the payment receipt.",
+              "x-nullable": true
+            }
+          },
+          "x-nullable": true
+        },
+        "cancellation": {
+          "x-ms-summary": "Cancellation",
+          "description": "Cancellation details. Empty unless the booking was cancelled.",
+          "properties": {
+            "by": {
+              "type": "string",
+              "x-ms-summary": "Cancelled By",
+              "description": "Who cancelled the booking: booker, host or system.",
+              "enum": [
+                "booker",
+                "host",
+                "system"
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "x-ms-summary": "Cancellation Reason",
+              "description": "The reason given for the cancellation.",
+              "x-nullable": true
+            },
+            "at": {
+              "type": "string",
+              "x-ms-summary": "Cancelled At",
+              "description": "When the booking was cancelled, in ISO 8601 UTC."
+            }
+          },
+          "x-nullable": true
+        },
+        "manageUrl": {
+          "type": "string",
+          "x-ms-summary": "Manage URL",
+          "description": "The link that opens this booking in Business Box."
+        },
+        "createdAt": {
+          "type": "string",
+          "x-ms-summary": "Created At",
+          "description": "When the booking was created, in ISO 8601 UTC."
+        },
+        "updatedAt": {
+          "type": "string",
+          "x-ms-summary": "Updated At",
+          "description": "When the booking was last changed, in ISO 8601 UTC."
+        }
+      }
+    },
+    "BookingList": {
+      "type": "object",
+      "description": "A page of bookings.",
+      "properties": {
+        "items": {
+          "type": "array",
+          "x-ms-summary": "Bookings",
+          "description": "The bookings on this page.",
+          "items": {
+            "$ref": "#/definitions/Booking"
+          }
+        },
+        "nextCursor": {
+          "type": "string",
+          "x-ms-summary": "Next Cursor",
+          "description": "Pass this value as Cursor to get the next page. Empty on the last page.",
+          "x-nullable": true
+        }
+      }
+    },
+    "EventType": {
+      "type": "object",
+      "description": "Something customers can book.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Event Type ID",
+          "description": "The unique identifier of the event type."
+        },
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Event Type Name",
+          "description": "The name of the event type in the host language."
+        },
+        "nameI18n": {
+          "type": "object",
+          "x-ms-summary": "Event Type Names",
+          "description": "The event type names in each supported language.",
+          "properties": {
+            "en": {
+              "type": "string",
+              "x-ms-summary": "English",
+              "description": "The English text."
+            },
+            "ja": {
+              "type": "string",
+              "x-ms-summary": "Japanese",
+              "description": "The Japanese text."
+            }
+          }
+        },
+        "description": {
+          "type": "string",
+          "x-ms-summary": "Event Type Description",
+          "description": "The description shown to customers.",
+          "x-nullable": true
+        },
+        "slug": {
+          "type": "string",
+          "x-ms-summary": "Event Type Slug",
+          "description": "The URL slug of the event type."
+        },
+        "durationMinutes": {
+          "type": "integer",
+          "x-ms-summary": "Duration in Minutes",
+          "description": "The length of the meeting in minutes.",
+          "format": "int32"
+        },
+        "visibility": {
+          "type": "string",
+          "x-ms-summary": "Visibility",
+          "description": "Whether the event type is public or invite_only.",
+          "enum": [
+            "public",
+            "invite_only"
+          ]
+        },
+        "active": {
+          "type": "boolean",
+          "x-ms-summary": "Active",
+          "description": "Whether the event type can currently be booked."
+        },
+        "bookingUrl": {
+          "type": "string",
+          "x-ms-summary": "Booking URL",
+          "description": "The public booking page link for this event type.",
+          "x-nullable": true
+        },
+        "price": {
+          "x-ms-summary": "Price",
+          "description": "The price. Empty for free event types.",
+          "properties": {
+            "amount": {
+              "type": "integer",
+              "x-ms-summary": "Price Amount",
+              "description": "The price in minor currency units. JPY has no minor unit, so 5000 is 5,000 yen.",
+              "format": "int64"
+            },
+            "currency": {
+              "type": "string",
+              "x-ms-summary": "Price Currency",
+              "description": "The ISO 4217 currency code, for example jpy."
+            }
+          },
+          "x-nullable": true
+        },
+        "payOnArrival": {
+          "type": "boolean",
+          "x-ms-summary": "Pay on Arrival",
+          "description": "Whether the customer pays in person instead of online."
+        },
+        "locationKind": {
+          "type": "string",
+          "x-ms-summary": "Location Type",
+          "description": "The location type: google_meet, teams, zoom, phone, in_person or custom."
+        },
+        "createdAt": {
+          "type": "string",
+          "x-ms-summary": "Created At",
+          "description": "When the event type was created, in ISO 8601 UTC."
+        },
+        "updatedAt": {
+          "type": "string",
+          "x-ms-summary": "Updated At",
+          "description": "When the event type was last changed, in ISO 8601 UTC."
+        }
+      }
+    },
+    "EventTypeList": {
+      "type": "object",
+      "description": "A page of event types.",
+      "properties": {
+        "items": {
+          "type": "array",
+          "x-ms-summary": "Event Types",
+          "description": "The event types on this page.",
+          "items": {
+            "$ref": "#/definitions/EventType"
+          }
+        },
+        "nextCursor": {
+          "type": "string",
+          "x-ms-summary": "Next Cursor",
+          "description": "Pass this value as Cursor to get the next page. Empty on the last page.",
+          "x-nullable": true
+        }
+      }
+    },
+    "Slots": {
+      "type": "object",
+      "description": "Available start times.",
+      "properties": {
+        "slots": {
+          "type": "array",
+          "x-ms-summary": "Available Start Times",
+          "description": "The start times that can be booked, in ISO 8601 UTC.",
+          "items": {
+            "type": "string",
+            "x-ms-summary": "Start Time",
+            "description": "A start time that can be booked."
+          }
+        },
+        "calendarBlocked": {
+          "type": "boolean",
+          "x-ms-summary": "Calendar Unavailable",
+          "description": "True when a connected calendar could not be checked, so no times are offered."
+        }
+      }
+    },
+    "Account": {
+      "type": "object",
+      "description": "The Business Box account the API key belongs to.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Account ID",
+          "description": "The unique identifier of the account."
+        },
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Account Name",
+          "description": "The display name of the account."
+        },
+        "email": {
+          "type": "string",
+          "x-ms-summary": "Account Email",
+          "description": "The email address of the account."
+        },
+        "handle": {
+          "type": "string",
+          "x-ms-summary": "Handle",
+          "description": "The booking page handle of the account.",
+          "x-nullable": true
+        },
+        "locale": {
+          "type": "string",
+          "x-ms-summary": "Language",
+          "description": "The language of the account: en or ja.",
+          "enum": [
+            "en",
+            "ja"
+          ]
+        },
+        "timezone": {
+          "type": "string",
+          "x-ms-summary": "Time Zone",
+          "description": "The IANA time zone of the account."
+        },
+        "bookingPageUrl": {
+          "type": "string",
+          "x-ms-summary": "Booking Page URL",
+          "description": "The public booking page link of the account.",
+          "x-nullable": true
+        },
+        "plan": {
+          "type": "string",
+          "x-ms-summary": "Plan",
+          "description": "The subscription plan: free or standard.",
+          "enum": [
+            "free",
+            "standard"
+          ]
+        },
+        "scopes": {
+          "type": "array",
+          "x-ms-summary": "Scopes",
+          "description": "The permissions the API key carries.",
+          "items": {
+            "type": "string",
+            "enum": [
+              "event_types:read",
+              "bookings:read",
+              "bookings:write",
+              "webhooks:manage"
+            ]
+          }
+        }
+      }
+    },
+    "Invite": {
+      "type": "object",
+      "description": "A single use booking link.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Invite ID",
+          "description": "The unique identifier of the invite."
+        },
+        "eventTypeId": {
+          "type": "string",
+          "x-ms-summary": "Event Type ID",
+          "description": "The event type the link books."
+        },
+        "url": {
+          "type": "string",
+          "x-ms-summary": "Invite URL",
+          "description": "The single use booking link. Send it to the customer.",
+          "x-nullable": true
+        },
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Invitee Name",
+          "description": "The name the booking form is prefilled with.",
+          "x-nullable": true
+        },
+        "email": {
+          "type": "string",
+          "x-ms-summary": "Invitee Email",
+          "description": "The email the booking form is prefilled with.",
+          "x-nullable": true
+        },
+        "expiresAt": {
+          "type": "string",
+          "x-ms-summary": "Expires At",
+          "description": "When the link stops working, in ISO 8601 UTC."
+        },
+        "usedAt": {
+          "type": "string",
+          "x-ms-summary": "Used At",
+          "description": "When the link was used. Empty until it is used.",
+          "x-nullable": true
+        },
+        "bookingId": {
+          "type": "string",
+          "x-ms-summary": "Booking ID",
+          "description": "The booking made with the link. Empty until it is used.",
+          "x-nullable": true
+        },
+        "createdAt": {
+          "type": "string",
+          "x-ms-summary": "Created At",
+          "description": "When the link was created, in ISO 8601 UTC."
+        }
+      }
+    },
+    "WebhookSubscription": {
+      "type": "object",
+      "description": "A webhook subscription.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Subscription ID",
+          "description": "The unique identifier of the subscription."
+        },
+        "url": {
+          "type": "string",
+          "x-ms-summary": "Callback URL",
+          "description": "The address events are delivered to."
+        },
+        "events": {
+          "type": "array",
+          "x-ms-summary": "Events",
+          "description": "The subscribed event types.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "status": {
+          "type": "string",
+          "x-ms-summary": "Subscription Status",
+          "description": "Whether the subscription is active or disabled."
+        },
+        "createdAt": {
+          "type": "string",
+          "x-ms-summary": "Created At",
+          "description": "When the subscription was created, in ISO 8601 UTC."
+        }
+      }
+    },
+    "BookingEvent": {
+      "type": "object",
+      "description": "A booking event delivered by Business Box.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Event ID",
+          "description": "The unique identifier of the event. Use it to ignore duplicate deliveries."
+        },
+        "type": {
+          "type": "string",
+          "x-ms-summary": "Event Type Code",
+          "description": "What happened: booking.created, booking.rescheduled, booking.cancelled or booking.no_show."
+        },
+        "createdAt": {
+          "type": "string",
+          "x-ms-summary": "Event Time",
+          "description": "When the event happened, in ISO 8601 UTC."
+        },
+        "apiVersion": {
+          "type": "string",
+          "x-ms-summary": "API Version",
+          "description": "The version of the payload format, currently v1."
+        },
+        "data": {
+          "type": "object",
+          "x-ms-summary": "Data",
+          "description": "The event data.",
+          "properties": {
+            "booking": {
+              "$ref": "#/definitions/Booking"
+            },
+            "previous": {
+              "type": "object",
+              "x-ms-summary": "Previous Time",
+              "description": "For booking.rescheduled, the time the booking had before it moved.",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "x-ms-summary": "Previous Booking ID",
+                  "description": "The booking ID before the move."
+                },
+                "start": {
+                  "type": "string",
+                  "x-ms-summary": "Previous Start Time",
+                  "description": "The start time before the move, in ISO 8601 UTC."
+                },
+                "end": {
+                  "type": "string",
+                  "x-ms-summary": "Previous End Time",
+                  "description": "The end time before the move, in ISO 8601 UTC."
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization"
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://marubox.jp"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://marubox.jp/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Productivity;Business Management"
+    }
+  ],
+  "x-ms-capabilities": {
+    "testConnection": {
+      "operationId": "GetCurrentAccount"
+    }
+  }
+}
