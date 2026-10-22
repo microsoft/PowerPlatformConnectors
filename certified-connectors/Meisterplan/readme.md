@@ -29,8 +29,11 @@ The connector supports reading and/or updating the following Meisterplan entitie
 - Programs
 - Projects
 - Project Comments (read only)
+- Project Segments
 - Allocation Comments (read only)
 - Resources
+- Resource Team Contributions
+- Risks
 - Role Capacities
 - Roles
 - Scenarios (read only)
