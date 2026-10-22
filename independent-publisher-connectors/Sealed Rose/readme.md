@@ -16,6 +16,9 @@ Analyzes text content for perplexity, burstiness, and token-distribution signatu
 ### Verify media URL for deepfake manipulation (`VerifyMediaUrl`)
 Evaluates a remote video, audio, or image URL using multimodal neural decomposition and temporal optical flow analysis.
 
+### Get API quota and usage (`GetUsage`)
+Returns the current billing period verification usage and remaining API quota for the authenticated key.
+
 ## Obtaining Credentials
 
 1. Visit the Sealed Rose Developer Portal at [https://sealedrose.com/developers](https://sealedrose.com/developers).
