@@ -60,12 +60,11 @@ None in v1. The backend does not yet expose webhooks or reliable incremental pol
 ## Obtaining Credentials
 The connector authenticates with a bearer token (JWT).
 
-1. Obtain a token by calling `POST https://pantherahive.com/api/auth/login` with your Field Suite Cloud account email and password in the JSON body (`{"email": "...", "password": "..."}`). The response contains the JWT.
+1. Obtain a token by calling `POST https://pantherhive-api.hotwodi4.workers.dev/api/auth/login` with your Field Suite Cloud account email and password in the JSON body (`{"email": "...", "password": "..."}`). The response contains the JWT.
 2. When creating the connection in Power Automate, enter the token in the Authorization field in the form `Bearer <token>`.
 
 ## Known Issues and Limitations
 - No triggers are available in v1.
-- Notion analysis is optional: the connector is fully usable without Notion. Analyze Notion Source uses your own Notion integration token, which is passed per request and never stored.
 - The bearer token expires with the underlying Field Suite Cloud session; when it expires, update the connection with a fresh token.
 - `limit` on List Customers is capped at 100 records per request.
 - No triggers are available in v1.
