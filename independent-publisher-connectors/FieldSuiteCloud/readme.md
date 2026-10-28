@@ -65,9 +65,9 @@ The connector authenticates with a bearer token (JWT).
 
 ## Known Issues and Limitations
 - No triggers are available in v1.
-- Notion operations are optional: the connector is fully usable without Notion. Notion operations use your own Notion integration token, which is passed per request and never stored.
-- Import from Notion consumes account credits after the first free demo run. When credits are insufficient, the call returns HTTP 402.
-- Import from Notion is asynchronous; poll Get Import Status until the status is completed or failed.
+- Notion analysis is optional: the connector is fully usable without Notion. Analyze Notion Source uses your own Notion integration token, which is passed per request and never stored.
+- The bearer token expires with the underlying Field Suite Cloud session; when it expires, update the connection with a fresh token.
+- `limit` on List Customers is capped at 100 records per request.
 - No triggers are available in v1.
 - The bearer token expires with the underlying Field Suite Cloud session; when it expires, update the connection with a fresh token.
 - `limit` on List Customers is capped at 100 records per request.
