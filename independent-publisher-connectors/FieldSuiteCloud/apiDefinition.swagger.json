@@ -27,7 +27,7 @@
       }
     ]
   },
-  "host": "pantherhive-api.hotwodi4.workers.dev",
+  "host": "pantherahive.com",
   "basePath": "/",
   "schemes": [
     "https"
@@ -574,6 +574,119 @@
         ],
         "x-ms-visibility": "important"
       }
+    },
+    "/api/import/analyze": {
+      "post": {
+        "summary": "Analyze Notion Source",
+        "description": "Analyzes a Notion workspace using the supplied integration token and returns a blueprint of its databases, fields, and detected workflows.",
+        "operationId": "AnalyzeNotionSource",
+        "x-ms-visibility": "important",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/NotionAnalyzeInput"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Blueprint of the analyzed Notion workspace.",
+            "schema": {
+              "$ref": "#/definitions/BusinessBlueprint"
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/api/import/generate": {
+      "post": {
+        "summary": "Import from Notion",
+        "description": "Queues an asynchronous job that imports a Notion workspace and creates Field Suite Cloud records from it. The first run is a free demo run; later runs consume credits. Poll the returned run ID with Get Import Status.",
+        "operationId": "ImportFromNotion",
+        "x-ms-visibility": "important",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/NotionImportInput"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Import job queued.",
+            "schema": {
+              "$ref": "#/definitions/NotionImportResponse"
+            }
+          },
+          "402": {
+            "description": "Insufficient credits for this import. Top up the account wallet and retry."
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/api/make/workflow-status/{runId}": {
+      "get": {
+        "summary": "Get Import Status",
+        "description": "Returns the current status, output, and credit usage of a previously queued import or generation job.",
+        "operationId": "GetImportStatus",
+        "x-ms-visibility": "important",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "runId",
+            "required": true,
+            "type": "string",
+            "description": "The run ID returned by Import from Notion."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current status of the import job.",
+            "schema": {
+              "$ref": "#/definitions/ImportStatus"
+            }
+          },
+          "404": {
+            "description": "No job found with that run ID."
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
     }
   },
   "definitions": {
@@ -960,6 +1073,213 @@
         "hourlyRate": {
           "format": "double",
           "type": "number"
+        }
+      }
+    },
+    "NotionAnalyzeInput": {
+      "required": [
+        "notionToken"
+      ],
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "string",
+          "enum": [
+            "notion"
+          ],
+          "default": "notion",
+          "description": "The import source. Always \"notion\" for this operation."
+        },
+        "notionToken": {
+          "type": "string",
+          "description": "The Notion integration token of the workspace to analyze."
+        }
+      }
+    },
+    "NotionImportInput": {
+      "required": [
+        "notionToken"
+      ],
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "string",
+          "enum": [
+            "notion"
+          ],
+          "default": "notion",
+          "description": "The import source. Always \"notion\" for this operation."
+        },
+        "notionToken": {
+          "type": "string",
+          "description": "The Notion integration token of the workspace to import."
+        },
+        "target": {
+          "type": "string",
+          "enum": [
+            "field_suite"
+          ],
+          "default": "field_suite",
+          "description": "The import target. Always \"field_suite\" to create Field Suite Cloud records."
+        },
+        "blueprint": {
+          "type": "object",
+          "description": "Optional blueprint previously returned by Analyze Notion Source. Omit to analyze the workspace automatically."
+        }
+      }
+    },
+    "BusinessBlueprint": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "blueprint": {
+          "type": "object",
+          "properties": {
+            "source": {
+              "type": "string"
+            },
+            "entities": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/BlueprintEntity"
+              }
+            },
+            "documents": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "workflows": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "summary": {
+              "type": "object",
+              "properties": {
+                "entityCount": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "documentCount": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "workflowCount": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "BlueprintEntity": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "NotionImportResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "description": "Always \"queued\" for a successfully submitted job."
+        },
+        "runId": {
+          "type": "string",
+          "description": "Identifier to poll with Get Import Status."
+        },
+        "workflowId": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "target": {
+          "type": "string"
+        },
+        "demo": {
+          "type": "boolean",
+          "description": "True when this run was executed as the free demo run."
+        },
+        "blueprintSummary": {
+          "type": "object",
+          "properties": {
+            "entityCount": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "documentCount": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "workflowCount": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "ImportStatus": {
+      "type": "object",
+      "properties": {
+        "runId": {
+          "type": "string"
+        },
+        "workflowId": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "description": "One of queued, running, completed, or failed."
+        },
+        "output": {
+          "type": "object",
+          "description": "The job output when complete. Dynamic content is not available for this field."
+        },
+        "creditsUsed": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "creditsRefunded": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "error": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string"
         }
       }
     }
