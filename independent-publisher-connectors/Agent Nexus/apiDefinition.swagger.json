@@ -1,0 +1,88 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Agent Nexus",
+    "description": "Agent Nexus is a live-monitored registry of APIs, MCP servers and CLIs for AI agents. Find the right external service for a task and check whether it is currently up.",
+    "version": "1.0",
+    "contact": {"name": "Agent Nexus", "url": "https://agentnexus.app", "email": "support@agentnexus.app"}
+  },
+  "host": "agentnexus.app",
+  "basePath": "/api/public",
+  "schemes": ["https"],
+  "consumes": [],
+  "produces": ["application/json"],
+  "paths": {
+    "/discover": {
+      "get": {
+        "summary": "Find a service for a task",
+        "description": "Returns APIs, MCP servers or CLIs that can perform the described task, ranked by relevance and live reliability.",
+        "operationId": "DiscoverCapabilities",
+        "parameters": [
+          {"name": "q", "in": "query", "required": true, "type": "string", "x-ms-summary": "Need", "description": "Task in plain words, e.g. send email."},
+          {"name": "category", "in": "query", "required": false, "type": "string", "enum": ["api", "mcp", "cli"], "x-ms-summary": "Category", "description": "Restrict to one kind of service."},
+          {"name": "limit", "in": "query", "required": false, "type": "integer", "default": 5, "x-ms-summary": "Limit", "description": "Maximum number of matches."}
+        ],
+        "responses": {"200": {"description": "Matches", "schema": {"$ref": "#/definitions/DiscoverResponse"}}}
+      }
+    },
+    "/registry": {
+      "get": {
+        "summary": "Search the registry",
+        "description": "Keyword search over approved registry entries.",
+        "operationId": "SearchRegistry",
+        "parameters": [
+          {"name": "q", "in": "query", "required": false, "type": "string", "x-ms-summary": "Query", "description": "Keywords."},
+          {"name": "category", "in": "query", "required": false, "type": "string", "enum": ["api", "mcp", "cli"], "x-ms-summary": "Category", "description": "Restrict to one kind of service."},
+          {"name": "limit", "in": "query", "required": false, "type": "integer", "default": 10, "x-ms-summary": "Limit", "description": "Maximum number of results."}
+        ],
+        "responses": {"200": {"description": "Results", "schema": {"$ref": "#/definitions/RegistryResponse"}}}
+      }
+    },
+    "/status": {
+      "get": {
+        "summary": "Check live status",
+        "description": "Returns the latest monitored health of one registry entry.",
+        "operationId": "GetStatus",
+        "parameters": [
+          {"name": "slug", "in": "query", "required": true, "type": "string", "x-ms-summary": "Slug", "description": "Entry identifier, e.g. smtp2go-api."}
+        ],
+        "responses": {"200": {"description": "Status", "schema": {"type": "object"}}}
+      }
+    }
+  },
+  "definitions": {
+    "Entry": {
+      "type": "object",
+      "properties": {
+        "slug": {"type": "string", "x-ms-summary": "Slug", "description": "Entry identifier."},
+        "name": {"type": "string", "x-ms-summary": "Name", "description": "Service name."},
+        "category": {"type": "string", "x-ms-summary": "Category", "description": "api, mcp or cli."},
+        "summary": {"type": "string", "x-ms-summary": "Summary", "description": "Short description."}
+      }
+    },
+    "DiscoverResponse": {
+      "type": "object",
+      "properties": {
+        "need": {"type": "string", "x-ms-summary": "Need", "description": "Interpreted task."},
+        "count": {"type": "integer", "x-ms-summary": "Count", "description": "Number of matches."},
+        "matches": {"type": "array", "items": {"$ref": "#/definitions/Entry"}, "x-ms-summary": "Matches", "description": "Matching services."}
+      }
+    },
+    "RegistryResponse": {
+      "type": "object",
+      "properties": {
+        "count": {"type": "integer", "x-ms-summary": "Count", "description": "Number of results."},
+        "results": {"type": "array", "items": {"$ref": "#/definitions/Entry"}, "x-ms-summary": "Results", "description": "Registry entries."}
+      }
+    }
+  },
+  "securityDefinitions": {
+    "API Key": {"type": "apiKey", "in": "header", "name": "x-api-key"}
+  },
+  "security": [{"API Key": []}],
+  "x-ms-connector-metadata": [
+    {"propertyName": "Website", "propertyValue": "https://agentnexus.app"},
+    {"propertyName": "Privacy policy", "propertyValue": "https://agentnexus.app/privacy"},
+    {"propertyName": "Categories", "propertyValue": "AI;IT Operations"}
+  ]
+}
