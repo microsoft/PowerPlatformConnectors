@@ -46,7 +46,7 @@
         "parameters": [
           {"name": "slug", "in": "query", "required": true, "type": "string", "x-ms-summary": "Slug", "description": "Entry identifier, e.g. smtp2go-api."}
         ],
-        "responses": {"200": {"description": "Status", "schema": {"type": "object"}}}
+        "responses": {"200": {"description": "Status", "schema": {"$ref": "#/definitions/StatusResponse"}}}
       }
     }
   },
@@ -57,7 +57,11 @@
         "slug": {"type": "string", "x-ms-summary": "Slug", "description": "Entry identifier."},
         "name": {"type": "string", "x-ms-summary": "Name", "description": "Service name."},
         "category": {"type": "string", "x-ms-summary": "Category", "description": "api, mcp or cli."},
-        "summary": {"type": "string", "x-ms-summary": "Summary", "description": "Short description."}
+        "summary": {"type": "string", "x-ms-summary": "Summary", "description": "Short description."},
+        "endpoint": {"type": "string", "description": "Provider endpoint; invoke it separately with the provider's credentials."},
+        "docs_url": {"type": "string", "description": "Provider documentation."},
+        "auth_mode": {"type": "string", "description": "Provider authentication requirements."},
+        "pricing": {"type": "string", "description": "Provider's advertised pricing."}
       }
     },
     "DiscoverResponse": {
@@ -65,7 +69,60 @@
       "properties": {
         "need": {"type": "string", "x-ms-summary": "Need", "description": "Interpreted task."},
         "count": {"type": "integer", "x-ms-summary": "Count", "description": "Number of matches."},
-        "matches": {"type": "array", "items": {"$ref": "#/definitions/Entry"}, "x-ms-summary": "Matches", "description": "Matching services."}
+        "matches": {"type": "array", "items": {"$ref": "#/definitions/DiscoveryMatch"}, "x-ms-summary": "Matches", "description": "Matching services with call contracts and reliability evidence."}
+      }
+    },
+    "CallContract": {
+      "type": "object",
+      "properties": {
+        "endpoint": {"type": "string", "description": "Provider endpoint to invoke separately."},
+        "auth_mode": {"type": "string", "description": "Provider authentication requirements."},
+        "input_format": {"type": "string", "description": "Accepted request format."},
+        "output_format": {"type": "string", "description": "Response format."},
+        "rate_limit": {"type": "string", "description": "Advertised provider rate limits."},
+        "pricing": {"type": "string", "description": "Advertised provider pricing."},
+        "docs_url": {"type": "string", "description": "Provider documentation."}
+      }
+    },
+    "TrustEvidence": {
+      "type": "object",
+      "properties": {
+        "verified": {"type": "boolean", "description": "Whether publisher verification is recorded."},
+        "reliability_score": {"type": "number", "description": "Registry reliability score, not an execution guarantee."},
+        "last_probe_ok": {"type": "boolean", "description": "Whether the latest endpoint probe succeeded."},
+        "last_probe_at": {"type": "string", "description": "Latest endpoint probe time."}
+      }
+    },
+    "DiscoveryMatch": {
+      "type": "object",
+      "properties": {
+        "slug": {"type": "string", "description": "Entry identifier for status lookup."},
+        "name": {"type": "string", "description": "Provider name."},
+        "category": {"type": "string", "description": "api, mcp or cli."},
+        "summary": {"type": "string", "description": "Service summary."},
+        "call": {"$ref": "#/definitions/CallContract"},
+        "trust": {"$ref": "#/definitions/TrustEvidence"}
+      }
+    },
+    "StatusEntry": {
+      "type": "object",
+      "properties": {
+        "slug": {"type": "string", "description": "Entry identifier."},
+        "name": {"type": "string", "description": "Service name."},
+        "health_ok": {"type": "boolean", "description": "Latest monitored endpoint health; not proof of downstream execution."},
+        "health_checked_at": {"type": "string", "description": "Time of the latest endpoint health check."},
+        "checks_total": {"type": "integer", "description": "Recorded endpoint checks."},
+        "checks_ok": {"type": "integer", "description": "Successful endpoint checks."},
+        "avg_latency_ms": {"type": "integer", "description": "Average measured endpoint latency in milliseconds."},
+        "window_uptime": {"type": "number", "description": "Successful-check fraction in the requested history window."}
+      }
+    },
+    "StatusResponse": {
+      "type": "object",
+      "properties": {
+        "generated_at": {"type": "string", "description": "Status response generation time."},
+        "window_days": {"type": "integer", "description": "History window length in days."},
+        "entry": {"$ref": "#/definitions/StatusEntry"}
       }
     },
     "RegistryResponse": {

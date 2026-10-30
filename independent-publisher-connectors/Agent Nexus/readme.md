@@ -19,3 +19,8 @@ Request a free key at https://agentnexus.app/free-key and paste it when creating
 
 ## Known Issues and Limitations
 Free plan is limited to 1,000 calls per day. Agent Nexus is a discovery registry: it does not proxy calls to the listed services.
+
+## Validation status
+The three HTTPS operations were checked on October 30, 2026: discovery for `send email`, registry search for `brave`, and live status for `brave-search-api` returned HTTP 200. Discovery exposes nested `call` and `trust` fields, and status exposes nested `entry` health fields.
+
+Import, connection creation with a private key, and operation testing inside a Power Platform environment remain pending. HTTP checks are not a substitute for that certification test. The publisher name and the independent-publisher title convention must be confirmed during certification; no approval or public availability is implied.
