@@ -54,7 +54,7 @@ Takes one number off the consent list when consent is withdrawn, with an optiona
 3. Copy the key. It is shown once.
 4. When creating a connection, paste the key on its own into the **API Key** field. The connector adds the `Bearer` prefix for you; do not type it.
 
-The key is sent in the `Authorization` header on every call.
+The key is sent as a Bearer token in the `Authorization` header on every call.
 
 ## Getting Started
 
@@ -69,7 +69,7 @@ With a test key, `+441134960002` comes back `tps-listed`, `+442079460018` comes 
 
 - **Batch size.** Screen phone numbers takes up to 200 numbers per call. For a larger list, split it with a Select or Chunk expression and call the action once per chunk.
 - **Status `unknown` is not `clean`.** It covers both a number that is not a valid UK line and a register check that failed. Treat it as not screened.
-- **Checks age.** The registers change daily. Screen a list again before calling if the check is 27 or more days old; the `checkedAt` field on each result is the time to measure from.
+- **Checks age.** The registers change daily. Screen each number again on or before its `recheckBy` date (27 days after `checkedAt`).
 - **HTTP 429 has three meanings.** The `error` field is `rate_limited` when a retry after the `Retry-After` header will succeed. It is `allowance_reached` or `daily_cap_reached` when the account's plan allowance or daily cap is spent, and a retry will not clear those; the default retry policy on the action will retry anyway, so check the `error` field in a run that fails on 429.
 - **Test keys are read only on lists.** The four add and remove operations on the suppression and consent lists return HTTP 403 `test_key_read_only` on a test key; the two list reads work on either. Use a live key for list changes; they are free and need no credits.
 - **Limited keys.** A key created with only some scopes returns HTTP 403 `insufficient_scope` on the actions outside them, and a key with an IP allowlist returns 403 `ip_not_allowed` from any other address. Calls from this connector come from Microsoft data centre addresses, so use a key with no IP allowlist, or one that covers the Power Platform outbound addresses for your region.
