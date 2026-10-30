@@ -1,7 +1,7 @@
 # Agent Nexus
 Agent Nexus is a live-monitored registry of APIs, MCP servers and CLIs for AI agents. Use it to find the right external service for a task and to check whether that service is currently up.
 
-## Publisher: Youssef El Hannouni
+## Publisher: Agent Nexus
 
 ## Prerequisites
 A free Agent Nexus API key from https://agentnexus.app/free-key (1,000 calls/day free).
