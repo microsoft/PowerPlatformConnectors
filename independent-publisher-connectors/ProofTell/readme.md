@@ -22,17 +22,16 @@ Returns the account's balance in US dollars (paid, promotional and held amounts)
 1. Sign in to the ProofTell dashboard and open Developers, then Integrations.
 2. Create a key named after this platform, for example "Power Automate", and choose its mode: a `pt_test_` key is the free sandbox (simulated, deterministic answers); a `pt_live_` key spends the account's balance.
 3. Copy the key: it is shown once.
-4. When the connector asks for the API key, enter the word `Bearer`, a space, then the key: `Bearer pt_live_…` or `Bearer pt_test_…`.
+4. When the connector asks for the API key, paste the key itself: `pt_live_…` or `pt_test_…`.
 
 ## Getting Started
 Add an action of the connector to a flow, for example "Look up a phone number" after a form submission, pass the phone number from the trigger, and leave Level on Line type. The outputs (Valid, Line type, Country code, Current carrier and the rest) are then available to the next steps. To try the actions without spending anything, connect with a sandbox key and use the documented inputs: `+447700900123` (a valid GB mobile), `jane@example.com` (deliverable), `203.0.113.1` (a clean US address) and `203.0.113.66` (a Tor exit node).
 
 ## Known Issues and Limitations
-- The API key field takes the word Bearer, a space and the key. Without the prefix every action fails with 401 `invalid_api_key`.
 - A sandbox (`pt_test_`) key answers every action with simulated, deterministic results and never contacts a network or a mail server. Use a `pt_live_` key for real answers.
 - Every live check is charged from the account's balance at the moment it runs; Basic is free but needs a balance above zero. When the balance cannot cover a check the action fails with 402 `insufficient_balance` and names the amounts to top up.
 - The rate limit is 20 requests a second per key, with bursts of 50. Past it an action fails with 429 `rate_limited`; a retry after one second succeeds.
 - Checking a whole file of numbers or addresses is not part of this connector: use the Files page of the ProofTell dashboard.
 
 ## Deployment Instructions
-Import `apiDefinition.swagger.json` as a custom connector (in Power Automate: Custom connectors, New custom connector, Import an OpenAPI file), or run `paconn create --api-def apiDefinition.swagger.json --api-prop apiProperties.json` with the [Power Platform Connectors CLI](https://github.com/microsoft/PowerPlatformConnectors/tree/dev/tools/paconn-cli). Then create a connection with `Bearer ` followed by your key and test it with "Get the balance".
+Run `paconn create --api-def apiDefinition.swagger.json --api-prop apiProperties.json` with the [Power Platform Connectors CLI](https://github.com/microsoft/PowerPlatformConnectors/tree/dev/tools/paconn-cli): the properties file carries the policy that sends the key as `Authorization: Bearer <key>`. Importing `apiDefinition.swagger.json` alone in the portal (Custom connectors, New custom connector, Import an OpenAPI file) works too: then add that policy yourself in the Definition step (New policy, Set HTTP header, name `Authorization`, value `Bearer @connectionParameters('api_key')`, action override, on the request). Create a connection with your key and test it with "Get the balance".
