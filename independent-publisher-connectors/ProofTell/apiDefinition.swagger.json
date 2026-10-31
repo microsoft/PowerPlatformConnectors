@@ -1,0 +1,1522 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0",
+    "title": "ProofTell",
+    "description": "ProofTell checks a phone number, an email address and an IP address, one at a time or together as a 0 to 100 risk score with a verdict and its reasons. Each check is charged from your balance; the sandbox is free.",
+    "contact": {
+      "name": "ProofTell support",
+      "url": "https://prooftell.com",
+      "email": "support@prooftell.com"
+    }
+  },
+  "host": "api.prooftell.com",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/phone": {
+      "post": {
+        "operationId": "LookUpPhoneNumber",
+        "summary": "Look up a phone number",
+        "description": "Checks a phone number at the level you choose: Basic (free: valid or not, the formats and the country), Line type (the default: the line type and the carrier the number was allocated to), Current carrier (the carrier the number is on today and whether it was ported), Line status (whether the subscriber is on the network right now) and Fraud score (a 0 to 100 score with its risk level and the number's fraud flags). Each level includes the ones before it. Charged per check from your balance; the sandbox is free.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "x-ms-summary": "Request",
+            "description": "What to check.",
+            "schema": {
+              "$ref": "#/definitions/PhoneRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The phone answer: the number's fields, the blocks of the level requested and the billing fields.",
+            "schema": {
+              "$ref": "#/definitions/PhoneResult"
+            }
+          },
+          "default": {
+            "description": "An error: the body carries a stable code and a message, and on 402 the amount missing from the balance."
+          }
+        }
+      }
+    },
+    "/v1/email": {
+      "post": {
+        "operationId": "VerifyEmailAddress",
+        "summary": "Verify an email address",
+        "description": "Verifies an email address: whether it is deliverable, the result and its reason, the flags (disposable, role account, free provider, catch-all) and a likely correction of a misspelt domain. Charged per check from your balance; a syntax error, an unknown and a soft bounce are free. The sandbox is free.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "x-ms-summary": "Request",
+            "description": "What to check.",
+            "schema": {
+              "$ref": "#/definitions/EmailRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The verification result and the billing fields.",
+            "schema": {
+              "$ref": "#/definitions/EmailResult"
+            }
+          },
+          "default": {
+            "description": "An error: the body carries a stable code and a message, and on 402 the amount missing from the balance."
+          }
+        }
+      }
+    },
+    "/v1/ip": {
+      "post": {
+        "operationId": "LookUpIpAddress",
+        "summary": "Look up an IP address",
+        "description": "Looks up an IP address: whether it is a Tor exit node, a VPN or a datacenter address, and its country, region, city and network. Charged per check from your balance; a private or reserved address is answered and free. The sandbox is free.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "x-ms-summary": "Request",
+            "description": "What to check.",
+            "schema": {
+              "$ref": "#/definitions/IpRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The address, its geography, its network, the list flags and the billing fields.",
+            "schema": {
+              "$ref": "#/definitions/IpResult"
+            }
+          },
+          "default": {
+            "description": "An error: the body carries a stable code and a message, and on 402 the amount missing from the balance."
+          }
+        }
+      }
+    },
+    "/v1/assess": {
+      "post": {
+        "operationId": "AssessIdentityRisk",
+        "summary": "Assess the risk of an identity",
+        "description": "Scores a phone number, an email address and an IP address together, any one of them at least: a 0 to 100 score, a verdict (allow, review or deny) against your organization's thresholds, the reasons that added to the score and each signal's own result. Charged per check from your balance for the signals that answered; the sandbox is free.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "x-ms-summary": "Request",
+            "description": "What to check.",
+            "schema": {
+              "$ref": "#/definitions/AssessRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The assessment: the score, the verdict, the reasons, each signal's result and the billing fields.",
+            "schema": {
+              "$ref": "#/definitions/Assessment"
+            }
+          },
+          "default": {
+            "description": "An error: the body carries a stable code and a message, and on 402 the amount missing from the balance."
+          }
+        }
+      }
+    },
+    "/v1/balance": {
+      "get": {
+        "operationId": "GetBalance",
+        "summary": "Get the balance",
+        "description": "Returns your account's balance in US dollars (paid, promotional and held amounts) and what this month's checks cost so far. Free; it is also how the connection is tested.",
+        "x-ms-visibility": "advanced",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The balance and this month's usage.",
+            "schema": {
+              "$ref": "#/definitions/Balance"
+            }
+          },
+          "default": {
+            "description": "An error: the body carries a stable code and a message, and on 402 the amount missing from the balance."
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "PhoneRequest": {
+      "type": "object",
+      "required": [
+        "phone"
+      ],
+      "properties": {
+        "phone": {
+          "type": "string",
+          "x-ms-summary": "Phone number",
+          "description": "The number to look up, in E.164 (+447700900123) or in national format with a country.",
+          "x-ms-visibility": "important"
+        },
+        "country": {
+          "type": "string",
+          "x-ms-summary": "Country",
+          "description": "The two-letter ISO 3166-1 code (GB) of the country of a number in national format.",
+          "x-ms-visibility": "advanced"
+        },
+        "level": {
+          "type": "string",
+          "x-ms-summary": "Level",
+          "description": "How far to look; each level includes the ones before it. Line type when left empty.",
+          "enum": [
+            "basic",
+            "line_type",
+            "current_carrier",
+            "line_status",
+            "fraud_score"
+          ],
+          "default": "line_type",
+          "x-ms-enum-values": [
+            {
+              "value": "basic",
+              "displayName": "Basic"
+            },
+            {
+              "value": "line_type",
+              "displayName": "Line type"
+            },
+            {
+              "value": "current_carrier",
+              "displayName": "Current carrier"
+            },
+            {
+              "value": "line_status",
+              "displayName": "Line status"
+            },
+            {
+              "value": "fraud_score",
+              "displayName": "Fraud score"
+            }
+          ],
+          "x-ms-visibility": "important"
+        }
+      }
+    },
+    "PhoneResult": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "x-ms-summary": "Status",
+          "description": "success when the number was judged, valid or not; error when it could not be parsed, which is free."
+        },
+        "phone": {
+          "type": "string",
+          "x-ms-summary": "Phone number",
+          "description": "The number in E.164 when it is valid; as sent otherwise."
+        },
+        "valid": {
+          "type": "boolean",
+          "x-ms-summary": "Valid",
+          "description": "Whether the number is a valid number of its numbering plan."
+        },
+        "reason": {
+          "type": "string",
+          "x-ms-summary": "Reason",
+          "description": "Why the number is not valid, when it is not: too_short, too_long, invalid_length, invalid_country_code, unrecognized_range or not_a_number."
+        },
+        "line_type": {
+          "type": "string",
+          "x-ms-summary": "Line type",
+          "description": "The line type: mobile, fixed_line, fixed_line_or_mobile, voip, toll_free, premium_rate, shared_cost, personal_number, pager, uan, voicemail or unknown."
+        },
+        "e164": {
+          "type": "string",
+          "x-ms-summary": "Number (E164)",
+          "description": "The number in E.164 format, with its country calling code."
+        },
+        "international_format": {
+          "type": "string",
+          "x-ms-summary": "International format",
+          "description": "The number formatted for dialling from abroad, with spaces."
+        },
+        "national_format": {
+          "type": "string",
+          "x-ms-summary": "National format",
+          "description": "The number as dialled inside its country."
+        },
+        "country": {
+          "type": "string",
+          "x-ms-summary": "Country",
+          "description": "The name of the number's country."
+        },
+        "country_code": {
+          "type": "string",
+          "x-ms-summary": "Country code",
+          "description": "The two-letter ISO 3166-1 code of the number's country."
+        },
+        "country_prefix": {
+          "type": "string",
+          "x-ms-summary": "Calling code",
+          "description": "The country calling code, without the plus sign."
+        },
+        "region": {
+          "type": "string",
+          "x-ms-summary": "Region",
+          "description": "Where the number is registered, when the numbering plan says."
+        },
+        "original_carrier": {
+          "type": "string",
+          "x-ms-summary": "Original carrier",
+          "description": "The carrier the number range was allocated to; the carrier today is under Current carrier."
+        },
+        "timezone": {
+          "type": "array",
+          "x-ms-summary": "Time zones",
+          "description": "The time zones of the number, as IANA names.",
+          "items": {
+            "type": "string",
+            "x-ms-summary": "Time zone",
+            "description": "An IANA time zone name, such as Europe/London."
+          }
+        },
+        "geographical": {
+          "type": "boolean",
+          "x-ms-summary": "Geographical",
+          "description": "Whether the number is tied to a geographic area."
+        },
+        "level": {
+          "type": "string",
+          "x-ms-summary": "Level",
+          "description": "The level requested; the signal lines say which answered."
+        },
+        "current_carrier": {
+          "type": "object",
+          "x-ms-summary": "Current carrier",
+          "description": "Number portability: the carrier the number is on today. Present from the Current carrier level up.",
+          "properties": {
+            "status": {
+              "type": "string",
+              "x-ms-summary": "Current carrier status",
+              "description": "success, or error when the number could not be queried, which is free."
+            },
+            "carrier": {
+              "type": "string",
+              "x-ms-summary": "Current carrier name",
+              "description": "The carrier the number is on today."
+            },
+            "ported": {
+              "type": "boolean",
+              "x-ms-summary": "Current carrier ported",
+              "description": "Whether the number was ported away from the carrier it was allocated to."
+            },
+            "ported_date": {
+              "type": "string",
+              "x-ms-summary": "Current carrier ported date",
+              "description": "The last known port, when the level carries it."
+            },
+            "line_type": {
+              "type": "string",
+              "x-ms-summary": "Current carrier line type",
+              "description": "The line type on the carrier the number is on today, in the United States and Canada."
+            },
+            "country_code": {
+              "type": "string",
+              "x-ms-summary": "Current carrier country",
+              "description": "The two-letter country code of the current carrier."
+            },
+            "source": {
+              "type": "string",
+              "x-ms-summary": "Current carrier source",
+              "description": "line_status or fraud_score when the block was read from that level's answer."
+            }
+          }
+        },
+        "line_status": {
+          "type": "object",
+          "x-ms-summary": "Line status",
+          "description": "Network presence: whether the subscriber is on the mobile network right now. Present from the Line status level up.",
+          "properties": {
+            "status": {
+              "type": "string",
+              "x-ms-summary": "Line status result",
+              "description": "success, or error when the number could not be queried, which is free."
+            },
+            "present": {
+              "type": "string",
+              "x-ms-summary": "Line status present",
+              "description": "Whether the subscriber is on the network right now: yes, no or unknown."
+            },
+            "reachable": {
+              "type": "boolean",
+              "x-ms-summary": "Line status reachable",
+              "description": "Present as true or false; empty when unknown."
+            },
+            "reason": {
+              "type": "string",
+              "x-ms-summary": "Line status reason",
+              "description": "Why not present or unknown: switched_off, unknown_subscriber, absent, call_barred, roaming_not_allowed, network_not_covered, fixed_line or presence_not_available."
+            },
+            "covered": {
+              "type": "boolean",
+              "x-ms-summary": "Line status covered",
+              "description": "Whether the network is one the presence check reaches; when false the call is charged as Current carrier."
+            },
+            "ported": {
+              "type": "boolean",
+              "x-ms-summary": "Line status ported",
+              "description": "Whether the number was ported."
+            },
+            "network": {
+              "type": "string",
+              "x-ms-summary": "Line status network",
+              "description": "The network the number is on today."
+            },
+            "line_type": {
+              "type": "string",
+              "x-ms-summary": "Line status line type",
+              "description": "mobile or fixed_line."
+            },
+            "country_code": {
+              "type": "string",
+              "x-ms-summary": "Line status country",
+              "description": "The two-letter country code of the network."
+            },
+            "source": {
+              "type": "string",
+              "x-ms-summary": "Line status source",
+              "description": "fraud_score when the block was read from the fraud score's answer."
+            }
+          }
+        },
+        "fraud_score": {
+          "type": "object",
+          "x-ms-summary": "Fraud score",
+          "description": "Fraud intelligence for the number, with the network facts the lower levels show. Present at the Fraud score level.",
+          "properties": {
+            "status": {
+              "type": "string",
+              "x-ms-summary": "Fraud score result",
+              "description": "success, or error with a reason when the number could not be scored, which is free."
+            },
+            "reason": {
+              "type": "string",
+              "x-ms-summary": "Fraud score reason",
+              "description": "presence_not_available when the presence query was not possible for this number; the rest of the answer stands."
+            },
+            "score": {
+              "type": "integer",
+              "x-ms-summary": "Fraud score",
+              "description": "The propensity-for-fraud score, 0 to 100: higher is riskier.",
+              "format": "int32"
+            },
+            "risk_level": {
+              "type": "string",
+              "x-ms-summary": "Risk level",
+              "description": "low, medium (from 20) or high (from 50)."
+            },
+            "present": {
+              "type": "string",
+              "x-ms-summary": "Fraud score present",
+              "description": "Whether the subscriber is on the network right now: yes, no or unknown."
+            },
+            "ported": {
+              "type": "boolean",
+              "x-ms-summary": "Fraud score ported",
+              "description": "Whether the number was ported."
+            },
+            "ported_date": {
+              "type": "string",
+              "x-ms-summary": "Fraud score ported date",
+              "description": "The last known port."
+            },
+            "network": {
+              "type": "string",
+              "x-ms-summary": "Fraud score network",
+              "description": "The current carrier."
+            },
+            "service_type": {
+              "type": "string",
+              "x-ms-summary": "Service type",
+              "description": "The numbering range's service type: mobile, voip, premium_rate, satellite, machine_to_machine, freephone, geographic, msrn and others."
+            },
+            "line_type": {
+              "type": "string",
+              "x-ms-summary": "Fraud score line type",
+              "description": "mobile or fixed_line."
+            },
+            "premium_rate": {
+              "type": "boolean",
+              "x-ms-summary": "Premium rate",
+              "description": "Whether the number is premium-rate."
+            },
+            "voip": {
+              "type": "boolean",
+              "x-ms-summary": "VoIP",
+              "description": "Whether the number is a VoIP line."
+            },
+            "iprn": {
+              "type": "boolean",
+              "x-ms-summary": "IPRN",
+              "description": "Whether the number is flagged as an international premium-rate number used to test access."
+            },
+            "iprn_range": {
+              "type": "boolean",
+              "x-ms-summary": "IPRN range",
+              "description": "Whether the number is in a range flagged for premium-rate fraud."
+            },
+            "msrn": {
+              "type": "boolean",
+              "x-ms-summary": "MSRN",
+              "description": "Whether the number is a mobile station roaming number advertised for roaming-call fraud."
+            },
+            "country_code": {
+              "type": "string",
+              "x-ms-summary": "Fraud score country",
+              "description": "The two-letter country code of the number."
+            }
+          }
+        },
+        "cost": {
+          "type": "string",
+          "x-ms-summary": "Cost",
+          "description": "What this call cost, in US dollars with six decimals."
+        },
+        "currency": {
+          "type": "string",
+          "x-ms-summary": "Currency",
+          "description": "The currency of the cost: USD."
+        },
+        "signals": {
+          "type": "object",
+          "x-ms-summary": "Signal lines",
+          "description": "The lines of the answer: the level's and, above Line type, the line type's.",
+          "properties": {
+            "basic": {
+              "type": "object",
+              "x-ms-summary": "Basic line",
+              "description": "The basic line of the answer: whether it ran, why not, and what it cost.",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "x-ms-summary": "Basic line status",
+                  "description": "ok when the line answered and was charged; unavailable when it did not run."
+                },
+                "reason": {
+                  "type": "string",
+                  "x-ms-summary": "Basic line reason",
+                  "description": "Why the line did not run, when known: not_offered, not_offered_in_country, invalid_number, network_not_covered, fixed_line, presence_not_available or portability_not_available."
+                },
+                "cost": {
+                  "type": "string",
+                  "x-ms-summary": "Basic line cost",
+                  "description": "What the line cost, in US dollars with six decimals."
+                }
+              }
+            },
+            "line_type": {
+              "type": "object",
+              "x-ms-summary": "Line type line",
+              "description": "The line type line of the answer: whether it ran, why not, and what it cost.",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "x-ms-summary": "Line type line status",
+                  "description": "ok when the line answered and was charged; unavailable when it did not run."
+                },
+                "reason": {
+                  "type": "string",
+                  "x-ms-summary": "Line type line reason",
+                  "description": "Why the line did not run, when known: not_offered, not_offered_in_country, invalid_number, network_not_covered, fixed_line, presence_not_available or portability_not_available."
+                },
+                "cost": {
+                  "type": "string",
+                  "x-ms-summary": "Line type line cost",
+                  "description": "What the line cost, in US dollars with six decimals."
+                }
+              }
+            },
+            "current_carrier": {
+              "type": "object",
+              "x-ms-summary": "Current carrier line",
+              "description": "The current carrier line of the answer: whether it ran, why not, and what it cost.",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "x-ms-summary": "Current carrier line status",
+                  "description": "ok when the line answered and was charged; unavailable when it did not run."
+                },
+                "reason": {
+                  "type": "string",
+                  "x-ms-summary": "Current carrier line reason",
+                  "description": "Why the line did not run, when known: not_offered, not_offered_in_country, invalid_number, network_not_covered, fixed_line, presence_not_available or portability_not_available."
+                },
+                "cost": {
+                  "type": "string",
+                  "x-ms-summary": "Current carrier line cost",
+                  "description": "What the line cost, in US dollars with six decimals."
+                }
+              }
+            },
+            "line_status": {
+              "type": "object",
+              "x-ms-summary": "Line status line",
+              "description": "The line status line of the answer: whether it ran, why not, and what it cost.",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "x-ms-summary": "Line status line status",
+                  "description": "ok when the line answered and was charged; unavailable when it did not run."
+                },
+                "reason": {
+                  "type": "string",
+                  "x-ms-summary": "Line status line reason",
+                  "description": "Why the line did not run, when known: not_offered, not_offered_in_country, invalid_number, network_not_covered, fixed_line, presence_not_available or portability_not_available."
+                },
+                "cost": {
+                  "type": "string",
+                  "x-ms-summary": "Line status line cost",
+                  "description": "What the line cost, in US dollars with six decimals."
+                }
+              }
+            },
+            "fraud_score": {
+              "type": "object",
+              "x-ms-summary": "Fraud score line",
+              "description": "The fraud score line of the answer: whether it ran, why not, and what it cost.",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "x-ms-summary": "Fraud score line status",
+                  "description": "ok when the line answered and was charged; unavailable when it did not run."
+                },
+                "reason": {
+                  "type": "string",
+                  "x-ms-summary": "Fraud score line reason",
+                  "description": "Why the line did not run, when known: not_offered, not_offered_in_country, invalid_number, network_not_covered, fixed_line, presence_not_available or portability_not_available."
+                },
+                "cost": {
+                  "type": "string",
+                  "x-ms-summary": "Fraud score line cost",
+                  "description": "What the line cost, in US dollars with six decimals."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "EmailRequest": {
+      "type": "object",
+      "required": [
+        "email"
+      ],
+      "properties": {
+        "email": {
+          "type": "string",
+          "x-ms-summary": "Email address",
+          "description": "The address to verify.",
+          "x-ms-visibility": "important"
+        },
+        "timeout": {
+          "type": "integer",
+          "x-ms-summary": "Timeout (ms)",
+          "description": "The time allowed for the mail server dialogue, in milliseconds, at most 45000; past it the address comes back unknown, free.",
+          "format": "int32",
+          "x-ms-visibility": "advanced",
+          "minimum": 1000,
+          "maximum": 45000
+        }
+      }
+    },
+    "EmailResult": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "x-ms-summary": "Status",
+          "description": "success, or error when the address could not be checked."
+        },
+        "email": {
+          "type": "string",
+          "x-ms-summary": "Email address",
+          "description": "The address as sent."
+        },
+        "result": {
+          "type": "string",
+          "x-ms-summary": "Result",
+          "description": "The result label: deliverable, undeliverable, hardbounce, softbounce, catch_all, disposable, inbox_full, unknown or syntax_error."
+        },
+        "deliverable": {
+          "type": "boolean",
+          "x-ms-summary": "Deliverable",
+          "description": "Whether mail to this address is expected to arrive."
+        },
+        "did_you_mean": {
+          "type": "string",
+          "x-ms-summary": "Did you mean",
+          "description": "A likely correction of a misspelt domain, or empty."
+        },
+        "user": {
+          "type": "string",
+          "x-ms-summary": "User",
+          "description": "The part of the address before the at sign."
+        },
+        "domain": {
+          "type": "string",
+          "x-ms-summary": "Domain",
+          "description": "The part of the address after the at sign."
+        },
+        "code": {
+          "type": "integer",
+          "x-ms-summary": "Result code",
+          "description": "The numeric result code.",
+          "format": "int32"
+        },
+        "verdict": {
+          "type": "string",
+          "x-ms-summary": "Verdict",
+          "description": "deliverable, undeliverable, risky or unknown."
+        },
+        "reason": {
+          "type": "string",
+          "x-ms-summary": "Reason",
+          "description": "The verdict's reason: mailbox_exists, mailbox_rejected, disposable_domain, domain_catch_all, greylisted, mailbox_full, missing_at_sign and others."
+        },
+        "suggested_action": {
+          "type": "string",
+          "x-ms-summary": "Suggested action",
+          "description": "The safe default for a sign-up form: accept, accept_and_confirm or reject."
+        },
+        "flags": {
+          "type": "object",
+          "x-ms-summary": "Flags",
+          "description": "What else is known about the address.",
+          "properties": {
+            "disposable": {
+              "type": "boolean",
+              "x-ms-summary": "Disposable",
+              "description": "Whether the domain is a disposable mail provider."
+            },
+            "role_account": {
+              "type": "boolean",
+              "x-ms-summary": "Role account",
+              "description": "Whether the address is a role such as info or sales rather than a person."
+            },
+            "free_provider": {
+              "type": "boolean",
+              "x-ms-summary": "Free provider",
+              "description": "Whether the domain is a free mail provider."
+            },
+            "catch_all": {
+              "type": "boolean",
+              "x-ms-summary": "Catch all",
+              "description": "Whether the domain accepts mail to any address."
+            }
+          }
+        },
+        "provider": {
+          "type": "string",
+          "x-ms-summary": "Mail provider",
+          "description": "The mail provider behind the domain, when known."
+        },
+        "latency_ms": {
+          "type": "integer",
+          "x-ms-summary": "Latency (ms)",
+          "description": "How long the mail server dialogue took, in milliseconds.",
+          "format": "int32"
+        },
+        "billed": {
+          "type": "boolean",
+          "x-ms-summary": "Billed",
+          "description": "Whether this run counted as a charged check."
+        },
+        "cost": {
+          "type": "string",
+          "x-ms-summary": "Cost",
+          "description": "What this call cost, in US dollars with six decimals."
+        },
+        "currency": {
+          "type": "string",
+          "x-ms-summary": "Currency",
+          "description": "The currency of the cost: USD."
+        },
+        "signals": {
+          "type": "object",
+          "x-ms-summary": "Signal lines",
+          "description": "The email line of the answer.",
+          "properties": {
+            "email": {
+              "type": "object",
+              "x-ms-summary": "Email line",
+              "description": "The email line of the answer: whether it ran, why not, and what it cost.",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "x-ms-summary": "Email line status",
+                  "description": "ok when the line answered and was charged; unavailable when it did not run."
+                },
+                "reason": {
+                  "type": "string",
+                  "x-ms-summary": "Email line reason",
+                  "description": "Why the line did not run, when known: not_offered, not_offered_in_country, invalid_number, network_not_covered, fixed_line, presence_not_available or portability_not_available."
+                },
+                "cost": {
+                  "type": "string",
+                  "x-ms-summary": "Email line cost",
+                  "description": "What the line cost, in US dollars with six decimals."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "IpRequest": {
+      "type": "object",
+      "required": [
+        "ip"
+      ],
+      "properties": {
+        "ip": {
+          "type": "string",
+          "x-ms-summary": "IP address",
+          "description": "The IPv4 or IPv6 address to look up.",
+          "x-ms-visibility": "important"
+        }
+      }
+    },
+    "IpResult": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "x-ms-summary": "Status",
+          "description": "success when the address was looked up."
+        },
+        "ip": {
+          "type": "string",
+          "x-ms-summary": "IP address",
+          "description": "The address as sent."
+        },
+        "version": {
+          "type": "integer",
+          "x-ms-summary": "IP version",
+          "description": "4 or 6.",
+          "format": "int32"
+        },
+        "routable": {
+          "type": "boolean",
+          "x-ms-summary": "Routable",
+          "description": "False for a private, loopback or otherwise reserved address, which is answered and free."
+        },
+        "country_code": {
+          "type": "string",
+          "x-ms-summary": "Country code",
+          "description": "The two-letter ISO 3166-1 code of the address's country."
+        },
+        "country": {
+          "type": "string",
+          "x-ms-summary": "Country",
+          "description": "The name of the address's country."
+        },
+        "region": {
+          "type": "string",
+          "x-ms-summary": "Region",
+          "description": "The region the address is located in."
+        },
+        "city": {
+          "type": "string",
+          "x-ms-summary": "City",
+          "description": "The city the address is located in."
+        },
+        "latitude": {
+          "type": "number",
+          "x-ms-summary": "Latitude",
+          "description": "The latitude of the location.",
+          "format": "double"
+        },
+        "longitude": {
+          "type": "number",
+          "x-ms-summary": "Longitude",
+          "description": "The longitude of the location.",
+          "format": "double"
+        },
+        "accuracy_km": {
+          "type": "integer",
+          "x-ms-summary": "Accuracy (km)",
+          "description": "The radius of the location, in kilometres.",
+          "format": "int32"
+        },
+        "timezone": {
+          "type": "string",
+          "x-ms-summary": "Time zone",
+          "description": "The IANA time zone of the location."
+        },
+        "asn": {
+          "type": "integer",
+          "x-ms-summary": "ASN",
+          "description": "The autonomous system number of the network.",
+          "format": "int32"
+        },
+        "as_org": {
+          "type": "string",
+          "x-ms-summary": "Network organization",
+          "description": "The organization that runs the network."
+        },
+        "is_tor": {
+          "type": "boolean",
+          "x-ms-summary": "Tor",
+          "description": "Whether the address is a Tor exit node."
+        },
+        "is_vpn": {
+          "type": "boolean",
+          "x-ms-summary": "VPN",
+          "description": "Whether the address belongs to a VPN provider."
+        },
+        "is_datacenter": {
+          "type": "boolean",
+          "x-ms-summary": "Datacenter",
+          "description": "Whether the address belongs to a hosting or cloud provider."
+        },
+        "is_anonymous": {
+          "type": "boolean",
+          "x-ms-summary": "Anonymous",
+          "description": "Whether the address is Tor or a VPN."
+        },
+        "anycast": {
+          "type": "boolean",
+          "x-ms-summary": "Anycast",
+          "description": "Whether the address is anycast."
+        },
+        "cost": {
+          "type": "string",
+          "x-ms-summary": "Cost",
+          "description": "What this call cost, in US dollars with six decimals."
+        },
+        "currency": {
+          "type": "string",
+          "x-ms-summary": "Currency",
+          "description": "The currency of the cost: USD."
+        },
+        "signals": {
+          "type": "object",
+          "x-ms-summary": "Signal lines",
+          "description": "The IP line of the answer.",
+          "properties": {
+            "ip": {
+              "type": "object",
+              "x-ms-summary": "IP line",
+              "description": "The IP line of the answer: whether it ran, why not, and what it cost.",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "x-ms-summary": "IP line status",
+                  "description": "ok when the line answered and was charged; unavailable when it did not run."
+                },
+                "reason": {
+                  "type": "string",
+                  "x-ms-summary": "IP line reason",
+                  "description": "Why the line did not run, when known: not_offered, not_offered_in_country, invalid_number, network_not_covered, fixed_line, presence_not_available or portability_not_available."
+                },
+                "cost": {
+                  "type": "string",
+                  "x-ms-summary": "IP line cost",
+                  "description": "What the line cost, in US dollars with six decimals."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "AssessRequest": {
+      "type": "object",
+      "properties": {
+        "phone": {
+          "type": "string",
+          "x-ms-summary": "Phone number",
+          "description": "The number, in E.164 or in national format with a country. Send any of phone, email and IP, one at least.",
+          "x-ms-visibility": "important"
+        },
+        "email": {
+          "type": "string",
+          "x-ms-summary": "Email address",
+          "description": "The address. Text that is not an address is scored as invalid, not refused.",
+          "x-ms-visibility": "important"
+        },
+        "ip": {
+          "type": "string",
+          "x-ms-summary": "IP address",
+          "description": "The IPv4 or IPv6 address of the end user.",
+          "x-ms-visibility": "important"
+        },
+        "country": {
+          "type": "string",
+          "x-ms-summary": "Country",
+          "description": "The two-letter ISO 3166-1 code of the country of a number in national format.",
+          "x-ms-visibility": "advanced"
+        },
+        "reference": {
+          "type": "string",
+          "x-ms-summary": "Reference",
+          "description": "Your own id for this check, echoed back in the answer.",
+          "x-ms-visibility": "advanced",
+          "maxLength": 128
+        }
+      }
+    },
+    "Assessment": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Assessment ID",
+          "description": "The id of this assessment."
+        },
+        "mode": {
+          "type": "string",
+          "x-ms-summary": "Mode",
+          "description": "live, or test for a sandbox call."
+        },
+        "reference": {
+          "type": "string",
+          "x-ms-summary": "Reference",
+          "description": "Your own id for this check, as sent."
+        },
+        "score": {
+          "type": "integer",
+          "x-ms-summary": "Score",
+          "description": "The risk score: 0 is no risk found, 100 the highest risk.",
+          "format": "int32"
+        },
+        "verdict": {
+          "type": "string",
+          "x-ms-summary": "Verdict",
+          "description": "allow, review or deny: the score against your organization's thresholds."
+        },
+        "reasons": {
+          "type": "array",
+          "x-ms-summary": "Reasons",
+          "description": "The rules that added to the score.",
+          "items": {
+            "type": "object",
+            "x-ms-summary": "Reason",
+            "description": "One rule that added to the score.",
+            "properties": {
+              "code": {
+                "type": "string",
+                "x-ms-summary": "Reason code",
+                "description": "The stable code of the rule, such as email_disposable or ip_tor."
+              },
+              "points": {
+                "type": "integer",
+                "x-ms-summary": "Reason points",
+                "description": "How many points the rule added.",
+                "format": "int32"
+              },
+              "message": {
+                "type": "string",
+                "x-ms-summary": "Reason message",
+                "description": "A readable sentence about the rule."
+              }
+            }
+          }
+        },
+        "signals": {
+          "type": "object",
+          "x-ms-summary": "Signals",
+          "description": "One entry per signal sent, with its own result.",
+          "properties": {
+            "phone": {
+              "type": "object",
+              "x-ms-summary": "Phone signal",
+              "description": "The phone signal of the assessment: whether it ran, what it cost and its own result.",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "x-ms-summary": "Phone signal status",
+                  "description": "ok when the signal answered; unavailable when it did not run."
+                },
+                "reason": {
+                  "type": "string",
+                  "x-ms-summary": "Phone signal reason",
+                  "description": "Why the signal did not run, when known: not_offered."
+                },
+                "cost": {
+                  "type": "string",
+                  "x-ms-summary": "Phone signal cost",
+                  "description": "What the signal cost, in US dollars with six decimals."
+                },
+                "result": {
+                  "type": "object",
+                  "x-ms-summary": "Phone result",
+                  "description": "The phone number's own fields.",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "x-ms-summary": "Status",
+                      "description": "success when the number was judged, valid or not; error when it could not be parsed, which is free."
+                    },
+                    "phone": {
+                      "type": "string",
+                      "x-ms-summary": "Phone number",
+                      "description": "The number in E.164 when it is valid; as sent otherwise."
+                    },
+                    "valid": {
+                      "type": "boolean",
+                      "x-ms-summary": "Valid",
+                      "description": "Whether the number is a valid number of its numbering plan."
+                    },
+                    "reason": {
+                      "type": "string",
+                      "x-ms-summary": "Reason",
+                      "description": "Why the number is not valid, when it is not: too_short, too_long, invalid_length, invalid_country_code, unrecognized_range or not_a_number."
+                    },
+                    "line_type": {
+                      "type": "string",
+                      "x-ms-summary": "Line type",
+                      "description": "The line type: mobile, fixed_line, fixed_line_or_mobile, voip, toll_free, premium_rate, shared_cost, personal_number, pager, uan, voicemail or unknown."
+                    },
+                    "e164": {
+                      "type": "string",
+                      "x-ms-summary": "Number (E164)",
+                      "description": "The number in E.164 format, with its country calling code."
+                    },
+                    "international_format": {
+                      "type": "string",
+                      "x-ms-summary": "International format",
+                      "description": "The number formatted for dialling from abroad, with spaces."
+                    },
+                    "national_format": {
+                      "type": "string",
+                      "x-ms-summary": "National format",
+                      "description": "The number as dialled inside its country."
+                    },
+                    "country": {
+                      "type": "string",
+                      "x-ms-summary": "Country",
+                      "description": "The name of the number's country."
+                    },
+                    "country_code": {
+                      "type": "string",
+                      "x-ms-summary": "Country code",
+                      "description": "The two-letter ISO 3166-1 code of the number's country."
+                    },
+                    "country_prefix": {
+                      "type": "string",
+                      "x-ms-summary": "Calling code",
+                      "description": "The country calling code, without the plus sign."
+                    },
+                    "region": {
+                      "type": "string",
+                      "x-ms-summary": "Region",
+                      "description": "Where the number is registered, when the numbering plan says."
+                    },
+                    "original_carrier": {
+                      "type": "string",
+                      "x-ms-summary": "Original carrier",
+                      "description": "The carrier the number range was allocated to; the carrier today is under Current carrier."
+                    },
+                    "timezone": {
+                      "type": "array",
+                      "x-ms-summary": "Time zones",
+                      "description": "The time zones of the number, as IANA names.",
+                      "items": {
+                        "type": "string",
+                        "x-ms-summary": "Time zone",
+                        "description": "An IANA time zone name, such as Europe/London."
+                      }
+                    },
+                    "geographical": {
+                      "type": "boolean",
+                      "x-ms-summary": "Geographical",
+                      "description": "Whether the number is tied to a geographic area."
+                    }
+                  }
+                }
+              }
+            },
+            "email": {
+              "type": "object",
+              "x-ms-summary": "Email signal",
+              "description": "The email signal of the assessment: whether it ran, what it cost and its own result.",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "x-ms-summary": "Email signal status",
+                  "description": "ok when the signal answered; unavailable when it did not run."
+                },
+                "reason": {
+                  "type": "string",
+                  "x-ms-summary": "Email signal reason",
+                  "description": "Why the signal did not run, when known: not_offered."
+                },
+                "cost": {
+                  "type": "string",
+                  "x-ms-summary": "Email signal cost",
+                  "description": "What the signal cost, in US dollars with six decimals."
+                },
+                "result": {
+                  "type": "object",
+                  "x-ms-summary": "Email result",
+                  "description": "The email address's own fields.",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "x-ms-summary": "Status",
+                      "description": "success, or error when the address could not be checked."
+                    },
+                    "email": {
+                      "type": "string",
+                      "x-ms-summary": "Email address",
+                      "description": "The address as sent."
+                    },
+                    "result": {
+                      "type": "string",
+                      "x-ms-summary": "Result",
+                      "description": "The result label: deliverable, undeliverable, hardbounce, softbounce, catch_all, disposable, inbox_full, unknown or syntax_error."
+                    },
+                    "deliverable": {
+                      "type": "boolean",
+                      "x-ms-summary": "Deliverable",
+                      "description": "Whether mail to this address is expected to arrive."
+                    },
+                    "did_you_mean": {
+                      "type": "string",
+                      "x-ms-summary": "Did you mean",
+                      "description": "A likely correction of a misspelt domain, or empty."
+                    },
+                    "user": {
+                      "type": "string",
+                      "x-ms-summary": "User",
+                      "description": "The part of the address before the at sign."
+                    },
+                    "domain": {
+                      "type": "string",
+                      "x-ms-summary": "Domain",
+                      "description": "The part of the address after the at sign."
+                    },
+                    "code": {
+                      "type": "integer",
+                      "x-ms-summary": "Result code",
+                      "description": "The numeric result code.",
+                      "format": "int32"
+                    },
+                    "verdict": {
+                      "type": "string",
+                      "x-ms-summary": "Verdict",
+                      "description": "deliverable, undeliverable, risky or unknown."
+                    },
+                    "reason": {
+                      "type": "string",
+                      "x-ms-summary": "Reason",
+                      "description": "The verdict's reason: mailbox_exists, mailbox_rejected, disposable_domain, domain_catch_all, greylisted, mailbox_full, missing_at_sign and others."
+                    },
+                    "suggested_action": {
+                      "type": "string",
+                      "x-ms-summary": "Suggested action",
+                      "description": "The safe default for a sign-up form: accept, accept_and_confirm or reject."
+                    },
+                    "flags": {
+                      "type": "object",
+                      "x-ms-summary": "Flags",
+                      "description": "What else is known about the address.",
+                      "properties": {
+                        "disposable": {
+                          "type": "boolean",
+                          "x-ms-summary": "Disposable",
+                          "description": "Whether the domain is a disposable mail provider."
+                        },
+                        "role_account": {
+                          "type": "boolean",
+                          "x-ms-summary": "Role account",
+                          "description": "Whether the address is a role such as info or sales rather than a person."
+                        },
+                        "free_provider": {
+                          "type": "boolean",
+                          "x-ms-summary": "Free provider",
+                          "description": "Whether the domain is a free mail provider."
+                        },
+                        "catch_all": {
+                          "type": "boolean",
+                          "x-ms-summary": "Catch all",
+                          "description": "Whether the domain accepts mail to any address."
+                        }
+                      }
+                    },
+                    "provider": {
+                      "type": "string",
+                      "x-ms-summary": "Mail provider",
+                      "description": "The mail provider behind the domain, when known."
+                    },
+                    "latency_ms": {
+                      "type": "integer",
+                      "x-ms-summary": "Latency (ms)",
+                      "description": "How long the mail server dialogue took, in milliseconds.",
+                      "format": "int32"
+                    }
+                  }
+                }
+              }
+            },
+            "ip": {
+              "type": "object",
+              "x-ms-summary": "IP signal",
+              "description": "The ip signal of the assessment: whether it ran, what it cost and its own result.",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "x-ms-summary": "IP signal status",
+                  "description": "ok when the signal answered; unavailable when it did not run."
+                },
+                "reason": {
+                  "type": "string",
+                  "x-ms-summary": "IP signal reason",
+                  "description": "Why the signal did not run, when known: not_offered."
+                },
+                "cost": {
+                  "type": "string",
+                  "x-ms-summary": "IP signal cost",
+                  "description": "What the signal cost, in US dollars with six decimals."
+                },
+                "result": {
+                  "type": "object",
+                  "x-ms-summary": "IP result",
+                  "description": "The IP address's own fields.",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "x-ms-summary": "Status",
+                      "description": "success when the address was looked up."
+                    },
+                    "ip": {
+                      "type": "string",
+                      "x-ms-summary": "IP address",
+                      "description": "The address as sent."
+                    },
+                    "version": {
+                      "type": "integer",
+                      "x-ms-summary": "IP version",
+                      "description": "4 or 6.",
+                      "format": "int32"
+                    },
+                    "routable": {
+                      "type": "boolean",
+                      "x-ms-summary": "Routable",
+                      "description": "False for a private, loopback or otherwise reserved address, which is answered and free."
+                    },
+                    "country_code": {
+                      "type": "string",
+                      "x-ms-summary": "Country code",
+                      "description": "The two-letter ISO 3166-1 code of the address's country."
+                    },
+                    "country": {
+                      "type": "string",
+                      "x-ms-summary": "Country",
+                      "description": "The name of the address's country."
+                    },
+                    "region": {
+                      "type": "string",
+                      "x-ms-summary": "Region",
+                      "description": "The region the address is located in."
+                    },
+                    "city": {
+                      "type": "string",
+                      "x-ms-summary": "City",
+                      "description": "The city the address is located in."
+                    },
+                    "latitude": {
+                      "type": "number",
+                      "x-ms-summary": "Latitude",
+                      "description": "The latitude of the location.",
+                      "format": "double"
+                    },
+                    "longitude": {
+                      "type": "number",
+                      "x-ms-summary": "Longitude",
+                      "description": "The longitude of the location.",
+                      "format": "double"
+                    },
+                    "accuracy_km": {
+                      "type": "integer",
+                      "x-ms-summary": "Accuracy (km)",
+                      "description": "The radius of the location, in kilometres.",
+                      "format": "int32"
+                    },
+                    "timezone": {
+                      "type": "string",
+                      "x-ms-summary": "Time zone",
+                      "description": "The IANA time zone of the location."
+                    },
+                    "asn": {
+                      "type": "integer",
+                      "x-ms-summary": "ASN",
+                      "description": "The autonomous system number of the network.",
+                      "format": "int32"
+                    },
+                    "as_org": {
+                      "type": "string",
+                      "x-ms-summary": "Network organization",
+                      "description": "The organization that runs the network."
+                    },
+                    "is_tor": {
+                      "type": "boolean",
+                      "x-ms-summary": "Tor",
+                      "description": "Whether the address is a Tor exit node."
+                    },
+                    "is_vpn": {
+                      "type": "boolean",
+                      "x-ms-summary": "VPN",
+                      "description": "Whether the address belongs to a VPN provider."
+                    },
+                    "is_datacenter": {
+                      "type": "boolean",
+                      "x-ms-summary": "Datacenter",
+                      "description": "Whether the address belongs to a hosting or cloud provider."
+                    },
+                    "is_anonymous": {
+                      "type": "boolean",
+                      "x-ms-summary": "Anonymous",
+                      "description": "Whether the address is Tor or a VPN."
+                    },
+                    "anycast": {
+                      "type": "boolean",
+                      "x-ms-summary": "Anycast",
+                      "description": "Whether the address is anycast."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ruleset": {
+          "type": "string",
+          "x-ms-summary": "Rule set",
+          "description": "The version of the scoring rules that produced this result."
+        },
+        "cost": {
+          "type": "string",
+          "x-ms-summary": "Cost",
+          "description": "What this call cost, in US dollars with six decimals: the sum of the signal lines."
+        },
+        "currency": {
+          "type": "string",
+          "x-ms-summary": "Currency",
+          "description": "The currency of the cost: USD."
+        },
+        "createdAt": {
+          "type": "string",
+          "x-ms-summary": "Created at",
+          "description": "When the assessment was made, in ISO 8601.",
+          "format": "date-time"
+        }
+      }
+    },
+    "Balance": {
+      "type": "object",
+      "properties": {
+        "currency": {
+          "type": "string",
+          "x-ms-summary": "Currency",
+          "description": "The currency of the amounts: USD."
+        },
+        "balance": {
+          "type": "string",
+          "x-ms-summary": "Balance",
+          "description": "Paid plus promotional, less held, in US dollars with four decimals: the account's, shared by its organizations."
+        },
+        "paid": {
+          "type": "string",
+          "x-ms-summary": "Paid",
+          "description": "The paid balance, in US dollars with four decimals."
+        },
+        "promotional": {
+          "type": "string",
+          "x-ms-summary": "Promotional",
+          "description": "The promotional balance, in US dollars with four decimals."
+        },
+        "held": {
+          "type": "string",
+          "x-ms-summary": "Held",
+          "description": "What running files have reserved, in US dollars with four decimals."
+        },
+        "usage": {
+          "type": "object",
+          "x-ms-summary": "Usage",
+          "description": "This calendar month, UTC, across the account.",
+          "properties": {
+            "month": {
+              "type": "string",
+              "x-ms-summary": "Month",
+              "description": "The month, as YYYY-MM."
+            },
+            "runs": {
+              "type": "integer",
+              "x-ms-summary": "Runs",
+              "description": "How many checks ran this month.",
+              "format": "int32"
+            },
+            "amount": {
+              "type": "string",
+              "x-ms-summary": "Amount",
+              "description": "What they cost, in US dollars with four decimals."
+            }
+          }
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization"
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://prooftell.com/integrations?utm_source=power-automate&utm_medium=integration"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://prooftell.com/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Data;Security"
+    }
+  ]
+}
