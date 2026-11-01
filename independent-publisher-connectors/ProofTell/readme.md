@@ -25,12 +25,12 @@ Returns the account's balance in US dollars (paid, promotional and held amounts)
 4. When the connector asks for the API key, paste the key itself: `pt_live_…` or `pt_test_…`.
 
 ## Getting Started
-Add an action of the connector to a flow, for example "Look up a phone number" after a form submission, pass the phone number from the trigger, and leave Level on Line type. The outputs (Valid, Line type, Country code, Current carrier and the rest) are then available to the next steps. To try the actions without spending anything, connect with a sandbox key and use the documented inputs: `+447700900123` (a valid GB mobile), `jane@example.com` (deliverable), `203.0.113.1` (a clean US address) and `203.0.113.66` (a Tor exit node).
+Add an action of the connector to a flow, for example "Look up a phone number" after a form submission, pass the phone number from the trigger, and leave Level on Line type. The outputs (Valid, Line type, Country code, Original carrier and the rest) are then available to the next steps. To try the actions without spending anything, connect with a sandbox key and use the documented inputs: `+447700900123` (a valid GB mobile), `jane@example.com` (deliverable), `203.0.113.1` (a clean US address) and `203.0.113.66` (a Tor exit node).
 
 ## Known Issues and Limitations
-- A sandbox (`pt_test_`) key answers every action with simulated, deterministic results and never contacts a network or a mail server. Use a `pt_live_` key for real answers.
+- A sandbox (`pt_test_`) key answers every check with simulated, deterministic results and never contacts a network or a mail server; Get the balance answers the real balance with either key. Use a `pt_live_` key for real answers.
 - Every live check is charged from the account's balance at the moment it runs; Basic is free but needs a balance above zero. When the balance cannot cover a check the action fails with 402 `insufficient_balance` and names the amounts to top up.
-- The rate limit is 20 requests a second per key, with bursts of 50. Past it an action fails with 429 `rate_limited`; a retry after one second succeeds.
+- The rate limit is about 20 requests a second per key on each server instance, with bursts of 50. Past it an action fails with 429 `rate_limited` and `retry_after` 1: retry after a second (Power Automate's retry policy does this by default).
 - Checking a whole file of numbers or addresses is not part of this connector: use the Files page of the ProofTell dashboard.
 
 ## Deployment Instructions
