@@ -1,0 +1,2959 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "FoxInsights",
+    "description": "Bring FoxInsights tank data into your flows and business apps. Get devices, fill levels and the latest readings, trigger orders or alerts when a tank runs low, and keep partners, customers, products and tank settings in sync with your ERP or CRM.",
+    "version": "0.4.2",
+    "contact": {
+      "name": "FoxInsights Partner Support",
+      "url": "https://www.foxinsights.ai/en/contact",
+      "email": "partner-support@foxinsights.ai"
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.foxinsights.ai"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.foxinsights.ai/en/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Internet of Things;Data"
+    }
+  ],
+  "host": "api.oilfox.io",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/external/v5/partner": {
+      "get": {
+        "operationId": "GetPartnerTree",
+        "summary": "Get partner tree",
+        "description": "Returns the partner that owns the connection credentials together with all of its sub-partners as a nested tree. Use 'List partners' to loop over partners in a flow.",
+        "x-ms-visibility": "advanced",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Partner tree.",
+            "schema": {
+              "$ref": "#/definitions/PartnerTree"
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreatePartner",
+        "summary": "Create partner",
+        "description": "Creates a sub-partner. Not safe to retry: a repeated call creates a second partner.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreatePartnerRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Created partner.",
+            "schema": {
+              "$ref": "#/definitions/Partner"
+            }
+          }
+        }
+      }
+    },
+    "/connector/v5/partners": {
+      "get": {
+        "operationId": "ListPartners",
+        "summary": "List partners",
+        "description": "Returns the partner that owns the connection credentials and all of its sub-partners as a flat list, ready for 'Apply to each'.",
+        "x-ms-visibility": "important",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Partners.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PartnerListItem"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/external/v5/partner/{partnerId}/device": {
+      "get": {
+        "operationId": "GetPartnerDevices",
+        "summary": "Get partner devices",
+        "description": "Returns the devices that belong directly to one partner, with their current fill level and latest measurement. Devices of sub-partners are not included.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "partnerId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Partner whose own devices are returned.",
+            "x-ms-summary": "Partner",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "ListPartners",
+              "value-path": "id",
+              "value-title": "name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Devices.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Device"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/external/v5/device/{hwid}": {
+      "get": {
+        "operationId": "GetDevice",
+        "summary": "Get device",
+        "description": "Returns one device by its hardware ID, with its current fill level and latest measurement.",
+        "parameters": [
+          {
+            "name": "hwid",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Hardware ID of the device, printed on the sensor.",
+            "x-ms-summary": "Hardware ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Device.",
+            "schema": {
+              "$ref": "#/definitions/Device"
+            }
+          }
+        }
+      }
+    },
+    "/external/v5/device/search": {
+      "get": {
+        "operationId": "SearchDevicesByInternalId",
+        "summary": "Search devices by internal ID",
+        "description": "Returns the devices with the given partner-specific internal ID.",
+        "parameters": [
+          {
+            "name": "internalId",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "description": "Partner's own ID for the device.",
+            "x-ms-summary": "Internal ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Devices.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Device"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/external/v5/device/search/company": {
+      "get": {
+        "operationId": "SearchDevicesByCompany",
+        "summary": "Search devices by company",
+        "description": "Returns the devices whose address company matches the given name.",
+        "parameters": [
+          {
+            "name": "company",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "description": "Company name in the device address.",
+            "x-ms-summary": "Company"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Devices.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Device"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/external/v5/device/{hwid}/cancellation-state": {
+      "get": {
+        "operationId": "GetDeviceCancellationState",
+        "summary": "Get device cancellation state",
+        "description": "Returns whether the device contract is cancelled or marked for cancellation and from when it can be cancelled.",
+        "parameters": [
+          {
+            "name": "hwid",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Hardware ID of the device.",
+            "x-ms-summary": "Hardware ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cancellation state.",
+            "schema": {
+              "$ref": "#/definitions/CancellationState"
+            }
+          }
+        }
+      }
+    },
+    "/external/v5/user/{userId}/device": {
+      "get": {
+        "operationId": "GetUserDevices",
+        "summary": "Get user devices",
+        "description": "Returns the devices assigned to one end customer, with their current fill level and latest measurement.",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "ID of the end customer.",
+            "x-ms-summary": "User ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Devices.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Device"
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "AssignDeviceToUser",
+        "summary": "Assign device to user",
+        "description": "Assigns a device to an end customer.",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "ID of the end customer.",
+            "x-ms-summary": "User ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AssignDeviceRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Device.",
+            "schema": {
+              "$ref": "#/definitions/Device"
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "UnassignDeviceFromUser",
+        "summary": "Unassign device from user",
+        "description": "Removes a device from an end customer. Without Keep device settings, the device address and tank settings are deleted.",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "ID of the end customer.",
+            "x-ms-summary": "User ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UnassignDeviceRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Device.",
+            "schema": {
+              "$ref": "#/definitions/Device"
+            }
+          }
+        }
+      }
+    },
+    "/external/v5/partner/{partnerId}": {
+      "get": {
+        "operationId": "GetPartner",
+        "summary": "Get partner",
+        "description": "Returns one partner with its internal ID, products and notification e-mail addresses.",
+        "parameters": [
+          {
+            "name": "partnerId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Partner to return.",
+            "x-ms-summary": "Partner",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "ListPartners",
+              "value-path": "id",
+              "value-title": "name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Partner.",
+            "schema": {
+              "$ref": "#/definitions/Partner"
+            }
+          }
+        }
+      }
+    },
+    "/external/v5/partner/internal-id/{internalId}": {
+      "get": {
+        "operationId": "SearchPartnersByInternalId",
+        "summary": "Search partners by internal ID",
+        "description": "Returns the partners with the given internal ID.",
+        "parameters": [
+          {
+            "name": "internalId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Internal ID of the partner.",
+            "x-ms-summary": "Internal ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Partners.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Partner"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/external/v5/user/{userId}": {
+      "get": {
+        "operationId": "GetUser",
+        "summary": "Get user",
+        "description": "Returns one end customer.",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "ID of the end customer.",
+            "x-ms-summary": "User ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User.",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "UpdateUser",
+        "summary": "Update user",
+        "description": "Replaces all fields of an end customer; fields left empty are cleared.",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "ID of the end customer.",
+            "x-ms-summary": "User ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User.",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          }
+        }
+      }
+    },
+    "/external/v5/user/internal-id/{internalId}": {
+      "get": {
+        "operationId": "SearchUsersByInternalId",
+        "summary": "Search users by internal ID",
+        "description": "Returns the end customers with the given internal ID.",
+        "parameters": [
+          {
+            "name": "internalId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Internal ID of the end customer.",
+            "x-ms-summary": "Internal ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Users.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/User"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/connector/v5/user/search": {
+      "get": {
+        "operationId": "SearchUsersByCustomField",
+        "summary": "Search users by custom field",
+        "description": "Returns the end customers whose custom field has the given value.",
+        "parameters": [
+          {
+            "name": "fieldName",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "description": "Name of the custom field.",
+            "x-ms-summary": "Custom field name"
+          },
+          {
+            "name": "fieldValue",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "description": "Value to search for.",
+            "x-ms-summary": "Custom field value"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Users.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/User"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/external/v5/user/search/email/{email}": {
+      "get": {
+        "operationId": "GetUserByEmail",
+        "summary": "Get user by email",
+        "description": "Returns the end customer with the given e-mail address.",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "E-mail address of the end customer.",
+            "x-ms-summary": "Email",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User.",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          }
+        }
+      }
+    },
+    "/external/v5/product/search": {
+      "get": {
+        "operationId": "SearchProductsByCode",
+        "summary": "Search products by code",
+        "description": "Returns the products with the given product code.",
+        "parameters": [
+          {
+            "name": "productCode",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "description": "Product code.",
+            "x-ms-summary": "Product code"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Products.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Product"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/external/v5/product/type": {
+      "get": {
+        "operationId": "GetProductTypes",
+        "summary": "Get product types",
+        "description": "Returns all product types with their default settings.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Product types.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ProductType"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/external/v5/product/{productId}/tank-predefined": {
+      "get": {
+        "operationId": "GetPredefinedTankTypes",
+        "summary": "Get predefined tank types",
+        "description": "Returns the catalogue tank types available for a product.",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "ID of the product.",
+            "x-ms-summary": "Product ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tank types.",
+            "schema": {
+              "$ref": "#/definitions/PredefinedTankTypes"
+            }
+          }
+        }
+      }
+    },
+    "/external/v5/device/{hwid}/metadata": {
+      "put": {
+        "operationId": "UpdateDeviceMetadata",
+        "summary": "Update device name and notes",
+        "description": "Replaces the device name, internal ID and partner notes.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/hwid"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DeviceMetadataRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Device.",
+            "schema": {
+              "$ref": "#/definitions/Device"
+            }
+          }
+        }
+      }
+    },
+    "/external/v5/device/{hwid}/address": {
+      "put": {
+        "operationId": "UpdateDeviceAddress",
+        "summary": "Update device address",
+        "description": "Replaces the device address.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/hwid"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AddressRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Device.",
+            "schema": {
+              "$ref": "#/definitions/Device"
+            }
+          }
+        }
+      }
+    },
+    "/external/v5/device/{hwid}/labels": {
+      "put": {
+        "operationId": "UpdateDeviceLabels",
+        "summary": "Set device labels",
+        "description": "Replaces all labels of the device with the given list; labels not in the list are removed.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/hwid"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DeviceLabelsRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Device.",
+            "schema": {
+              "$ref": "#/definitions/Device"
+            }
+          }
+        }
+      }
+    },
+    "/external/v5/device/{hwid}/notification": {
+      "put": {
+        "operationId": "UpdateDeviceNotification",
+        "summary": "Update device notifications",
+        "description": "Sets the fill levels at which the info and alert notifications are sent.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/hwid"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DeviceNotificationRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Device.",
+            "schema": {
+              "$ref": "#/definitions/Device"
+            }
+          }
+        }
+      }
+    },
+    "/external/v5/device/{hwid}/is-locked": {
+      "put": {
+        "operationId": "UpdateDeviceLock",
+        "summary": "Lock or unlock device",
+        "description": "Locks or unlocks the device configuration for end customers.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/hwid"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DeviceLockRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Device.",
+            "schema": {
+              "$ref": "#/definitions/Device"
+            }
+          }
+        }
+      }
+    },
+    "/external/v5/device/{hwid}/partner": {
+      "put": {
+        "operationId": "MoveDeviceToPartner",
+        "summary": "Move device to partner",
+        "description": "Moves the device to another partner within the accessible partner tree.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/hwid"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DevicePartnerRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Device.",
+            "schema": {
+              "$ref": "#/definitions/Device"
+            }
+          }
+        }
+      }
+    },
+    "/external/v5/device/{hwid}/cancel": {
+      "put": {
+        "operationId": "CancelDevice",
+        "summary": "Cancel device contract",
+        "description": "Marks the device contract for cancellation on the given date.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/hwid"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CancelDeviceRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cancellation date.",
+            "schema": {
+              "$ref": "#/definitions/CancelDeviceRequest"
+            }
+          }
+        }
+      }
+    },
+    "/external/v5/device/{hwid}/product": {
+      "put": {
+        "operationId": "UpdateDeviceProduct",
+        "summary": "Change device product",
+        "description": "Changes the product stored in the device's tank or silo.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/hwid"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DeviceProductRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Device.",
+            "schema": {
+              "$ref": "#/definitions/Device"
+            }
+          }
+        }
+      }
+    },
+    "/external/v5/device/{hwid}/tank-custom": {
+      "put": {
+        "operationId": "SetDeviceTankCustom",
+        "summary": "Set custom tank",
+        "description": "Configures the device for a tank described by its dimensions; replaces any previous tank or silo configuration.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/hwid"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TankCustomRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Device.",
+            "schema": {
+              "$ref": "#/definitions/Device"
+            }
+          }
+        }
+      }
+    },
+    "/external/v5/device/{hwid}/tank-predefined": {
+      "put": {
+        "operationId": "SetDeviceTankPredefined",
+        "summary": "Set catalogue tank",
+        "description": "Configures the device for a catalogue tank type (see 'Get predefined tank types'); replaces any previous tank or silo configuration.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/hwid"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TankPredefinedRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Device.",
+            "schema": {
+              "$ref": "#/definitions/Device"
+            }
+          }
+        }
+      }
+    },
+    "/external/v5/device/{hwid}/silo": {
+      "put": {
+        "operationId": "SetDeviceSilo",
+        "summary": "Set silo",
+        "description": "Configures the device for a silo; replaces any previous tank or silo configuration.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/hwid"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SiloRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Device.",
+            "schema": {
+              "$ref": "#/definitions/Device"
+            }
+          }
+        }
+      }
+    },
+    "/external/v5/device/{hwid}/config": {
+      "delete": {
+        "operationId": "DeleteDeviceConfig",
+        "summary": "Delete tank configuration",
+        "description": "Removes the tank or silo configuration of the device; fill levels are not computed until a new configuration is set.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/hwid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Device.",
+            "schema": {
+              "$ref": "#/definitions/Device"
+            }
+          }
+        }
+      }
+    },
+    "/external/v5/partner/{partnerId}/name": {
+      "put": {
+        "operationId": "UpdatePartnerName",
+        "summary": "Rename partner",
+        "description": "Changes the partner name.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/partnerId"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PartnerNameRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Partner.",
+            "schema": {
+              "$ref": "#/definitions/Partner"
+            }
+          }
+        }
+      }
+    },
+    "/external/v5/partner/{partnerId}/internal-id": {
+      "put": {
+        "operationId": "UpdatePartnerInternalId",
+        "summary": "Update partner internal ID",
+        "description": "Changes the partner's internal ID.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/partnerId"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PartnerInternalIdRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Partner.",
+            "schema": {
+              "$ref": "#/definitions/Partner"
+            }
+          }
+        }
+      }
+    },
+    "/external/v5/partner/{partnerId}/notification-emails": {
+      "put": {
+        "operationId": "UpdatePartnerNotificationEmails",
+        "summary": "Set partner notification emails",
+        "description": "Replaces the list of e-mail addresses that receive partner notifications.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/partnerId"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PartnerNotificationEmailsRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Partner.",
+            "schema": {
+              "$ref": "#/definitions/Partner"
+            }
+          }
+        }
+      }
+    },
+    "/external/v5/partner/{partnerId}/products": {
+      "put": {
+        "operationId": "UpdatePartnerProducts",
+        "summary": "Set partner products",
+        "description": "Replaces the list of products assigned to the partner.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/partnerId"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PartnerProductsRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Partner.",
+            "schema": {
+              "$ref": "#/definitions/Partner"
+            }
+          }
+        }
+      }
+    },
+    "/external/v5/user": {
+      "post": {
+        "operationId": "CreateUser",
+        "summary": "Create user",
+        "description": "Creates an end customer. Not safe to retry: a repeated call fails or creates a duplicate.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Created user.",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          }
+        }
+      }
+    },
+    "/external/v5/product": {
+      "post": {
+        "operationId": "CreateProduct",
+        "summary": "Create product",
+        "description": "Creates a product. Not safe to retry: a repeated call creates a second product.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ProductRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Created product.",
+            "schema": {
+              "$ref": "#/definitions/Product"
+            }
+          }
+        }
+      }
+    },
+    "/external/v5/product/{productId}": {
+      "put": {
+        "operationId": "UpdateProduct",
+        "summary": "Update product",
+        "description": "Replaces all fields of a product.",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "ID of the product.",
+            "x-ms-summary": "Product ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ProductRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product.",
+            "schema": {
+              "$ref": "#/definitions/Product"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Partner": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Partner ID.",
+          "x-ms-summary": "Partner ID"
+        },
+        "internalId": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "Partner's internal ID.",
+          "x-ms-summary": "Partner internal ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Partner name.",
+          "x-ms-summary": "Partner name"
+        },
+        "products": {
+          "type": "array",
+          "description": "Products assigned to the partner.",
+          "x-ms-summary": "Products",
+          "items": {
+            "$ref": "#/definitions/PartnerProduct"
+          }
+        },
+        "notificationEmails": {
+          "type": "array",
+          "description": "E-mail addresses that receive partner notifications.",
+          "x-ms-summary": "Notification emails",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "User": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "User ID.",
+          "x-ms-summary": "User ID"
+        },
+        "internalId": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "Partner's own ID for the end customer.",
+          "x-ms-summary": "User internal ID"
+        },
+        "partnerId": {
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true,
+          "description": "ID of the partner the user belongs to.",
+          "x-ms-summary": "User partner ID"
+        },
+        "email": {
+          "type": "string",
+          "description": "E-mail address.",
+          "x-ms-summary": "Email"
+        },
+        "phone": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "Phone number.",
+          "x-ms-summary": "Phone"
+        },
+        "title": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "Title.",
+          "x-ms-summary": "Title"
+        },
+        "firstName": {
+          "type": "string",
+          "description": "First name.",
+          "x-ms-summary": "First name"
+        },
+        "lastName": {
+          "type": "string",
+          "description": "Last name.",
+          "x-ms-summary": "Last name"
+        },
+        "companyName": {
+          "type": "string",
+          "description": "Company name.",
+          "x-ms-summary": "Company name"
+        },
+        "companyPosition": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "Position in the company, e.g. MANAGEMENT, SALES, DISPATCHING.",
+          "x-ms-summary": "Company position"
+        },
+        "street": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "Street and house number.",
+          "x-ms-summary": "Street"
+        },
+        "zipCode": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "Postal code.",
+          "x-ms-summary": "Postal code"
+        },
+        "city": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "City.",
+          "x-ms-summary": "City"
+        },
+        "country": {
+          "type": "string",
+          "description": "Country as ISO 3166-1 alpha-2 code.",
+          "x-ms-summary": "Country"
+        },
+        "locale": {
+          "type": "string",
+          "description": "Language and region, e.g. de-DE.",
+          "x-ms-summary": "Locale"
+        },
+        "role": {
+          "type": "string",
+          "description": "Role, e.g. USER, B2B_CUSTOMER, B2B_ADMIN.",
+          "x-ms-summary": "Role"
+        },
+        "customFields": {
+          "type": "object",
+          "description": "Partner-defined custom fields as name/value pairs.",
+          "x-ms-summary": "Custom fields",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "Product": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Product ID.",
+          "x-ms-summary": "Product ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Product name.",
+          "x-ms-summary": "Product name"
+        },
+        "code": {
+          "type": "string",
+          "description": "Product code.",
+          "x-ms-summary": "Product code"
+        },
+        "type": {
+          "type": "string",
+          "description": "Product type, e.g. HEATING_OIL, DIESEL, LPG, PELLETS.",
+          "x-ms-summary": "Product type"
+        },
+        "isCollecting": {
+          "type": "boolean",
+          "description": "Whether the product is collected (e.g. waste oil) instead of consumed.",
+          "x-ms-summary": "Is collecting"
+        },
+        "densityKgpl": {
+          "type": "number",
+          "format": "double",
+          "x-nullable": true,
+          "description": "Density in kg per litre.",
+          "x-ms-summary": "Density (kg per L)"
+        },
+        "measurementInterval": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Measurement interval.",
+          "x-ms-summary": "Measurement interval",
+          "x-ms-visibility": "advanced"
+        },
+        "displayAs100Percent": {
+          "type": "string",
+          "description": "Which capacity counts as 100 percent: USABLE_VOLUME or TOTAL_VOLUME.",
+          "x-ms-summary": "100 percent basis",
+          "x-ms-visibility": "advanced"
+        },
+        "safetyMargin": {
+          "type": "number",
+          "format": "double",
+          "description": "Safety margin.",
+          "x-ms-summary": "Safety margin",
+          "x-ms-visibility": "advanced"
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "Product image URL.",
+          "x-ms-summary": "Image URL",
+          "x-ms-visibility": "advanced"
+        },
+        "partnerIds": {
+          "type": "array",
+          "description": "Partners the product is assigned to.",
+          "x-ms-summary": "Partner IDs",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "offlineNotification": {
+          "type": "object",
+          "x-nullable": true,
+          "description": "Offline notification settings.",
+          "x-ms-visibility": "advanced",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "x-ms-summary": "Offline notification enabled"
+            },
+            "countFirst": {
+              "type": "integer",
+              "format": "int32",
+              "x-ms-summary": "Offline notification first count"
+            },
+            "countSecond": {
+              "type": "integer",
+              "format": "int32",
+              "x-ms-summary": "Offline notification second count"
+            },
+            "countRecurring": {
+              "type": "integer",
+              "format": "int32",
+              "x-ms-summary": "Offline notification recurring count"
+            }
+          }
+        },
+        "qualityList": {
+          "type": "object",
+          "x-nullable": true,
+          "description": "Product qualities.",
+          "x-ms-visibility": "advanced",
+          "properties": {
+            "defaultIndex": {
+              "type": "integer",
+              "format": "int32",
+              "x-ms-summary": "Default quality index"
+            },
+            "default": {
+              "$ref": "#/definitions/ProductQuality"
+            },
+            "items": {
+              "type": "array",
+              "x-ms-summary": "Qualities",
+              "items": {
+                "$ref": "#/definitions/ProductQuality"
+              }
+            }
+          }
+        },
+        "meteringTime": {
+          "type": "object",
+          "x-nullable": true,
+          "description": "Time of day of the scheduled measurement.",
+          "x-ms-visibility": "advanced",
+          "properties": {
+            "hour": {
+              "type": "integer",
+              "format": "int32",
+              "x-ms-summary": "Metering hour"
+            },
+            "minute": {
+              "type": "integer",
+              "format": "int32",
+              "x-ms-summary": "Metering minute"
+            },
+            "second": {
+              "type": "integer",
+              "format": "int32",
+              "x-ms-summary": "Metering second"
+            },
+            "nano": {
+              "type": "integer",
+              "format": "int32",
+              "x-ms-summary": "Metering nanosecond"
+            }
+          }
+        }
+      }
+    },
+    "ProductQuality": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "x-ms-summary": "Quality ID"
+        },
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Quality name"
+        },
+        "code": {
+          "type": "string",
+          "x-ms-summary": "Quality code"
+        }
+      }
+    },
+    "ProductType": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Product type, e.g. HEATING_OIL, DIESEL, LPG, PELLETS.",
+          "x-ms-summary": "Product type"
+        },
+        "defaultDensityKgpl": {
+          "type": "number",
+          "format": "double",
+          "x-nullable": true,
+          "description": "Default density in kg per litre.",
+          "x-ms-summary": "Default density (kg per L)"
+        },
+        "measurementInterval": {
+          "type": "integer",
+          "format": "int64",
+          "x-ms-summary": "Default measurement interval"
+        },
+        "safetyMargin": {
+          "type": "number",
+          "format": "double",
+          "x-ms-summary": "Default safety margin"
+        },
+        "displayAs100Percent": {
+          "type": "string",
+          "description": "USABLE_VOLUME or TOTAL_VOLUME.",
+          "x-ms-summary": "Default 100 percent basis"
+        },
+        "imageUrl": {
+          "type": "string",
+          "x-ms-summary": "Image URL"
+        }
+      }
+    },
+    "PredefinedTankTypes": {
+      "type": "object",
+      "properties": {
+        "types": {
+          "type": "array",
+          "description": "Catalogue tank types.",
+          "x-ms-summary": "Tank types",
+          "items": {
+            "$ref": "#/definitions/TankPredefinedType"
+          }
+        }
+      }
+    },
+    "CancellationState": {
+      "type": "object",
+      "properties": {
+        "hwid": {
+          "type": "string",
+          "description": "Hardware ID of the device.",
+          "x-ms-summary": "Hardware ID"
+        },
+        "isCancelled": {
+          "type": "boolean",
+          "description": "Whether the device contract is cancelled.",
+          "x-ms-summary": "Is cancelled"
+        },
+        "cancellableAfter": {
+          "type": "object",
+          "x-nullable": true,
+          "description": "Earliest date the contract can be cancelled.",
+          "properties": {
+            "year": {
+              "type": "integer",
+              "format": "int32",
+              "x-ms-summary": "Cancellable after year"
+            },
+            "month": {
+              "type": "integer",
+              "format": "int32",
+              "x-ms-summary": "Cancellable after month"
+            },
+            "day": {
+              "type": "integer",
+              "format": "int32",
+              "x-ms-summary": "Cancellable after day"
+            }
+          }
+        },
+        "markedForCancellationOn": {
+          "type": "object",
+          "x-nullable": true,
+          "description": "Date the contract is marked to be cancelled on.",
+          "properties": {
+            "year": {
+              "type": "integer",
+              "format": "int32",
+              "x-ms-summary": "Cancellation year"
+            },
+            "month": {
+              "type": "integer",
+              "format": "int32",
+              "x-ms-summary": "Cancellation month"
+            },
+            "day": {
+              "type": "integer",
+              "format": "int32",
+              "x-ms-summary": "Cancellation day"
+            }
+          }
+        }
+      }
+    },
+    "DeviceMetadataRequest": {
+      "type": "object",
+      "required": [
+        "internalId",
+        "partnerNotes"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Device name; leave empty to clear.",
+          "x-ms-summary": "Device name"
+        },
+        "internalId": {
+          "type": "string",
+          "description": "Partner's own ID for the device; empty string clears it.",
+          "x-ms-summary": "Internal ID"
+        },
+        "partnerNotes": {
+          "type": "string",
+          "description": "Partner notes; empty string clears them.",
+          "x-ms-summary": "Partner notes"
+        }
+      }
+    },
+    "AddressRequest": {
+      "type": "object",
+      "required": [
+        "company",
+        "streetLines",
+        "city",
+        "zipCode",
+        "country"
+      ],
+      "properties": {
+        "company": {
+          "type": "string",
+          "description": "Company; may be empty.",
+          "x-ms-summary": "Company"
+        },
+        "streetLines": {
+          "type": "string",
+          "description": "Street and house number.",
+          "x-ms-summary": "Street"
+        },
+        "zipCode": {
+          "type": "string",
+          "description": "Postal code.",
+          "x-ms-summary": "Postal code"
+        },
+        "city": {
+          "type": "string",
+          "description": "City.",
+          "x-ms-summary": "City"
+        },
+        "country": {
+          "$ref": "#/definitions/CountryCode"
+        }
+      }
+    },
+    "CountryCode": {
+      "type": "string",
+      "description": "Country as ISO 3166-1 alpha-2 code.",
+      "x-ms-summary": "Country",
+      "enum": [
+        "AT",
+        "BE",
+        "BG",
+        "CH",
+        "CZ",
+        "DE",
+        "DK",
+        "EE",
+        "ES",
+        "FI",
+        "FR",
+        "GB",
+        "GR",
+        "HU",
+        "HR",
+        "IE",
+        "IT",
+        "LI",
+        "LT",
+        "LU",
+        "NL",
+        "NO",
+        "PL",
+        "PT",
+        "RO",
+        "RS",
+        "SE",
+        "SK",
+        "SI"
+      ]
+    },
+    "DeviceLabelsRequest": {
+      "type": "object",
+      "required": [
+        "labels"
+      ],
+      "properties": {
+        "labels": {
+          "type": "array",
+          "description": "Complete list of labels; replaces the current labels.",
+          "x-ms-summary": "Labels",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "DeviceNotificationRequest": {
+      "type": "object",
+      "required": [
+        "notificationInfoEnabled",
+        "notificationInfoPercentage",
+        "notificationAlertEnabled",
+        "notificationAlertPercentage"
+      ],
+      "properties": {
+        "notificationInfoEnabled": {
+          "type": "boolean",
+          "x-ms-summary": "Info notification enabled"
+        },
+        "notificationInfoPercentage": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Fill level in percent (0-100) that triggers the info notification.",
+          "x-ms-summary": "Info notification level (percent)"
+        },
+        "notificationAlertEnabled": {
+          "type": "boolean",
+          "x-ms-summary": "Alert notification enabled"
+        },
+        "notificationAlertPercentage": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Fill level in percent (0-100) that triggers the alert notification.",
+          "x-ms-summary": "Alert notification level (percent)"
+        }
+      }
+    },
+    "DeviceLockRequest": {
+      "type": "object",
+      "required": [
+        "isLocked"
+      ],
+      "properties": {
+        "isLocked": {
+          "type": "boolean",
+          "description": "Yes to lock the configuration for end customers.",
+          "x-ms-summary": "Locked"
+        }
+      }
+    },
+    "DevicePartnerRequest": {
+      "type": "object",
+      "required": [
+        "partnerId"
+      ],
+      "properties": {
+        "partnerId": {
+          "type": "string",
+          "description": "Partner to move the device to.",
+          "x-ms-summary": "Target partner",
+          "x-ms-dynamic-values": {
+            "operationId": "ListPartners",
+            "value-path": "id",
+            "value-title": "name"
+          }
+        }
+      }
+    },
+    "CancelDeviceRequest": {
+      "type": "object",
+      "required": [
+        "cancelAt"
+      ],
+      "properties": {
+        "cancelAt": {
+          "type": "object",
+          "required": [
+            "year",
+            "month",
+            "day"
+          ],
+          "description": "Cancellation date.",
+          "properties": {
+            "year": {
+              "type": "integer",
+              "format": "int32",
+              "x-ms-summary": "Cancel at year"
+            },
+            "month": {
+              "type": "integer",
+              "format": "int32",
+              "x-ms-summary": "Cancel at month"
+            },
+            "day": {
+              "type": "integer",
+              "format": "int32",
+              "x-ms-summary": "Cancel at day"
+            }
+          }
+        }
+      }
+    },
+    "DeviceProductRequest": {
+      "type": "object",
+      "required": [
+        "productId"
+      ],
+      "properties": {
+        "productId": {
+          "type": "string",
+          "description": "ID of the new product.",
+          "x-ms-summary": "Product ID"
+        }
+      }
+    },
+    "TankCustomRequest": {
+      "type": "object",
+      "required": [
+        "heightCm",
+        "offsetCm",
+        "volumeL",
+        "shape",
+        "isUsableVolume",
+        "mountingType",
+        "productId"
+      ],
+      "properties": {
+        "heightCm": {
+          "type": "number",
+          "format": "double",
+          "x-ms-summary": "Tank height (cm)"
+        },
+        "offsetCm": {
+          "type": "number",
+          "format": "double",
+          "description": "Distance between sensor and tank top.",
+          "x-ms-summary": "Sensor offset (cm)"
+        },
+        "volumeL": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Tank volume (L)"
+        },
+        "isUsableVolume": {
+          "type": "boolean",
+          "description": "Yes if the volume is the usable volume, no if it is the total volume.",
+          "x-ms-summary": "Volume is usable volume"
+        },
+        "shape": {
+          "type": "string",
+          "description": "VERTICAL_CYLINDER is stored as sent but reported as SQUARED.",
+          "x-ms-summary": "Tank shape",
+          "enum": [
+            "SQUARED",
+            "VERTICAL_CYLINDER",
+            "ROUNDED",
+            "CYLINDER"
+          ]
+        },
+        "mountingType": {
+          "$ref": "#/definitions/MountingType"
+        },
+        "productId": {
+          "type": "string",
+          "description": "ID of the stored product.",
+          "x-ms-summary": "Product ID"
+        }
+      }
+    },
+    "MountingType": {
+      "type": "string",
+      "description": "How the sensor is mounted.",
+      "x-ms-summary": "Mounting type",
+      "enum": [
+        "ADHESIVE",
+        "SCREW"
+      ]
+    },
+    "TankPredefinedRequest": {
+      "type": "object",
+      "required": [
+        "offsetTopCm",
+        "storageCount",
+        "productId",
+        "mountingType",
+        "storageTypeId"
+      ],
+      "properties": {
+        "storageTypeId": {
+          "type": "string",
+          "description": "Catalogue tank type ID from 'Get predefined tank types'.",
+          "x-ms-summary": "Tank type ID"
+        },
+        "storageCount": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Number of connected tanks of this type.",
+          "x-ms-summary": "Number of tanks"
+        },
+        "offsetTopCm": {
+          "type": "number",
+          "format": "double",
+          "x-ms-summary": "Sensor offset (cm)"
+        },
+        "mountingType": {
+          "$ref": "#/definitions/MountingType"
+        },
+        "productId": {
+          "type": "string",
+          "description": "ID of the stored product.",
+          "x-ms-summary": "Product ID"
+        }
+      }
+    },
+    "SiloRequest": {
+      "type": "object",
+      "required": [
+        "heightCm",
+        "widthCm",
+        "lengthCm",
+        "offsetTopCm",
+        "offsetSideCm",
+        "storeType",
+        "mounting",
+        "massKg",
+        "productId"
+      ],
+      "properties": {
+        "heightCm": {
+          "type": "number",
+          "format": "double",
+          "x-ms-summary": "Silo height (cm)"
+        },
+        "widthCm": {
+          "type": "number",
+          "format": "double",
+          "x-ms-summary": "Silo width (cm)"
+        },
+        "lengthCm": {
+          "type": "number",
+          "format": "double",
+          "x-ms-summary": "Silo length (cm)"
+        },
+        "offsetTopCm": {
+          "type": "number",
+          "format": "double",
+          "x-ms-summary": "Silo top offset (cm)"
+        },
+        "offsetSideCm": {
+          "type": "number",
+          "format": "double",
+          "x-ms-summary": "Silo side offset (cm)"
+        },
+        "storeType": {
+          "type": "string",
+          "x-ms-summary": "Silo store type",
+          "enum": [
+            "SACK_SILO",
+            "BUNKER_CONVEYOR",
+            "BUNKER_PROBE"
+          ]
+        },
+        "mounting": {
+          "type": "string",
+          "x-ms-summary": "Silo mounting",
+          "enum": [
+            "CEILING_VERTICAL",
+            "CEILING_DIAGONAL",
+            "PIPE_DIAGONAL",
+            "PIPE_VERTICAL"
+          ]
+        },
+        "massKg": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Silo capacity (kg)"
+        },
+        "productId": {
+          "type": "string",
+          "description": "ID of the stored product.",
+          "x-ms-summary": "Product ID"
+        }
+      }
+    },
+    "CreatePartnerRequest": {
+      "type": "object",
+      "required": [
+        "name",
+        "parentId",
+        "productIds"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Partner name"
+        },
+        "internalId": {
+          "type": "string",
+          "x-ms-summary": "Partner internal ID"
+        },
+        "parentId": {
+          "type": "string",
+          "description": "Partner under which the new partner is created.",
+          "x-ms-summary": "Parent partner",
+          "x-ms-dynamic-values": {
+            "operationId": "ListPartners",
+            "value-path": "id",
+            "value-title": "name"
+          }
+        },
+        "productIds": {
+          "type": "array",
+          "description": "Products assigned to the new partner.",
+          "x-ms-summary": "Product IDs",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "PartnerNameRequest": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "x-ms-summary": "New partner name"
+        }
+      }
+    },
+    "PartnerInternalIdRequest": {
+      "type": "object",
+      "required": [
+        "internalId"
+      ],
+      "properties": {
+        "internalId": {
+          "type": "string",
+          "x-ms-summary": "New partner internal ID"
+        }
+      }
+    },
+    "PartnerNotificationEmailsRequest": {
+      "type": "object",
+      "required": [
+        "notificationEmails"
+      ],
+      "properties": {
+        "notificationEmails": {
+          "type": "array",
+          "description": "Complete list; replaces the current addresses.",
+          "x-ms-summary": "Notification emails",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "PartnerProductsRequest": {
+      "type": "object",
+      "required": [
+        "productIds"
+      ],
+      "properties": {
+        "productIds": {
+          "type": "array",
+          "description": "Complete list; replaces the current products.",
+          "x-ms-summary": "Product IDs",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "UserRequest": {
+      "type": "object",
+      "required": [
+        "email",
+        "firstName",
+        "lastName",
+        "companyName",
+        "country",
+        "locale",
+        "role",
+        "customFields"
+      ],
+      "properties": {
+        "email": {
+          "type": "string",
+          "x-ms-summary": "Email"
+        },
+        "firstName": {
+          "type": "string",
+          "x-ms-summary": "First name"
+        },
+        "lastName": {
+          "type": "string",
+          "x-ms-summary": "Last name"
+        },
+        "title": {
+          "type": "string",
+          "x-ms-summary": "Title"
+        },
+        "phone": {
+          "type": "string",
+          "x-ms-summary": "Phone"
+        },
+        "companyName": {
+          "type": "string",
+          "description": "Company name; may be empty.",
+          "x-ms-summary": "Company name"
+        },
+        "companyPosition": {
+          "type": "string",
+          "x-ms-summary": "Company position",
+          "enum": [
+            "MANAGEMENT",
+            "SALES",
+            "SALES_LEAD",
+            "DISPATCHING",
+            "MARKETING",
+            "PROCUREMENT",
+            "IT",
+            "TRUCKER",
+            "PROPERTY_MANAGEMENT",
+            "FARMING",
+            "FREIGHT_FORWARDER",
+            "CONSTRUCTION",
+            "GARAGE",
+            "LUBES_RETAILER"
+          ]
+        },
+        "street": {
+          "type": "string",
+          "x-ms-summary": "Street"
+        },
+        "zipCode": {
+          "type": "string",
+          "x-ms-summary": "Postal code"
+        },
+        "city": {
+          "type": "string",
+          "x-ms-summary": "City"
+        },
+        "country": {
+          "$ref": "#/definitions/CountryCode"
+        },
+        "locale": {
+          "type": "string",
+          "description": "Language and region, e.g. de-DE.",
+          "x-ms-summary": "Locale"
+        },
+        "role": {
+          "type": "string",
+          "description": "USER for private customers, B2B_CUSTOMER / B2B_ADMIN for business customers.",
+          "x-ms-summary": "Role",
+          "enum": [
+            "USER",
+            "B2B_CUSTOMER",
+            "B2B_ADMIN",
+            "INACTIVE",
+            "DEMO"
+          ]
+        },
+        "internalId": {
+          "type": "string",
+          "x-ms-summary": "User internal ID"
+        },
+        "partnerId": {
+          "type": "string",
+          "description": "Partner the user belongs to.",
+          "x-ms-summary": "User partner",
+          "x-ms-dynamic-values": {
+            "operationId": "ListPartners",
+            "value-path": "id",
+            "value-title": "name"
+          }
+        },
+        "customFields": {
+          "type": "object",
+          "description": "Custom fields as a JSON object of name/value pairs; use {} for none.",
+          "x-ms-summary": "Custom fields",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "AssignDeviceRequest": {
+      "type": "object",
+      "required": [
+        "hwid",
+        "keepData"
+      ],
+      "properties": {
+        "hwid": {
+          "type": "string",
+          "x-ms-summary": "Hardware ID"
+        },
+        "keepData": {
+          "type": "boolean",
+          "description": "Yes to keep the device's address and tank settings.",
+          "x-ms-summary": "Keep device settings"
+        }
+      }
+    },
+    "UnassignDeviceRequest": {
+      "type": "object",
+      "required": [
+        "hwid"
+      ],
+      "properties": {
+        "hwid": {
+          "type": "string",
+          "x-ms-summary": "Hardware ID"
+        },
+        "keepData": {
+          "type": "boolean",
+          "description": "Yes to keep the device's address and tank settings; default no deletes them.",
+          "x-ms-summary": "Keep device settings"
+        }
+      }
+    },
+    "ProductRequest": {
+      "type": "object",
+      "required": [
+        "name",
+        "code",
+        "type",
+        "imageUrl",
+        "measurementInterval",
+        "safetyMargin",
+        "displayAs100Percent",
+        "partnerIds"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Product name"
+        },
+        "code": {
+          "type": "string",
+          "x-ms-summary": "Product code"
+        },
+        "type": {
+          "type": "string",
+          "x-ms-summary": "Product type",
+          "enum": [
+            "HEATING_OIL",
+            "LPG",
+            "DIESEL",
+            "LUBRICANT",
+            "PELLETS",
+            "WASTE",
+            "WASTE_OIL",
+            "USED_COOKING_OIL",
+            "WATER",
+            "AD_BLUE",
+            "COOLANT",
+            "HVO",
+            "OTHER"
+          ]
+        },
+        "densityKgpl": {
+          "type": "number",
+          "format": "double",
+          "x-ms-summary": "Density (kg per L)"
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "Image URL; take it from 'Get product types'.",
+          "x-ms-summary": "Image URL"
+        },
+        "measurementInterval": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Take the default from 'Get product types'.",
+          "x-ms-summary": "Measurement interval"
+        },
+        "safetyMargin": {
+          "type": "number",
+          "format": "double",
+          "description": "Take the default from 'Get product types'.",
+          "x-ms-summary": "Safety margin"
+        },
+        "displayAs100Percent": {
+          "type": "string",
+          "x-ms-summary": "100 percent basis",
+          "enum": [
+            "USABLE_VOLUME",
+            "TOTAL_VOLUME"
+          ]
+        },
+        "partnerIds": {
+          "type": "array",
+          "description": "Partners the product is assigned to.",
+          "x-ms-summary": "Partner IDs",
+          "items": {
+            "type": "string"
+          }
+        },
+        "offlineNotification": {
+          "type": "object",
+          "description": "Offline notification settings; leave empty for defaults.",
+          "x-ms-visibility": "advanced",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "x-ms-summary": "Offline notification enabled"
+            },
+            "countFirst": {
+              "type": "integer",
+              "format": "int32",
+              "x-ms-summary": "Offline notification first count"
+            },
+            "countSecond": {
+              "type": "integer",
+              "format": "int32",
+              "x-ms-summary": "Offline notification second count"
+            },
+            "countRecurring": {
+              "type": "integer",
+              "format": "int32",
+              "x-ms-summary": "Offline notification recurring count"
+            }
+          }
+        },
+        "meteringTime": {
+          "type": "object",
+          "description": "Time of day of the scheduled measurement; leave empty for default.",
+          "x-ms-visibility": "advanced",
+          "properties": {
+            "hour": {
+              "type": "integer",
+              "format": "int32",
+              "x-ms-summary": "Metering hour"
+            },
+            "minute": {
+              "type": "integer",
+              "format": "int32",
+              "x-ms-summary": "Metering minute"
+            }
+          }
+        }
+      }
+    },
+    "PartnerTree": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Partner ID.",
+          "x-ms-summary": "Partner ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Partner name.",
+          "x-ms-summary": "Partner name"
+        },
+        "products": {
+          "type": "array",
+          "description": "Products assigned to the partner.",
+          "x-ms-summary": "Products",
+          "items": {
+            "$ref": "#/definitions/PartnerProduct"
+          }
+        },
+        "children": {
+          "type": "array",
+          "description": "Sub-partners, each with the same structure as the partner.",
+          "x-ms-summary": "Subpartners",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "PartnerListItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Partner ID.",
+          "x-ms-summary": "Partner ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Partner name.",
+          "x-ms-summary": "Partner name"
+        },
+        "parentId": {
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true,
+          "description": "ID of the parent partner; empty for the partner that owns the credentials.",
+          "x-ms-summary": "Parent partner ID"
+        },
+        "depth": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Level in the partner tree; 0 for the partner that owns the credentials.",
+          "x-ms-summary": "Depth"
+        },
+        "products": {
+          "type": "array",
+          "description": "Products assigned to the partner.",
+          "x-ms-summary": "Products",
+          "items": {
+            "$ref": "#/definitions/PartnerProduct"
+          }
+        }
+      }
+    },
+    "PartnerProduct": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Product ID.",
+          "x-ms-summary": "Product ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Product name.",
+          "x-ms-summary": "Product name"
+        },
+        "code": {
+          "type": "string",
+          "description": "Product code.",
+          "x-ms-summary": "Product code"
+        },
+        "type": {
+          "type": "string",
+          "description": "Product type, e.g. HEATING_OIL.",
+          "x-ms-summary": "Product type"
+        }
+      }
+    },
+    "Device": {
+      "type": "object",
+      "properties": {
+        "hwid": {
+          "type": "string",
+          "description": "Hardware ID of the device; stable key for the device.",
+          "x-ms-summary": "Hardware ID"
+        },
+        "name": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "Device name.",
+          "x-ms-summary": "Device name"
+        },
+        "partnerId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "ID of the partner the device belongs to.",
+          "x-ms-summary": "Partner ID"
+        },
+        "internalId": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "Partner's own ID for the device; may be empty and is not guaranteed to be unique.",
+          "x-ms-summary": "Internal ID"
+        },
+        "partnerNotes": {
+          "type": "string",
+          "description": "Partner notes.",
+          "x-ms-summary": "Partner notes"
+        },
+        "productId": {
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true,
+          "description": "ID of the stored product.",
+          "x-ms-summary": "Product ID"
+        },
+        "productCode": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "Code of the stored product.",
+          "x-ms-summary": "Product code"
+        },
+        "userId": {
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true,
+          "description": "ID of the end customer the device is assigned to.",
+          "x-ms-summary": "User ID"
+        },
+        "hasServiceAgreement": {
+          "type": "boolean",
+          "x-nullable": true,
+          "description": "Whether the end customer has a service agreement.",
+          "x-ms-summary": "Has service agreement"
+        },
+        "maintenanceState": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "Maintenance state: UNKNOWN, OK, COMPLAINED, SENT_BACK, RECEIVED, CHECKED or DEFECT.",
+          "x-ms-summary": "Maintenance state"
+        },
+        "setupAt": {
+          "type": "integer",
+          "format": "int64",
+          "x-nullable": true,
+          "description": "Setup time. Its unit depends on the account mode, so do not rely on it.",
+          "x-ms-summary": "Setup time (raw)",
+          "x-ms-visibility": "internal"
+        },
+        "address": {
+          "$ref": "#/definitions/Address"
+        },
+        "maxVolume": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Legacy maximum volume in litres; use Usable quantity / Total quantity instead.",
+          "x-ms-summary": "Max volume (legacy)",
+          "x-ms-visibility": "advanced"
+        },
+        "lastMetering": {
+          "$ref": "#/definitions/Metering"
+        },
+        "notificationInfoEnabled": {
+          "type": "boolean",
+          "description": "Whether the info notification is enabled.",
+          "x-ms-summary": "Info notification enabled"
+        },
+        "notificationInfoPercentage": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Fill level in percent that triggers the info notification.",
+          "x-ms-summary": "Info notification level (percent)"
+        },
+        "notificationAlertEnabled": {
+          "type": "boolean",
+          "description": "Whether the alert notification is enabled.",
+          "x-ms-summary": "Alert notification enabled"
+        },
+        "notificationAlertPercentage": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Fill level in percent that triggers the alert notification.",
+          "x-ms-summary": "Alert notification level (percent)"
+        },
+        "isLocked": {
+          "type": "boolean",
+          "x-nullable": true,
+          "description": "Whether the device configuration is locked.",
+          "x-ms-summary": "Is locked"
+        },
+        "computed": {
+          "$ref": "#/definitions/ComputedStorage"
+        },
+        "tankCustom": {
+          "$ref": "#/definitions/TankCustom"
+        },
+        "silo": {
+          "$ref": "#/definitions/Silo"
+        },
+        "tankPredefined": {
+          "$ref": "#/definitions/TankPredefined"
+        },
+        "salesAssistantPrediction": {
+          "$ref": "#/definitions/SalesPrediction"
+        },
+        "labels": {
+          "type": "array",
+          "description": "Labels assigned to the device.",
+          "x-ms-summary": "Labels",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "Address": {
+      "type": "object",
+      "properties": {
+        "company": {
+          "type": "string",
+          "description": "Company.",
+          "x-ms-summary": "Address company"
+        },
+        "streetLines": {
+          "type": "string",
+          "description": "Street and house number.",
+          "x-ms-summary": "Address street"
+        },
+        "city": {
+          "type": "string",
+          "description": "City.",
+          "x-ms-summary": "Address city"
+        },
+        "zipCode": {
+          "type": "string",
+          "description": "Postal code.",
+          "x-ms-summary": "Address postal code"
+        },
+        "country": {
+          "type": "string",
+          "description": "Country as ISO 3166-1 alpha-2 code.",
+          "x-ms-summary": "Address country"
+        }
+      }
+    },
+    "Metering": {
+      "type": "object",
+      "x-nullable": true,
+      "description": "Latest reliable measurement; empty when the device has not measured yet.",
+      "properties": {
+        "quantity": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Measured quantity in litres.",
+          "x-ms-summary": "Measured quantity (L)"
+        },
+        "quantityUnit": {
+          "type": "string",
+          "description": "Unit of the measured quantity.",
+          "x-ms-summary": "Measured quantity unit"
+        },
+        "timestamp": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Measurement time as Unix seconds.",
+          "x-ms-summary": "Measured at (Unix seconds)",
+          "x-ms-visibility": "advanced"
+        },
+        "measuredAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Measurement time in UTC, derived from the Unix timestamp of the latest measurement.",
+          "x-ms-summary": "Measured at"
+        },
+        "estimatedForecastDate": {
+          "$ref": "#/definitions/LocalDate"
+        },
+        "batteryLevel": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "Battery level: FULL, GOOD, MEDIUM, WARNING or CRITICAL.",
+          "x-ms-summary": "Battery level"
+        },
+        "signalStrength": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "Signal strength: VERY_WEAK, WEAK, GOOD or EXCELLENT.",
+          "x-ms-summary": "Signal strength"
+        },
+        "distanceCm": {
+          "type": "number",
+          "format": "double",
+          "x-nullable": true,
+          "description": "Raw measured distance in cm.",
+          "x-ms-summary": "Raw distance (cm)",
+          "x-ms-visibility": "advanced"
+        },
+        "pressurePa": {
+          "type": "number",
+          "format": "double",
+          "x-nullable": true,
+          "description": "Raw measured pressure in Pa.",
+          "x-ms-summary": "Raw pressure (Pa)",
+          "x-ms-visibility": "advanced"
+        },
+        "angleDeg": {
+          "type": "number",
+          "format": "double",
+          "x-nullable": true,
+          "description": "Raw measured angle in degrees.",
+          "x-ms-summary": "Raw angle (deg)",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "ComputedStorage": {
+      "type": "object",
+      "x-nullable": true,
+      "description": "Fill level computed from the storage configuration; empty when the device has no storage configured.",
+      "properties": {
+        "currentQuantity": {
+          "$ref": "#/definitions/Quantity"
+        },
+        "percentage": {
+          "type": "integer",
+          "format": "int32",
+          "x-nullable": true,
+          "description": "Fill level in percent; check Measured at, a device without a measurement can report 0.",
+          "x-ms-summary": "Fill level (percent)"
+        },
+        "usableQuantity": {
+          "$ref": "#/definitions/Quantity"
+        },
+        "totalQuantity": {
+          "$ref": "#/definitions/Quantity"
+        },
+        "productSafetyMargin": {
+          "type": "number",
+          "format": "double",
+          "description": "Product safety margin.",
+          "x-ms-summary": "Product safety margin",
+          "x-ms-visibility": "advanced"
+        },
+        "displayAs100Percent": {
+          "type": "string",
+          "description": "Which capacity counts as 100 percent: USABLE_VOLUME or TOTAL_VOLUME.",
+          "x-ms-summary": "100 percent basis",
+          "x-ms-visibility": "advanced"
+        },
+        "productName": {
+          "type": "string",
+          "description": "Stored product.",
+          "x-ms-summary": "Product name"
+        },
+        "isCollectingProduct": {
+          "type": "boolean",
+          "description": "Whether the storage collects product (e.g. waste oil) instead of consuming it.",
+          "x-ms-summary": "Is collecting product"
+        }
+      }
+    },
+    "Quantity": {
+      "type": "object",
+      "x-nullable": true,
+      "properties": {
+        "value": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Quantity.",
+          "x-ms-summary": "Value"
+        },
+        "unit": {
+          "type": "string",
+          "description": "Unit: L or kg.",
+          "x-ms-summary": "Unit"
+        }
+      }
+    },
+    "LocalDate": {
+      "type": "object",
+      "x-nullable": true,
+      "description": "Estimated date when the storage needs a refill.",
+      "properties": {
+        "year": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Forecast year"
+        },
+        "month": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Forecast month"
+        },
+        "day": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Forecast day"
+        }
+      }
+    },
+    "SalesPrediction": {
+      "type": "object",
+      "x-nullable": true,
+      "description": "Sales assistant order prediction.",
+      "properties": {
+        "indexRaw": {
+          "type": "number",
+          "format": "double",
+          "description": "Raw order probability index.",
+          "x-ms-summary": "Order probability (raw)",
+          "x-ms-visibility": "advanced"
+        },
+        "index": {
+          "type": "string",
+          "description": "Order probability: VERY_HIGH, HIGH, MEDIUM or LOW.",
+          "x-ms-summary": "Order probability"
+        },
+        "quantity": {
+          "$ref": "#/definitions/Quantity"
+        }
+      }
+    },
+    "TankCustom": {
+      "type": "object",
+      "x-nullable": true,
+      "description": "Custom tank configuration.",
+      "properties": {
+        "heightCm": {
+          "type": "number",
+          "format": "double",
+          "x-ms-summary": "Tank height (cm)"
+        },
+        "offsetCm": {
+          "type": "number",
+          "format": "double",
+          "x-ms-summary": "Sensor offset (cm)"
+        },
+        "volumeL": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Tank volume (L)"
+        },
+        "usableVolumeL": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Usable volume (L)"
+        },
+        "isUsableVolume": {
+          "type": "boolean",
+          "x-ms-summary": "Volume is usable volume"
+        },
+        "shape": {
+          "type": "string",
+          "description": "SQUARED, ROUNDED or CYLINDER.",
+          "x-ms-summary": "Tank shape"
+        },
+        "mountingType": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "ADHESIVE or SCREW.",
+          "x-ms-summary": "Mounting type"
+        },
+        "productId": {
+          "type": "string",
+          "format": "uuid",
+          "x-ms-summary": "Tank product ID"
+        }
+      }
+    },
+    "TankPredefined": {
+      "type": "object",
+      "x-nullable": true,
+      "description": "Predefined (catalogue) tank configuration.",
+      "properties": {
+        "offsetTopCm": {
+          "type": "number",
+          "format": "double",
+          "x-ms-summary": "Sensor offset (cm)"
+        },
+        "storageCount": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Number of tanks"
+        },
+        "mountingType": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "ADHESIVE or SCREW.",
+          "x-ms-summary": "Mounting type"
+        },
+        "productId": {
+          "type": "string",
+          "format": "uuid",
+          "x-ms-summary": "Tank product ID"
+        },
+        "type": {
+          "$ref": "#/definitions/TankPredefinedType"
+        }
+      }
+    },
+    "TankPredefinedType": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "x-ms-summary": "Tank type ID"
+        },
+        "manufacturerName": {
+          "type": "string",
+          "x-ms-summary": "Tank manufacturer"
+        },
+        "typeName": {
+          "type": "string",
+          "x-ms-summary": "Tank type"
+        },
+        "totalHeightCm": {
+          "type": "number",
+          "format": "double",
+          "x-ms-summary": "Tank type height (cm)"
+        },
+        "offsetTopInternalCm": {
+          "type": "number",
+          "format": "double",
+          "x-ms-summary": "Tank type top offset (cm)",
+          "x-ms-visibility": "advanced"
+        },
+        "offsetBottomCm": {
+          "type": "number",
+          "format": "double",
+          "x-ms-summary": "Tank type bottom offset (cm)",
+          "x-ms-visibility": "advanced"
+        },
+        "totalQuantity": {
+          "$ref": "#/definitions/Quantity"
+        }
+      }
+    },
+    "Silo": {
+      "type": "object",
+      "x-nullable": true,
+      "description": "Silo configuration.",
+      "properties": {
+        "heightCm": {
+          "type": "number",
+          "format": "double",
+          "x-ms-summary": "Silo height (cm)"
+        },
+        "widthCm": {
+          "type": "number",
+          "format": "double",
+          "x-ms-summary": "Silo width (cm)"
+        },
+        "lengthCm": {
+          "type": "number",
+          "format": "double",
+          "x-ms-summary": "Silo length (cm)"
+        },
+        "offsetTopCm": {
+          "type": "number",
+          "format": "double",
+          "x-ms-summary": "Silo top offset (cm)"
+        },
+        "offsetSideCm": {
+          "type": "number",
+          "format": "double",
+          "x-ms-summary": "Silo side offset (cm)"
+        },
+        "storeType": {
+          "type": "string",
+          "description": "SACK_SILO, BUNKER_CONVEYOR or BUNKER_PROBE.",
+          "x-ms-summary": "Silo store type"
+        },
+        "mounting": {
+          "type": "string",
+          "description": "CEILING_VERTICAL, CEILING_DIAGONAL, PIPE_DIAGONAL or PIPE_VERTICAL.",
+          "x-ms-summary": "Silo mounting"
+        },
+        "massKg": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Silo capacity (kg)"
+        },
+        "productId": {
+          "type": "string",
+          "format": "uuid",
+          "x-ms-summary": "Silo product ID"
+        }
+      }
+    }
+  },
+  "parameters": {
+    "hwid": {
+      "name": "hwid",
+      "in": "path",
+      "required": true,
+      "type": "string",
+      "description": "Hardware ID of the device, printed on the sensor.",
+      "x-ms-summary": "Hardware ID",
+      "x-ms-url-encoding": "single",
+      "x-ms-parameter-location": "method"
+    },
+    "partnerId": {
+      "name": "partnerId",
+      "in": "path",
+      "required": true,
+      "type": "string",
+      "description": "Partner to change.",
+      "x-ms-summary": "Partner",
+      "x-ms-url-encoding": "single",
+      "x-ms-parameter-location": "method",
+      "x-ms-dynamic-values": {
+        "operationId": "ListPartners",
+        "value-path": "id",
+        "value-title": "name"
+      }
+    }
+  },
+  "responses": {},
+  "securityDefinitions": {
+    "basic_auth": {
+      "type": "basic"
+    }
+  },
+  "security": [
+    {
+      "basic_auth": []
+    }
+  ],
+  "tags": []
+}
