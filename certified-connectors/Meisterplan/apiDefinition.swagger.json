@@ -32,7 +32,7 @@
           "Task Management"
         ],
         "summary": "Get a List of Tasks",
-        "description": "This endpoint is paginated. It returns a list of tasks up to the specified PAGESIZE",
+        "description": "This endpoint is paginated. It returns a list of tasks up to the specified pageSize",
         "operationId": "GetAllTasks",
         "produces": [
           "application/json"
@@ -54,6 +54,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -141,6 +142,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -185,7 +187,7 @@
           "Task Management"
         ],
         "summary": "Replace Tasks",
-        "description": "This endpoint is used to replace all existing tasks of a specific project with a new list of tasks provided in the request. How it works: You send a list of tasks for a specific project. The system will synchronize the project’s tasks with this list using the task key as identifier. This means:\n\n-   Tasks currently in the system but not in your list will be deleted. -   Tasks in your list that do not exist in the system will be created. -   Tasks that exist both in the system and in your list will be     updated, if there are changes.",
+        "description": "This endpoint is used to replace all existing tasks of a specific project with a new list of tasks provided in the request. How it works: You send a list of tasks for a specific project. The system will synchronize the project’s tasks with this list using the task key as identifier. This means:\n\n- Tasks currently in the system but not in your list will be deleted. - Tasks in your list that do not exist in the system will be created. - Tasks that exist both in the system and in your list will be updated,   if there are changes.",
         "operationId": "ReplaceTask",
         "consumes": [
           "application/json"
@@ -210,6 +212,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -223,6 +226,365 @@
               "$ref": "#/definitions/TaskReplaceRequest"
             },
             "x-ms-summary": "Task Replace Request"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        }
+      }
+    },
+    "/v1/scenarios/{scenarioId}/projects/{projectId}/segments": {
+      "get": {
+        "tags": [
+          "Project Segments"
+        ],
+        "summary": "Get a List of Project Segments (Alpha)",
+        "description": "Returns a list of segments of a project.\n\nAlpha endpoint: Alpha endpoints are early versions made available for evaluation and feedback. Their contract and behavior may change without notice and should not be relied on for production use.",
+        "operationId": "GetAllSegments",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "scenarioId",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Scenario Id",
+            "x-ms-url-encoding": "single",
+            "x-example": "UUID"
+          },
+          {
+            "in": "path",
+            "name": "projectId",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "format": "uuid",
+            "x-ms-summary": "Project Id",
+            "x-ms-url-encoding": "single",
+            "x-example": "UUID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ListResponseProjectSegmentResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Project Segments"
+        ],
+        "summary": "Replace Project Segments (Alpha)",
+        "description": "This endpoint replaces all segments of a project with a new list of segments. The following rules apply. - The request accepts an ordered list of segments. The finish field is required. The segmentKey, description, and phase fields are optional. Segments are ordered according to their position in the request. This operation cannot be used to reorder existing segments. - Existing segments can be retained by providing a segmentKey that already exists. When an existing segment is retained, its duration is adjusted as needed, including any associated milestones. FTE allocations remain unchanged. - Omitted fields of existing segments are left unchanged. Explicit null clears a field where allowed. - Existing segments cannot be inserted as new empty segments without allocations or milestones. - Any segments not included in the new list are deleted, along with their allocations and milestones. - After the replacement, the project duration is determined by the project start date and the latest segment finish date. - Phase field options are created automatically if they do not already exist.\n\nAlpha endpoint: Alpha endpoints are early versions made available for evaluation and feedback. Their contract and behavior may change without notice and should not be relied on for production use.",
+        "operationId": "ReplaceSegments",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "scenarioId",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Scenario Id",
+            "x-ms-url-encoding": "single",
+            "x-example": "UUID"
+          },
+          {
+            "in": "path",
+            "name": "projectId",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "format": "uuid",
+            "x-ms-summary": "Project Id",
+            "x-ms-url-encoding": "single",
+            "x-example": "UUID"
+          },
+          {
+            "in": "body",
+            "name": "payload",
+            "description": "Segment represented by a JSON document.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ProjectSegmentScheduleReplaceAllRequest"
+            },
+            "x-ms-summary": "Payload"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        }
+      }
+    },
+    "/v1/scenarios/{scenarioId}/projects/{projectId}/risks": {
+      "get": {
+        "tags": [
+          "Risks"
+        ],
+        "summary": "Get a List of Risks",
+        "description": "Returns a list of risks of this project",
+        "operationId": "GetAllRisks",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageSize",
+            "description": "Page Size",
+            "type": "integer",
+            "default": 250,
+            "maximum": 500,
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "x-ms-summary": "Page Size",
+            "x-example": "100"
+          },
+          {
+            "in": "query",
+            "name": "pageAfter",
+            "description": "The cursor after which to retrieve results. The cursor can be taken from a preceding request.",
+            "type": "string",
+            "x-ms-summary": "Page After",
+            "x-example": "opaque cursor"
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "description": "Stringified JSON object with a subset of properties of the expected object. Selects all objects that exactly match the specified properties. Risks are searchable by riskKey and name. Note: take care to URL encode your parameter. { \"riskKey\": string, \"name\": string }",
+            "type": "string",
+            "x-ms-summary": "Filter",
+            "x-example": "{\"riskKey\": \"MPRSK-1\"}"
+          },
+          {
+            "in": "path",
+            "name": "scenarioId",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Scenario Id",
+            "x-ms-url-encoding": "single",
+            "x-example": "UUID"
+          },
+          {
+            "in": "path",
+            "name": "projectId",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "format": "uuid",
+            "x-ms-summary": "Project Id",
+            "x-ms-url-encoding": "single",
+            "x-example": "UUID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PaginatedResponseRiskResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Risks"
+        ],
+        "summary": "Create Risks",
+        "description": "Creates a risk with the given fields and returns the newly created risk.",
+        "operationId": "CreateRisk",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "scenarioId",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Scenario Id",
+            "x-ms-url-encoding": "single",
+            "x-example": "UUID"
+          },
+          {
+            "in": "path",
+            "name": "projectId",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "format": "uuid",
+            "x-ms-summary": "Project Id",
+            "x-ms-url-encoding": "single",
+            "x-example": "UUID"
+          },
+          {
+            "in": "body",
+            "name": "payload",
+            "description": "Risk represented by a JSON document.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RiskCreateRequest"
+            },
+            "x-ms-summary": "Payload"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/RiskResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Risks"
+        ],
+        "summary": "Replace Risks",
+        "description": "Replaces risks of a given project within a scenario. Omitted fields of existing items are left unchanged. Explicit null clears a field where allowed.",
+        "operationId": "ReplaceRisks",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "scenarioId",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Scenario Id",
+            "x-ms-url-encoding": "single",
+            "x-example": "UUID"
+          },
+          {
+            "in": "path",
+            "name": "projectId",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "format": "uuid",
+            "x-ms-summary": "Project Id",
+            "x-ms-url-encoding": "single",
+            "x-example": "UUID"
+          },
+          {
+            "in": "body",
+            "name": "payload",
+            "description": "Risk represented by a JSON document.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RiskReplaceAllRequest"
+            },
+            "x-ms-summary": "Payload"
           }
         ],
         "responses": {
@@ -278,6 +640,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -287,7 +650,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ListResponseMilestoneResponse"
+              "$ref": "#/definitions/ListResponseMilestoneGetAllResponse"
             }
           },
           "400": {
@@ -337,6 +700,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -384,7 +748,7 @@
           "Milestones"
         ],
         "summary": "Replace Milestones",
-        "description": "Replaces milestones of a given project within a scenario.",
+        "description": "Replaces milestones of a given project within a scenario. Omitted fields of existing items are left unchanged. Explicit null clears a field where allowed.",
         "operationId": "ReplaceMilestones",
         "consumes": [
           "application/json"
@@ -399,7 +763,6 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
             "x-ms-summary": "Scenario Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -410,6 +773,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -420,7 +784,7 @@
             "description": "Milestone represented by a JSON document.",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/ReplaceMilestonesRequest"
+              "$ref": "#/definitions/MilestoneReplaceAllRequest"
             },
             "x-ms-summary": "Payload"
           }
@@ -478,6 +842,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -527,7 +892,6 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
             "x-ms-summary": "Scenario Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -538,6 +902,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -600,7 +965,6 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
             "x-ms-summary": "Scenario Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -611,6 +975,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -668,7 +1033,6 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
             "x-ms-summary": "Scenario Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -679,6 +1043,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -728,7 +1093,6 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
             "x-ms-summary": "Scenario Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -739,6 +1103,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -801,7 +1166,6 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
             "x-ms-summary": "Scenario Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -812,6 +1176,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -880,6 +1245,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -929,7 +1295,6 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
             "x-ms-summary": "Scenario Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -940,6 +1305,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -1002,7 +1368,6 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
             "x-ms-summary": "Scenario Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -1013,6 +1378,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -1026,6 +1392,68 @@
               "$ref": "#/definitions/AllocationReplaceRequest"
             },
             "x-ms-summary": "Allocation Replace Request"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        }
+      }
+    },
+    "/v1/resources/{resourceId}/teamContributions": {
+      "put": {
+        "tags": [
+          "Resources"
+        ],
+        "summary": "Replace Team Contributions",
+        "description": "This endpoint replaces all team contributions of a resource.",
+        "operationId": "ReplaceTeamContributions",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "resourceId",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "format": "uuid",
+            "x-ms-summary": "Resource Id",
+            "x-ms-url-encoding": "single",
+            "x-example": "UUID"
+          },
+          {
+            "in": "body",
+            "name": "payload",
+            "description": "Team contributions represented by a JSON document.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TeamContributionsReplaceRequest"
+            },
+            "x-ms-summary": "Payload"
           }
         ],
         "responses": {
@@ -1071,6 +1499,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Resource Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -1138,6 +1567,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Resource Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -1200,6 +1630,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Resource Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -1264,7 +1695,7 @@
           "Webhooks"
         ],
         "summary": "Get a List of Webhooks",
-        "description": "This endpoint is paginated. It returns a list of webhooks up to the specified PAGESIZE",
+        "description": "This endpoint is paginated. It returns a list of webhooks up to the specified pageSize",
         "operationId": "GetAllWebhooks",
         "produces": [
           "application/json"
@@ -1389,7 +1820,7 @@
           "Teams"
         ],
         "summary": "Get a List of Teams",
-        "description": "This endpoint is paginated. It returns a list of teams up to the specified PAGESIZE",
+        "description": "This endpoint is paginated. It returns a list of teams up to the specified pageSize",
         "operationId": "GetAllTeams",
         "produces": [
           "application/json"
@@ -1428,7 +1859,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/PaginatedResponseTeamResponse"
+              "$ref": "#/definitions/PaginatedResponseTeamGetAllResponse"
             }
           },
           "400": {
@@ -1529,6 +1960,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Role Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -1588,6 +2020,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Role Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -1637,7 +2070,7 @@
           "Projects"
         ],
         "summary": "Get a List of Projects",
-        "description": "This endpoint is paginated. It returns a list of projects up to the specified PAGESIZE",
+        "description": "This endpoint is paginated. It returns a list of projects up to the specified pageSize",
         "operationId": "GetAllProjects",
         "produces": [
           "application/json"
@@ -1726,7 +2159,6 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
             "x-ms-summary": "Scenario Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -1798,6 +2230,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -1854,6 +2287,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -1910,6 +2344,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -1928,6 +2363,79 @@
         "responses": {
           "201": {
             "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/TaskManagementLinkResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Task Management"
+        ],
+        "summary": "Update Task Management Link",
+        "description": "Perform an update on a task management link specified by the given ID.",
+        "operationId": "UpdateTaskManagementLink",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "scenarioId",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Scenario Id",
+            "x-ms-url-encoding": "single",
+            "x-example": "UUID"
+          },
+          {
+            "in": "path",
+            "name": "projectId",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "format": "uuid",
+            "x-ms-summary": "Project Id",
+            "x-ms-url-encoding": "single",
+            "x-example": "UUID"
+          },
+          {
+            "in": "body",
+            "name": "payload",
+            "description": "Task Management Link represented by a JSON document.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TaskManagementLinkPatchRequest"
+            },
+            "x-ms-summary": "Payload"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/TaskManagementLinkResponse"
             }
@@ -1981,6 +2489,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -2065,6 +2574,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -2121,6 +2631,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -2259,7 +2770,6 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
             "x-ms-summary": "Scenario Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -2324,7 +2834,6 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
             "x-ms-summary": "Scenario Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -2599,7 +3108,7 @@
           "Resources"
         ],
         "summary": "Get a List of Resources",
-        "description": "This endpoint is paginated. It returns a list of resources up to the specified PAGESIZE",
+        "description": "This endpoint is paginated. It returns a list of resources up to the specified pageSize",
         "operationId": "GetAllResources",
         "produces": [
           "application/json"
@@ -2638,7 +3147,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/PaginatedResponseResourceResponse"
+              "$ref": "#/definitions/PaginatedResponseResourceGetAllResponse"
             }
           },
           "400": {
@@ -2729,6 +3238,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Resource Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -2781,7 +3291,7 @@
           "Resources"
         ],
         "summary": "Update Deviations from the Calendar",
-        "description": "Use this request to replace all calendar deviations of a resource for a certain time period. This time period can be defined using the root start and finish attributes of the request. Specify the new list of calendar deviations with the deviations property. Note that all deviations in the specified period will be overwritten by the deviations listed in the deviations property.\n\n-   If null is used for the start period and end period, all calendar     deviations of the resource are overwritten -   If only the start date of the period is defined, all deviations     starting from this time will be overwritten -   If only the end date of the period is defined, all deviations up to     that point will be overwritten -   If null is used for the start and/or end date of a calendar     deviation, the deviation is assumed to last from or until the root     start or finish date specified above.\n\nAll deviations are flattened into a sequential structure. Cases of overlapping deviations will be resolved by giving precedence to deviations occurring later in the array.",
+        "description": "Use this request to replace all calendar deviations of a resource for a certain time period. This time period can be defined using the root start and finish attributes of the request. Specify the new list of calendar deviations with the deviations property. Note that all deviations in the specified period will be overwritten by the deviations listed in the deviations property.\n\n- If null is used for the start period and end period, all calendar   deviations of the resource are overwritten - If only the start date of the period is defined, all deviations   starting from this time will be overwritten - If only the end date of the period is defined, all deviations up to   that point will be overwritten - If null is used for the start and/or end date of a calendar deviation,   the deviation is assumed to last from or until the root start or   finish date specified above.\n\nAll deviations are flattened into a sequential structure. Cases of overlapping deviations will be resolved by giving precedence to deviations occurring later in the array.",
         "operationId": "UpdateCalendarDeviations",
         "consumes": [
           "application/json"
@@ -2796,6 +3306,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Resource Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -2839,13 +3350,75 @@
         }
       }
     },
+    "/v1/resources/findOrCreateResources": {
+      "post": {
+        "tags": [
+          "Resources"
+        ],
+        "summary": "Find Or Create Resources",
+        "description": "Find or create resources by the given fields and return the IDs and keys of the resources. If autoCreate is set to false, nothing will be created and an error will be returned for every entry that could not be found.",
+        "operationId": "FindOrCreateResources",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "autoCreate",
+            "description": "If set to false, nothing will be created and an error will be returned for every entry that could not be found.",
+            "type": "boolean",
+            "default": true,
+            "x-ms-summary": "Auto Create"
+          },
+          {
+            "in": "body",
+            "name": "payload",
+            "description": "Find Or Create Resource represented by a JSON document.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ResourcesFindOrCreateRequest"
+            },
+            "x-ms-summary": "Payload"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ListResponseResourceFindOrCreateResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        }
+      }
+    },
     "/v1/obsTypes": {
       "get": {
         "tags": [
           "OBS"
         ],
         "summary": "Get all OBS Types",
-        "description": "This endpoint is for OBS types only. To get OBS units, use /obsTypes/<obs-type-id>/obsUnits",
+        "description": "This endpoint is for OBS types only. To get OBS units, use\n\n/obsTypes/<obs-type-id>/obsUnits",
         "operationId": "GetAllObsTypes",
         "produces": [
           "application/json"
@@ -2945,6 +3518,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Obs Type Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -2994,6 +3568,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Obs Type Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -3143,6 +3718,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Calendar Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -3193,7 +3769,7 @@
           "Calendars"
         ],
         "summary": "Update Calendar Exceptions",
-        "description": "Use this request to replace all calendar exceptions for a certain time period. This time period can be defined using the root start and finish attributes of the request. Specify the new list of calendar exceptions with the exceptions property. Note that all exceptions in the specified period will be overwritten by the exceptions listed in the exceptions property.\n\n-   If null is used for the start period and end period, all exceptions     of the calendar are overwritten -   If only the start date of the period is defined, all exceptions     starting from this time will be overwritten -   If only the end date of the period is defined, all exceptions up to     that point will be overwritten -   If an exception is removed and a parent calendar has an exception at     that date, this calendar inherits the exception from the parent     calendar.",
+        "description": "Use this request to replace all calendar exceptions for a certain time period. This time period can be defined using the root start and finish attributes of the request. Specify the new list of calendar exceptions with the exceptions property. Note that all exceptions in the specified period will be overwritten by the exceptions listed in the exceptions property.\n\n- If null is used for the start period and end period, all exceptions of   the calendar are overwritten - If only the start date of the period is defined, all exceptions   starting from this time will be overwritten - If only the end date of the period is defined, all exceptions up to   that point will be overwritten - If an exception is removed and a parent calendar has an exception at   that date, this calendar inherits the exception from the parent   calendar.",
         "operationId": "CreateCalendarExceptions",
         "consumes": [
           "application/json"
@@ -3208,6 +3784,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Calendar Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -3317,6 +3894,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Webhook Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -3364,6 +3942,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Webhook Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -3411,6 +3990,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Webhook Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -3473,6 +4053,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Team Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -3519,6 +4100,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Team Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -3565,6 +4147,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Team Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -3636,6 +4219,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -3682,7 +4266,6 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
             "x-ms-summary": "Scenario Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -3693,6 +4276,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -3739,7 +4323,6 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
             "x-ms-summary": "Scenario Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -3750,6 +4333,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -3770,6 +4354,379 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/ProjectResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        }
+      }
+    },
+    "/v1/scenarios/{scenarioId}/projects/{projectId}/segments/{segmentId}": {
+      "get": {
+        "tags": [
+          "Project Segments"
+        ],
+        "summary": "Get a Project Segment by ID (Alpha)",
+        "description": "Returns the individual segment specified by the given ID.\n\nAlpha endpoint: Alpha endpoints are early versions made available for evaluation and feedback. Their contract and behavior may change without notice and should not be relied on for production use.",
+        "operationId": "GetSegmentById",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "scenarioId",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Scenario Id",
+            "x-ms-url-encoding": "single",
+            "x-example": "UUID"
+          },
+          {
+            "in": "path",
+            "name": "projectId",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "format": "uuid",
+            "x-ms-summary": "Project Id",
+            "x-ms-url-encoding": "single",
+            "x-example": "UUID"
+          },
+          {
+            "in": "path",
+            "name": "segmentId",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "format": "uuid",
+            "x-ms-summary": "Segment Id",
+            "x-ms-url-encoding": "single",
+            "x-example": "UUID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ProjectSegmentResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Project Segments"
+        ],
+        "summary": "Update Project Segments (Alpha)",
+        "description": "- A segment can be updated by its ID. Supported fields are finish, description, and phase. - Updating the finish date triggers a stretch or shrink operation. Allocations remain constant in FTE, and associated milestones are adjusted accordingly. - All subsequent segments are shifted automatically to align with the updated segment's new finish date.\n\nAlpha endpoint: Alpha endpoints are early versions made available for evaluation and feedback. Their contract and behavior may change without notice and should not be relied on for production use.",
+        "operationId": "UpdateSegment",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "scenarioId",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Scenario Id",
+            "x-ms-url-encoding": "single",
+            "x-example": "UUID"
+          },
+          {
+            "in": "path",
+            "name": "projectId",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "format": "uuid",
+            "x-ms-summary": "Project Id",
+            "x-ms-url-encoding": "single",
+            "x-example": "UUID"
+          },
+          {
+            "in": "path",
+            "name": "segmentId",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "format": "uuid",
+            "x-ms-summary": "Segment Id",
+            "x-ms-url-encoding": "single",
+            "x-example": "UUID"
+          },
+          {
+            "in": "body",
+            "name": "payload",
+            "description": "Project Segment represented by a JSON document.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ProjectSegmentUpdateRequest"
+            },
+            "x-ms-summary": "Payload"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ProjectSegmentResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        }
+      }
+    },
+    "/v1/scenarios/{scenarioId}/projects/{projectId}/risks/{riskId}": {
+      "get": {
+        "tags": [
+          "Risks"
+        ],
+        "summary": "Get Risk by ID",
+        "description": "Returns the individual risk specified by the given ID",
+        "operationId": "GetRiskById",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "scenarioId",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Scenario Id",
+            "x-ms-url-encoding": "single",
+            "x-example": "UUID"
+          },
+          {
+            "in": "path",
+            "name": "projectId",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "format": "uuid",
+            "x-ms-summary": "Project Id",
+            "x-ms-url-encoding": "single",
+            "x-example": "UUID"
+          },
+          {
+            "in": "path",
+            "name": "riskId",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "format": "uuid",
+            "x-ms-summary": "Risk Id",
+            "x-ms-url-encoding": "single",
+            "x-example": "UUID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/RiskResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Risks"
+        ],
+        "summary": "Delete Risks",
+        "description": "Deletes a risk specified by the given ID.",
+        "operationId": "DeleteRisk",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "scenarioId",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Scenario Id",
+            "x-ms-url-encoding": "single",
+            "x-example": "UUID"
+          },
+          {
+            "in": "path",
+            "name": "projectId",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "format": "uuid",
+            "x-ms-summary": "Project Id",
+            "x-ms-url-encoding": "single",
+            "x-example": "UUID"
+          },
+          {
+            "in": "path",
+            "name": "riskId",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "format": "uuid",
+            "x-ms-summary": "Risk Id",
+            "x-ms-url-encoding": "single",
+            "x-example": "UUID"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Risks"
+        ],
+        "summary": "Update Risks",
+        "description": "Perform an update on a risk specified by the given ID.",
+        "operationId": "UpdateRisk",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "scenarioId",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Scenario Id",
+            "x-ms-url-encoding": "single",
+            "x-example": "UUID"
+          },
+          {
+            "in": "path",
+            "name": "projectId",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "format": "uuid",
+            "x-ms-summary": "Project Id",
+            "x-ms-url-encoding": "single",
+            "x-example": "UUID"
+          },
+          {
+            "in": "path",
+            "name": "riskId",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "format": "uuid",
+            "x-ms-summary": "Risk Id",
+            "x-ms-url-encoding": "single",
+            "x-example": "UUID"
+          },
+          {
+            "in": "body",
+            "name": "payload",
+            "description": "Risk represented by a JSON document.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RiskUpdateRequest"
+            },
+            "x-ms-summary": "Payload"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/RiskResponse"
             }
           },
           "400": {
@@ -3821,6 +4778,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -3831,6 +4789,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Milestone Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -3877,7 +4836,6 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
             "x-ms-summary": "Scenario Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -3888,6 +4846,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -3898,7 +4857,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
+            "format": "uuid",
             "x-ms-summary": "Milestone Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -3945,7 +4904,6 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
             "x-ms-summary": "Scenario Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -3956,6 +4914,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -3966,7 +4925,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
+            "format": "uuid",
             "x-ms-summary": "Milestone Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -4038,6 +4997,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -4048,6 +5008,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Financials Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -4094,7 +5055,6 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
             "x-ms-summary": "Scenario Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -4105,6 +5065,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -4115,7 +5076,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
+            "format": "uuid",
             "x-ms-summary": "Financials Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -4162,7 +5123,6 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
             "x-ms-summary": "Scenario Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -4173,6 +5133,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -4183,7 +5144,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
+            "format": "uuid",
             "x-ms-summary": "Financials Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -4245,7 +5206,6 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
             "x-ms-summary": "Scenario Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -4256,6 +5216,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -4266,7 +5227,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
+            "format": "uuid",
             "x-ms-summary": "Financial Actuals Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -4313,7 +5274,6 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
             "x-ms-summary": "Scenario Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -4324,6 +5284,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -4334,7 +5295,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
+            "format": "uuid",
             "x-ms-summary": "Financial Actuals Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -4381,7 +5342,6 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
             "x-ms-summary": "Scenario Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -4392,6 +5352,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -4402,7 +5363,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
+            "format": "uuid",
             "x-ms-summary": "Financial Actuals Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -4474,6 +5435,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -4484,6 +5446,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Allocation Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -4530,7 +5493,6 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
             "x-ms-summary": "Scenario Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -4541,6 +5503,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -4551,7 +5514,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
+            "format": "uuid",
             "x-ms-summary": "Allocation Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -4608,6 +5571,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -4618,7 +5582,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
+            "format": "uuid",
             "x-ms-summary": "Allocation Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -4690,6 +5654,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Program Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -4736,7 +5701,6 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
             "x-ms-summary": "Scenario Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -4747,7 +5711,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
+            "format": "uuid",
             "x-ms-summary": "Program Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -4794,7 +5758,6 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
             "x-ms-summary": "Scenario Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -4805,7 +5768,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
+            "format": "uuid",
             "x-ms-summary": "Program Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -4867,6 +5830,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Role Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -4913,6 +5877,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Role Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -4959,6 +5924,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Role Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -5020,6 +5986,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Resource Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -5066,7 +6033,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
+            "format": "uuid",
             "x-ms-summary": "Resource Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -5113,7 +6080,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
+            "format": "uuid",
             "x-ms-summary": "Resource Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -5175,6 +6142,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Resource Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -5185,6 +6153,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Absence Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -5231,6 +6200,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Resource Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -5241,6 +6211,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Absence Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -5287,6 +6258,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Resource Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -5297,6 +6269,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Absence Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -5346,7 +6319,7 @@
           "OBS"
         ],
         "summary": "Get an OBS Type by ID",
-        "description": "This endpoint is for OBS types only. To get OBS units, use /obsTypes/<obs-type-id>/obsUnits",
+        "description": "This endpoint is for OBS types only. To get OBS units, use\n\n/obsTypes/<obs-type-id>/obsUnits",
         "operationId": "GetObsTypeById",
         "produces": [
           "application/json"
@@ -5358,6 +6331,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Obs Type Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -5404,6 +6378,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Obs Type Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -5450,6 +6425,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Obs Type Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -5511,6 +6487,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Obs Type Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -5521,6 +6498,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Obs Unit Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -5567,6 +6545,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Obs Type Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -5577,6 +6556,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Obs Unit Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -5623,6 +6603,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Obs Type Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -5633,6 +6614,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Obs Unit Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -5694,6 +6676,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Calendar Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -5740,6 +6723,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Calendar Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -5786,6 +6770,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Calendar Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -5961,6 +6946,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Sprint Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -6033,7 +7019,7 @@
           "Scenarios"
         ],
         "summary": "Get Scenarios by ID",
-        "description": "Returns the individual scenario specified by the given ID. HINT: You can use \"planOfRecord\" as the ID for the plan of record scenario.",
+        "description": "Returns the individual scenario specified by the given ID. Hint: You can use \"planOfRecord\" as the ID for the plan of record scenario.",
         "operationId": "GetScenarioById",
         "produces": [
           "application/json"
@@ -6151,6 +7137,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -6161,6 +7148,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Task Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -6217,6 +7205,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -6227,6 +7216,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Task Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -6302,6 +7292,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -6360,6 +7351,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -6370,6 +7362,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Comment Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -6448,6 +7441,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -6506,6 +7500,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -6516,6 +7511,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Allocation Comment Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -6574,6 +7570,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -6584,6 +7581,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Actuals Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -6640,6 +7638,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Project Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -6650,6 +7649,7 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
+            "format": "uuid",
             "x-ms-summary": "Actuals Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -6866,6 +7866,62 @@
         "x-ms-visibility": "internal"
       }
     },
+    "/v1/meta/resources/dynamicSchema": {
+      "get": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Resources Dynamic Schema",
+        "description": "Returns swagger schema for resources.",
+        "operationId": "GetResourcesDynamicSchema",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "mode",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "CREATE_INPUT",
+              "UPDATE_INPUT",
+              "OUTPUT"
+            ]
+          },
+          {
+            "in": "query",
+            "name": "includeTeamContributions",
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SchemaResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        },
+        "x-ms-visibility": "internal"
+      }
+    },
     "/v1/meta/project/dynamicSchema": {
       "get": {
         "tags": [
@@ -7023,7 +8079,10 @@
             "required": true,
             "type": "string",
             "enum": [
-              "PROGRAM"
+              "PROGRAM",
+              "RISK",
+              "SEGMENT",
+              "MILESTONE"
             ]
           },
           {
@@ -7051,6 +8110,9 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           },
           "404": {
             "description": "Not Found"
@@ -7153,7 +8215,6 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
             "x-ms-summary": "Scenario Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -7164,7 +8225,6 @@
             "description": "Internal Meisterplan identifier",
             "required": true,
             "type": "string",
-            "minLength": 1,
             "x-ms-summary": "Milestone Dependency Id",
             "x-ms-url-encoding": "single",
             "x-example": "UUID"
@@ -7261,6 +8321,7 @@
         "hours": {
           "format": "double",
           "description": "The request accepts either hours or story points.",
+          "minimum": 0,
           "type": "number",
           "example": 22.5,
           "x-ms-summary": "Hours"
@@ -7268,6 +8329,7 @@
         "storyPoints": {
           "format": "double",
           "description": "The request accepts either hours or story points.",
+          "minimum": 0,
           "type": "number",
           "example": 8,
           "x-ms-summary": "Story Points"
@@ -7445,33 +8507,240 @@
       },
       "x-ms-summary": "Items"
     },
-    "Milestone": {
+    "ProjectSegmentScheduleReplaceAllRequest": {
+      "required": [
+        "items"
+      ],
+      "type": "object",
+      "properties": {
+        "items": {
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ProjectSegmentScheduleReplaceAllRequestItem"
+          },
+          "x-ms-summary": "Project Segments"
+        }
+      },
+      "x-ms-dynamic-schema": {
+        "operationId": "GetDynamicSchemaForEntity",
+        "parameters": {
+          "entityType": "SEGMENT",
+          "mode": "REPLACE_INPUT"
+        },
+        "value-path": "schema"
+      }
+    },
+    "ProjectSegmentScheduleReplaceAllRequestItem": {
+      "required": [
+        "finish"
+      ],
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string",
+          "example": "Here is an example of a segment description.",
+          "x-ms-summary": "Description"
+        },
+        "finish": {
+          "format": "date",
+          "pattern": "format: YYYY-MM-DD",
+          "type": "string",
+          "example": "2019-12-31",
+          "x-ms-summary": "Finish"
+        },
+        "segmentKey": {
+          "type": "string",
+          "example": "MPSEG-1",
+          "x-ms-summary": "Segment Key"
+        },
+        "phase": {
+          "$ref": "#/definitions/SingleValueFieldRequest"
+        }
+      },
+      "x-ms-summary": "Project Segments"
+    },
+    "SingleValueFieldRequest": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "description": "Missing values will be created automatically\n\nIf you import an unknown value, it will be automatically created for you in Meisterplan.",
+          "type": "string",
+          "x-ms-summary": "Value"
+        }
+      },
+      "x-ms-summary": "Phase"
+    },
+    "CustomFieldRequest": {
+      "type": "object",
+      "x-ms-summary": "Custom Fields"
+    },
+    "GenericResourceReferenceRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "If you specify the id to reference a resource you must omit the resourceKey property.",
+          "type": "string",
+          "example": "UUID",
+          "x-ms-summary": "ID"
+        },
+        "resourceKey": {
+          "description": "If you specify the resourceKey to reference a resource you must omit the id property.",
+          "type": "string",
+          "example": "KMY",
+          "x-ms-summary": "Resource Key"
+        }
+      },
+      "x-ms-summary": "Owner"
+    },
+    "RiskImpactRequest": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "description": "Risk impact\n\nMissing values will be created automatically\n\nIf you import an unknown value, it will be automatically created for you in Meisterplan.",
+          "type": "string",
+          "example": "High (3)",
+          "x-ms-summary": "Value"
+        }
+      },
+      "x-ms-summary": "Risk Impact"
+    },
+    "RiskLikelihoodRequest": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "description": "Risk likelihood\n\nMissing values will be created automatically\n\nIf you import an unknown value, it will be automatically created for you in Meisterplan.",
+          "type": "string",
+          "example": "Low (1)",
+          "x-ms-summary": "Value"
+        }
+      },
+      "x-ms-summary": "Risk Likelihood"
+    },
+    "RiskReplaceAllRequest": {
+      "required": [
+        "items"
+      ],
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RiskReplaceAllRequestItem"
+          },
+          "x-ms-summary": "Risks"
+        }
+      },
+      "x-ms-dynamic-schema": {
+        "operationId": "GetDynamicSchemaForEntity",
+        "parameters": {
+          "entityType": "RISK",
+          "mode": "REPLACE_INPUT"
+        },
+        "value-path": "schema"
+      }
+    },
+    "RiskReplaceAllRequestItem": {
+      "required": [
+        "name"
+      ],
+      "type": "object",
+      "properties": {
+        "impact": {
+          "$ref": "#/definitions/RiskImpactRequest"
+        },
+        "riskKey": {
+          "description": "Must be unique. If empty, value will be generated.",
+          "type": "string",
+          "example": "MPRSK-1",
+          "x-ms-summary": "Risk Key"
+        },
+        "likelihood": {
+          "$ref": "#/definitions/RiskLikelihoodRequest"
+        },
+        "name": {
+          "description": "Risk name.",
+          "minLength": 1,
+          "type": "string",
+          "example": "Decision Bottlenecks",
+          "x-ms-summary": "Name"
+        },
+        "owner": {
+          "$ref": "#/definitions/GenericResourceReferenceRequest"
+        },
+        "customFields": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/CustomFieldRequest"
+          },
+          "x-ms-summary": "Custom Fields"
+        }
+      },
+      "x-ms-summary": "Risk"
+    },
+    "MilestoneReplaceAllRequest": {
+      "required": [
+        "items"
+      ],
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/MilestoneReplaceAllRequestItem"
+          },
+          "x-ms-summary": "Milestones"
+        }
+      },
+      "x-ms-dynamic-schema": {
+        "operationId": "GetDynamicSchemaForEntity",
+        "parameters": {
+          "entityType": "MILESTONE",
+          "mode": "REPLACE_INPUT"
+        },
+        "value-path": "schema"
+      }
+    },
+    "MilestoneReplaceAllRequestItem": {
       "required": [
         "date",
         "name"
       ],
       "type": "object",
       "properties": {
+        "date": {
+          "format": "date",
+          "description": "Must be within the project's start and finish date.",
+          "pattern": "format: YYYY-MM-DD",
+          "type": "string",
+          "example": "2019-01-31",
+          "x-ms-summary": "Date"
+        },
+        "milestoneKey": {
+          "type": "string",
+          "x-ms-summary": "Milestone Key"
+        },
+        "projectPhase": {
+          "$ref": "#/definitions/ProjectPhase"
+        },
         "name": {
           "minLength": 1,
           "type": "string",
           "example": "Completion Initiation Phase",
           "x-ms-summary": "Name"
         },
-        "date": {
-          "description": "format: YYYY-MM-DD",
-          "type": "string",
-          "example": "2019-01-31",
-          "x-ms-summary": "Date"
-        },
-        "projectPhase": {
-          "$ref": "#/definitions/ProjectPhase"
-        },
         "status": {
           "$ref": "#/definitions/MilestoneStatus"
+        },
+        "customFields": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/CustomFieldRequest"
+          },
+          "x-ms-summary": "Custom Fields"
         }
       },
-      "x-ms-summary": "Milestones"
+      "x-ms-summary": "Milestone"
     },
     "MilestoneStatus": {
       "type": "object",
@@ -7487,33 +8756,20 @@
           "example": "ON_TRACK",
           "x-ms-summary": "Value"
         }
-      }
+      },
+      "x-ms-summary": "Status"
     },
     "ProjectPhase": {
       "type": "object",
       "properties": {
         "name": {
-          "description": "The project phase must exist prior to creation. It will not be implicitly created.",
+          "description": "Missing values will be created automatically\n\nIf you import an unknown value, it will be automatically created for you in Meisterplan.",
           "type": "string",
           "example": "Initiation",
           "x-ms-summary": "Name"
         }
-      }
-    },
-    "ReplaceMilestonesRequest": {
-      "required": [
-        "items"
-      ],
-      "type": "object",
-      "properties": {
-        "items": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Milestone"
-          },
-          "x-ms-summary": "Milestones"
-        }
-      }
+      },
+      "x-ms-summary": "Project Phase"
     },
     "Category": {
       "type": "object",
@@ -7545,7 +8801,6 @@
         },
         "amount": {
           "format": "double",
-          "minimum": 0,
           "type": "number",
           "example": 2000,
           "x-ms-summary": "Amount"
@@ -7598,6 +8853,7 @@
         },
         "milestoneId": {
           "description": "Is only valid in combination with on: Milestone. The milestone must exist in the project. It will not be implicitly created.",
+          "pattern": "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}",
           "type": "string",
           "example": "UUID",
           "x-ms-summary": "Milestone ID"
@@ -7629,7 +8885,6 @@
         },
         "amount": {
           "format": "double",
-          "minimum": 0,
           "type": "number",
           "example": 2000,
           "x-ms-summary": "Amount"
@@ -7759,18 +9014,21 @@
         "fte": {
           "format": "double",
           "description": "The request accepts either FTE, hours or days.",
+          "minimum": 0,
           "type": "number",
           "x-ms-summary": "Fte"
         },
         "days": {
           "format": "double",
           "description": "The request accepts either FTE, hours or days.",
+          "minimum": 0,
           "type": "number",
           "x-ms-summary": "Days"
         },
         "hours": {
           "format": "double",
           "description": "The request accepts either FTE, hours or days.",
+          "minimum": 0,
           "type": "number",
           "x-ms-summary": "Hours"
         }
@@ -7783,6 +9041,86 @@
         }
       ],
       "x-ms-summary": "Segments"
+    },
+    "ResourceTeam": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "If you specify the id to reference a team you must omit the resourceKey property.",
+          "type": "string",
+          "example": "UUID",
+          "x-ms-summary": "ID"
+        },
+        "resourceKey": {
+          "description": "If you specify the resourceKey to reference a team you must omit the id property.",
+          "type": "string",
+          "example": "KMY",
+          "x-ms-summary": "Resource Key"
+        }
+      },
+      "x-ms-summary": "Resource Team"
+    },
+    "TeamContribution": {
+      "required": [
+        "contribution",
+        "period",
+        "team"
+      ],
+      "type": "object",
+      "properties": {
+        "team": {
+          "$ref": "#/definitions/ResourceTeam"
+        },
+        "contribution": {
+          "format": "double",
+          "description": "Percentage of the resource's time that is allocated to this team during the contribution period. Decimal value between 0 and 1.",
+          "maximum": 1,
+          "exclusiveMaximum": false,
+          "minimum": 0,
+          "exclusiveMinimum": true,
+          "type": "number",
+          "example": 0.7555,
+          "x-ms-summary": "Contribution"
+        },
+        "period": {
+          "$ref": "#/definitions/TeamContributionPeriod"
+        }
+      },
+      "x-ms-summary": "Team Contribution"
+    },
+    "TeamContributionPeriod": {
+      "required": [
+        "start"
+      ],
+      "type": "object",
+      "properties": {
+        "start": {
+          "description": "format: YYYY-MM-DD",
+          "type": "string",
+          "example": "2019-01-31",
+          "x-ms-summary": "Start"
+        },
+        "finish": {
+          "description": "format: YYYY-MM-DD",
+          "type": "string",
+          "example": "2019-12-31",
+          "x-ms-summary": "Finish"
+        }
+      },
+      "x-ms-summary": "Team Contribution Period"
+    },
+    "TeamContributionsReplaceRequest": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TeamContribution"
+          },
+          "x-ms-summary": "Team Contributions"
+        }
+      },
+      "x-ms-summary": "Team Contributions"
     },
     "CreateAbsenceRequest": {
       "required": [
@@ -7919,8 +9257,7 @@
           "example": "Doe, Jane",
           "x-ms-summary": "User Display Name"
         }
-      },
-      "x-ms-summary": "User Ref"
+      }
     },
     "WebhookResponse": {
       "type": "object",
@@ -8179,6 +9516,24 @@
         }
       }
     },
+    "ContributionPeriodResponse": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "description": "format: YYYY-MM-DD",
+          "type": "string",
+          "example": "2019-01-31",
+          "x-ms-summary": "Start Date"
+        },
+        "finish": {
+          "description": "format: YYYY-MM-DD",
+          "type": "string",
+          "example": "2019-12-31",
+          "x-ms-summary": "Finish Date"
+        }
+      },
+      "x-ms-summary": "Contribution Period"
+    },
     "CostRateResponse": {
       "required": [
         "costPerHour"
@@ -8264,6 +9619,39 @@
         }
       },
       "x-ms-summary": "Resource Manager"
+    },
+    "ResourceReferenceResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "example": "UUID",
+          "x-ms-summary": "ID"
+        },
+        "resourceKey": {
+          "type": "string",
+          "example": "KMY",
+          "x-ms-summary": "Resource Key"
+        }
+      }
+    },
+    "TeamContributionResponse": {
+      "type": "object",
+      "properties": {
+        "resource": {
+          "$ref": "#/definitions/ResourceReferenceResponse"
+        },
+        "period": {
+          "$ref": "#/definitions/ContributionPeriodResponse"
+        },
+        "contribution": {
+          "description": "Percentage of the resource's time that is allocated to this team during the contribution period. Decimal value between 0 and 1.",
+          "type": "number",
+          "example": 0.7555,
+          "x-ms-summary": "Contribution"
+        }
+      },
+      "x-ms-summary": "Team Contribution"
     },
     "TeamPeriodResponse": {
       "type": "object",
@@ -8384,6 +9772,12 @@
         },
         "period": {
           "$ref": "#/definitions/TeamPeriodResponse"
+        },
+        "contributions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TeamContributionResponse"
+          }
         }
       },
       "x-ms-dynamic-schema": {
@@ -8535,10 +9929,6 @@
         }
       },
       "x-ms-summary": "Goal"
-    },
-    "CustomFieldRequest": {
-      "type": "object",
-      "x-ms-summary": "Custom Fields"
     },
     "Manager": {
       "type": "object",
@@ -8990,21 +10380,6 @@
       },
       "x-ms-summary": "Project Type"
     },
-    "ResourceReferenceResponse": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "example": "UUID",
-          "x-ms-summary": "ID"
-        },
-        "resourceKey": {
-          "type": "string",
-          "example": "KMY",
-          "x-ms-summary": "Resource Key"
-        }
-      }
-    },
     "StatusFieldResponse": {
       "type": "object",
       "properties": {
@@ -9016,6 +10391,24 @@
         }
       },
       "x-ms-summary": "Status"
+    },
+    "ProjectPeriodInTool": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "description": "format: YYYY-MM-DD",
+          "type": "string",
+          "example": "2019-01-31",
+          "x-ms-summary": "Project Period in Tool Start Date"
+        },
+        "finish": {
+          "description": "format: YYYY-MM-DD",
+          "type": "string",
+          "example": "2019-12-31",
+          "x-ms-summary": "Project Period in Tool Finish Date"
+        }
+      },
+      "x-ms-summary": "Project Period in Tool"
     },
     "TaskManagementLinkCreateOrUpdateRequest": {
       "required": [
@@ -9030,10 +10423,19 @@
           "x-ms-summary": "Tool Key"
         },
         "externalViewUrl": {
-          "description": "Should represent the link to the project in your external tool. Can be opened from the Information Panel of the linked project inside Meisterplan.",
+          "description": "Should represent the link to the project in your external tool. Can be opened from the Information Panel of the linked project inside Meisterplan. If provided for external links, projectIdOrKeyInTool must not be set. For in-app links, set projectIdOrKeyInTool instead and leave externalViewUrl unset.",
           "type": "string",
           "example": "https://www.asana.com/PROJECT-1234",
           "x-ms-summary": "External View URL"
+        },
+        "projectPeriodInTool": {
+          "$ref": "#/definitions/ProjectPeriodInTool"
+        },
+        "projectIdOrKeyInTool": {
+          "description": "The project identifier or key as used in the external tool for in-app links. This value links the Meisterplan project to its corresponding project in the external tool. If set, do not provide an external view URL, as it will be generated automatically from this identifier.",
+          "type": "string",
+          "example": "KNUTH-12334",
+          "x-ms-summary": "Project ID or Key in Tool"
         }
       },
       "x-ms-dynamic-schema": {
@@ -9043,6 +10445,24 @@
         },
         "value-path": "schema"
       }
+    },
+    "ProjectPeriodInToolResponse": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "description": "format: YYYY-MM-DD",
+          "type": "string",
+          "example": "2019-01-31",
+          "x-ms-summary": "Project Period in Tool Start Date"
+        },
+        "finish": {
+          "description": "format: YYYY-MM-DD",
+          "type": "string",
+          "example": "2019-12-31",
+          "x-ms-summary": "Project Period in Tool Finish Date"
+        }
+      },
+      "x-ms-summary": "Project Period in Tool"
     },
     "TaskManagementLinkResponse": {
       "type": "object",
@@ -9057,6 +10477,9 @@
           "type": "string",
           "example": "https://www.asana.com/PROJECT-1234",
           "x-ms-summary": "External View URL"
+        },
+        "projectPeriodInTool": {
+          "$ref": "#/definitions/ProjectPeriodInToolResponse"
         },
         "projectIdOrKeyInTool": {
           "description": "In tool linked projectId or toolKey",
@@ -9158,6 +10581,152 @@
         "value-path": "schema"
       }
     },
+    "RiskCreateRequest": {
+      "required": [
+        "name"
+      ],
+      "type": "object",
+      "properties": {
+        "impact": {
+          "$ref": "#/definitions/RiskImpactRequest"
+        },
+        "riskKey": {
+          "description": "Must be unique. If empty, value will be generated.",
+          "type": "string",
+          "example": "MPRSK-1",
+          "x-ms-summary": "Risk Key"
+        },
+        "likelihood": {
+          "$ref": "#/definitions/RiskLikelihoodRequest"
+        },
+        "name": {
+          "description": "Risk name.",
+          "minLength": 1,
+          "type": "string",
+          "example": "Decision Bottlenecks",
+          "x-ms-summary": "Name"
+        },
+        "owner": {
+          "$ref": "#/definitions/GenericResourceReferenceRequest"
+        },
+        "customFields": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/CustomFieldRequest"
+          },
+          "x-ms-summary": "Custom Fields"
+        }
+      },
+      "x-ms-dynamic-schema": {
+        "operationId": "GetDynamicSchemaForEntity",
+        "parameters": {
+          "entityType": "RISK",
+          "mode": "CREATE_INPUT"
+        },
+        "value-path": "schema"
+      },
+      "x-ms-summary": "Risk"
+    },
+    "RiskImpactResponse": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "description": "Risk impact",
+          "type": "string",
+          "example": "High (3)",
+          "x-ms-summary": "Value"
+        }
+      },
+      "x-ms-summary": "Risk Impact"
+    },
+    "RiskLikelihoodResponse": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "description": "Risk likelihood",
+          "type": "string",
+          "example": "Low (1)",
+          "x-ms-summary": "Value"
+        }
+      },
+      "x-ms-summary": "Risk Likelihood"
+    },
+    "RiskResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "Unique risk identifier. The same for this risk across all scenarios. Links to risks in the ``Risks`` endpoint.",
+          "type": "string",
+          "example": "UUID"
+        },
+        "impact": {
+          "$ref": "#/definitions/RiskImpactResponse"
+        },
+        "riskKey": {
+          "description": "Must be unique. If empty, value will be generated.",
+          "type": "string",
+          "example": "MPRSK-1",
+          "x-ms-summary": "Risk Key"
+        },
+        "likelihood": {
+          "$ref": "#/definitions/RiskLikelihoodResponse"
+        },
+        "name": {
+          "description": "Risk name.",
+          "type": "string",
+          "example": "Decision Bottlenecks",
+          "x-ms-summary": "Name"
+        },
+        "level": {
+          "format": "double",
+          "description": "Risk level = likelihood * impact",
+          "type": "number",
+          "x-ms-summary": "Level"
+        },
+        "owner": {
+          "$ref": "#/definitions/ResourceReferenceResponse"
+        },
+        "customFields": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/CustomFieldResponse"
+          },
+          "example": {
+            "cust_stage_gate": {
+              "value": "Approved"
+            },
+            "cust_risk": {
+              "value": "Medium"
+            },
+            "cust_resource": {
+              "id": "UUID",
+              "resourceKey": "KMY"
+            },
+            "cust_direction": {
+              "display": "North, East",
+              "items": [
+                {
+                  "value": "North"
+                },
+                {
+                  "value": "East"
+                }
+              ]
+            }
+          },
+          "x-ms-summary": "Custom Fields"
+        }
+      },
+      "x-ms-dynamic-schema": {
+        "operationId": "GetDynamicSchemaForEntity",
+        "parameters": {
+          "entityType": "RISK",
+          "mode": "OUTPUT"
+        },
+        "value-path": "schema"
+      },
+      "x-ms-summary": "Risk"
+    },
     "MilestoneCreateRequest": {
       "required": [
         "date",
@@ -9165,25 +10734,47 @@
       ],
       "type": "object",
       "properties": {
+        "date": {
+          "format": "date",
+          "description": "Must be within the project's start and finish date.",
+          "pattern": "format: YYYY-MM-DD",
+          "type": "string",
+          "example": "2019-01-31",
+          "x-ms-summary": "Date"
+        },
+        "milestoneKey": {
+          "type": "string",
+          "x-ms-summary": "Milestone Key"
+        },
+        "projectPhase": {
+          "$ref": "#/definitions/ProjectPhase"
+        },
         "name": {
           "minLength": 1,
           "type": "string",
           "example": "Completion Initiation Phase",
           "x-ms-summary": "Name"
         },
-        "date": {
-          "description": "format: YYYY-MM-DD",
-          "type": "string",
-          "example": "2019-01-31",
-          "x-ms-summary": "Date"
-        },
-        "projectPhase": {
-          "$ref": "#/definitions/ProjectPhase"
-        },
         "status": {
           "$ref": "#/definitions/MilestoneStatus"
+        },
+        "customFields": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/CustomFieldRequest"
+          },
+          "x-ms-summary": "Custom Fields"
         }
-      }
+      },
+      "x-ms-dynamic-schema": {
+        "operationId": "GetDynamicSchemaForEntity",
+        "parameters": {
+          "entityType": "MILESTONE",
+          "mode": "CREATE_INPUT"
+        },
+        "value-path": "schema"
+      },
+      "x-ms-summary": "Milestone"
     },
     "MilestoneResponse": {
       "type": "object",
@@ -9193,23 +10784,67 @@
           "example": "UUID",
           "x-ms-summary": "ID"
         },
+        "date": {
+          "format": "date",
+          "description": "Must be within the project's start and finish date.",
+          "pattern": "format: YYYY-MM-DD",
+          "type": "string",
+          "example": "2019-01-31",
+          "x-ms-summary": "Date"
+        },
+        "milestoneKey": {
+          "type": "string",
+          "x-ms-summary": "Milestone Key"
+        },
+        "projectPhase": {
+          "$ref": "#/definitions/ProjectPhaseResponse"
+        },
         "name": {
           "type": "string",
           "example": "Completion Initiation Phase",
           "x-ms-summary": "Name"
         },
-        "date": {
-          "description": "format: YYYY-MM-DD",
-          "type": "string",
-          "example": "2019-01-31",
-          "x-ms-summary": "Date"
-        },
-        "projectPhase": {
-          "$ref": "#/definitions/ProjectPhaseResponse"
-        },
         "status": {
           "$ref": "#/definitions/StatusResponse"
+        },
+        "customFields": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/CustomFieldResponse"
+          },
+          "example": {
+            "cust_stage_gate": {
+              "value": "Approved"
+            },
+            "cust_risk": {
+              "value": "Medium"
+            },
+            "cust_resource": {
+              "id": "UUID",
+              "resourceKey": "KMY"
+            },
+            "cust_direction": {
+              "display": "North, East",
+              "items": [
+                {
+                  "value": "North"
+                },
+                {
+                  "value": "East"
+                }
+              ]
+            }
+          },
+          "x-ms-summary": "Custom Fields"
         }
+      },
+      "x-ms-dynamic-schema": {
+        "operationId": "GetDynamicSchemaForEntity",
+        "parameters": {
+          "entityType": "MILESTONE",
+          "mode": "OUTPUT"
+        },
+        "value-path": "schema"
       },
       "x-ms-summary": "Milestone"
     },
@@ -9240,7 +10875,7 @@
         },
         "displayName": {
           "type": "string",
-          "example": "On Track",
+          "example": "On track",
           "x-ms-summary": "Display Name"
         }
       },
@@ -9265,7 +10900,6 @@
         },
         "amount": {
           "format": "double",
-          "minimum": 0,
           "type": "number",
           "example": 2000,
           "x-ms-summary": "Amount"
@@ -9563,6 +11197,7 @@
         "hours": {
           "format": "double",
           "description": "Actual time worked in hours",
+          "minimum": 0,
           "type": "number",
           "example": 5.5,
           "x-ms-summary": "Hours"
@@ -9683,24 +11318,6 @@
       },
       "x-ms-summary": "Actuals Entity Link"
     },
-    "GenericResourceReferenceRequest": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "description": "If you specify the id to reference a resource you must omit the resourceKey property.",
-          "type": "string",
-          "example": "UUID",
-          "x-ms-summary": "ID"
-        },
-        "resourceKey": {
-          "description": "If you specify the resourceKey to reference a resource you must omit the id property.",
-          "type": "string",
-          "example": "KMY",
-          "x-ms-summary": "Resource Key"
-        }
-      },
-      "x-ms-summary": "Manager"
-    },
     "ProgramCreateRequest": {
       "required": [
         "name"
@@ -9710,23 +11327,23 @@
         "goal": {
           "$ref": "#/definitions/BusinessGoal"
         },
-        "name": {
-          "minLength": 1,
-          "type": "string",
-          "example": "Release road map",
-          "x-ms-summary": "Name"
-        },
         "programKey": {
           "description": "Must be unique. If empty, value will be generated.",
           "type": "string",
           "example": "MPPRG-1",
           "x-ms-summary": "Program Key"
         },
+        "name": {
+          "minLength": 1,
+          "type": "string",
+          "example": "Release road map",
+          "x-ms-summary": "Name"
+        },
         "manager": {
           "$ref": "#/definitions/GenericResourceReferenceRequest"
         },
         "status": {
-          "$ref": "#/definitions/SingleValueFieldRequest"
+          "$ref": "#/definitions/ProgramStatusRequest"
         },
         "customFields": {
           "type": "object",
@@ -9758,22 +11375,19 @@
       },
       "x-ms-summary": "Program"
     },
-    "SingleValueFieldRequest": {
+    "ProgramStatusRequest": {
       "type": "object",
       "properties": {
         "value": {
-          "description": "Missing values will be created automatically\n\nIf you import an unknown value, it will be automatically created for you in Meisterplan.",
+          "description": "Program status.\n\nMissing values will be created automatically\n\nIf you import an unknown value, it will be automatically created for you in Meisterplan.",
           "type": "string",
+          "example": "No issues",
           "x-ms-summary": "Value"
         }
       },
-      "x-ms-summary": "Status"
+      "x-ms-summary": "Program Status"
     },
     "ProgramResponse": {
-      "required": [
-        "name",
-        "programKey"
-      ],
       "type": "object",
       "properties": {
         "id": {
@@ -9792,6 +11406,12 @@
         "goal": {
           "$ref": "#/definitions/BusinessGoalResponse"
         },
+        "programKey": {
+          "description": "Must be unique. If empty, value will be generated.",
+          "type": "string",
+          "example": "MPPRG-1",
+          "x-ms-summary": "Program Key"
+        },
         "lastChanged": {
           "format": "date-time",
           "type": "string",
@@ -9803,17 +11423,11 @@
           "example": "Release road map",
           "x-ms-summary": "Name"
         },
-        "programKey": {
-          "description": "Must be unique. If empty, value will be generated.",
-          "type": "string",
-          "example": "MPPRG-1",
-          "x-ms-summary": "Program Key"
-        },
         "manager": {
           "$ref": "#/definitions/ResourceReferenceResponse"
         },
         "rankCategory": {
-          "$ref": "#/definitions/SingleValueStringResponse"
+          "$ref": "#/definitions/RankCategoryResponse"
         },
         "start": {
           "format": "date",
@@ -9824,7 +11438,7 @@
           "x-ms-summary": "Start"
         },
         "status": {
-          "$ref": "#/definitions/SingleValueStringResponse"
+          "$ref": "#/definitions/ProgramStatusResponse"
         },
         "customFields": {
           "type": "object",
@@ -9894,14 +11508,29 @@
       },
       "x-ms-summary": "Program"
     },
-    "SingleValueStringResponse": {
+    "ProgramStatusResponse": {
       "type": "object",
       "properties": {
         "value": {
-          "type": "string"
+          "description": "Program status.",
+          "type": "string",
+          "example": "No issues",
+          "x-ms-summary": "Value"
         }
       },
-      "x-ms-summary": "Single Value"
+      "x-ms-summary": "Program Status"
+    },
+    "RankCategoryResponse": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "description": "Program rank category, computed from the program's position relative to the portfolio's must-have and cut-off lines.",
+          "type": "string",
+          "example": "MustHave",
+          "x-ms-summary": "Value"
+        }
+      },
+      "x-ms-summary": "Rank Category"
     },
     "Priorities": {
       "required": [
@@ -9934,20 +11563,112 @@
           "example": "LAST",
           "x-ms-summary": "Position"
         }
-      },
-      "x-ms-summary": "Below Cut-Off"
+      }
     },
     "PrioritiesUpdateRequest": {
       "type": "object",
       "properties": {
         "aboveMustHave": {
-          "$ref": "#/definitions/Priorities"
+          "x-ms-summary": "Above Must-Have",
+          "required": [
+            "items"
+          ],
+          "type": "object",
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PriorityEntry"
+              },
+              "example": [
+                {
+                  "id": "UUID"
+                },
+                {
+                  "id": "UUID"
+                }
+              ],
+              "x-ms-summary": "Items"
+            },
+            "position": {
+              "description": "Position can be FIRST or LAST. FIRST is default",
+              "enum": [
+                "FIRST",
+                "LAST"
+              ],
+              "type": "string",
+              "example": "LAST",
+              "x-ms-summary": "Position"
+            }
+          }
         },
         "regular": {
-          "$ref": "#/definitions/Priorities"
+          "x-ms-summary": "Regular",
+          "required": [
+            "items"
+          ],
+          "type": "object",
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PriorityEntry"
+              },
+              "example": [
+                {
+                  "id": "UUID"
+                },
+                {
+                  "id": "UUID"
+                }
+              ],
+              "x-ms-summary": "Items"
+            },
+            "position": {
+              "description": "Position can be FIRST or LAST. FIRST is default",
+              "enum": [
+                "FIRST",
+                "LAST"
+              ],
+              "type": "string",
+              "example": "LAST",
+              "x-ms-summary": "Position"
+            }
+          }
         },
         "belowCutOff": {
-          "$ref": "#/definitions/Priorities"
+          "x-ms-summary": "Below Cut-Off",
+          "required": [
+            "items"
+          ],
+          "type": "object",
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PriorityEntry"
+              },
+              "example": [
+                {
+                  "id": "UUID"
+                },
+                {
+                  "id": "UUID"
+                }
+              ],
+              "x-ms-summary": "Items"
+            },
+            "position": {
+              "description": "Position can be FIRST or LAST. FIRST is default",
+              "enum": [
+                "FIRST",
+                "LAST"
+              ],
+              "type": "string",
+              "example": "LAST",
+              "x-ms-summary": "Position"
+            }
+          }
         }
       }
     },
@@ -9984,12 +11705,14 @@
       "properties": {
         "fromMilestoneId": {
           "minLength": 1,
+          "pattern": "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}",
           "type": "string",
           "example": "UUID",
           "x-ms-summary": "From Milestone ID"
         },
         "toMilestoneId": {
           "minLength": 1,
+          "pattern": "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}",
           "type": "string",
           "example": "UUID",
           "x-ms-summary": "To Milestone ID"
@@ -10331,7 +12054,15 @@
           ],
           "x-ms-summary": "Cost Rates"
         }
-      }
+      },
+      "x-ms-dynamic-schema": {
+        "operationId": "GetResourcesDynamicSchema",
+        "parameters": {
+          "mode": "CREATE_INPUT"
+        },
+        "value-path": "schema"
+      },
+      "x-ms-summary": "Resource"
     },
     "EmploymentPeriodResponse": {
       "type": "object",
@@ -10544,8 +12275,59 @@
             }
           ],
           "x-ms-summary": "Cost Rates"
+        },
+        "teamContributions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ResourceTeamContributionResponse"
+          }
         }
-      }
+      },
+      "x-ms-dynamic-schema": {
+        "operationId": "GetResourcesDynamicSchema",
+        "parameters": {
+          "mode": "OUTPUT",
+          "includeTeamContributions": true
+        },
+        "value-path": "schema"
+      },
+      "x-ms-summary": "Resource"
+    },
+    "ResourceTeamContributionResponse": {
+      "type": "object",
+      "properties": {
+        "team": {
+          "$ref": "#/definitions/ResourceReferenceResponse"
+        },
+        "period": {
+          "$ref": "#/definitions/TeamContributionPeriodResponse"
+        },
+        "contribution": {
+          "description": "Percentage of the resource's time that is allocated to this team during the contribution period. Decimal value between 0 and 1.",
+          "type": "number",
+          "example": 0.7555,
+          "x-ms-summary": "Contribution"
+        }
+      },
+      "x-ms-summary": "Resource Team Contribution"
+    },
+    "TeamContributionPeriodResponse": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "description": "format: YYYY-MM-DD",
+          "type": "string",
+          "example": "2019-01-31",
+          "x-ms-summary": "Start Date"
+        },
+        "finish": {
+          "description": "format: YYYY-MM-DD",
+          "type": "string",
+          "example": "2019-12-31",
+          "x-ms-summary": "Finish Date"
+        }
+      },
+      "x-ms-summary": "Team Contribution Period"
     },
     "CalendarDeviation": {
       "required": [
@@ -10682,6 +12464,141 @@
         }
       },
       "x-ms-summary": "Absence"
+    },
+    "ResourceFindOrCreateRequest": {
+      "required": [
+        "lastName"
+      ],
+      "type": "object",
+      "properties": {
+        "resourceKey": {
+          "type": "string",
+          "example": "KMY",
+          "x-ms-summary": "Resource Key"
+        },
+        "firstName": {
+          "type": "string",
+          "example": "Jane",
+          "x-ms-summary": "First Name"
+        },
+        "lastName": {
+          "type": "string",
+          "example": "Doe",
+          "x-ms-summary": "Last Name"
+        },
+        "emailAddress": {
+          "type": "string",
+          "example": "jane.doe@meisterplan.com",
+          "x-ms-summary": "Email Address"
+        }
+      },
+      "x-ms-summary": "Find Or Create Resources"
+    },
+    "ResourcesFindOrCreateRequest": {
+      "required": [
+        "items"
+      ],
+      "type": "object",
+      "properties": {
+        "items": {
+          "maxItems": 500,
+          "minItems": 0,
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ResourceFindOrCreateRequest"
+          },
+          "x-ms-summary": "Find Or Create Resources"
+        }
+      }
+    },
+    "ApiError": {
+      "required": [
+        "status",
+        "title"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "detail": {
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/definitions/Source"
+        }
+      }
+    },
+    "ListResponseResourceFindOrCreateResponse": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ResourceFindOrCreateResponse"
+          },
+          "x-ms-summary": "Items"
+        }
+      },
+      "x-ms-summary": "List"
+    },
+    "ResourceFindOrCreateFailureResponse": {
+      "required": [
+        "error"
+      ],
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/ApiError"
+        }
+      }
+    },
+    "ResourceFindOrCreateResponse": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/ApiError"
+        },
+        "id": {
+          "type": "string",
+          "example": "UUID",
+          "x-ms-summary": "ID"
+        },
+        "resourceKey": {
+          "type": "string",
+          "example": "KMY",
+          "x-ms-summary": "Resource Key"
+        }
+      }
+    },
+    "ResourceFindOrCreateSuccessResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "example": "UUID",
+          "x-ms-summary": "ID"
+        },
+        "resourceKey": {
+          "type": "string",
+          "example": "KMY",
+          "x-ms-summary": "Resource Key"
+        }
+      }
+    },
+    "Source": {
+      "type": "object",
+      "properties": {
+        "pointer": {
+          "type": "string"
+        },
+        "parameter": {
+          "type": "string"
+        }
+      }
     },
     "ObsTypeCreateRequest": {
       "required": [
@@ -10998,6 +12915,7 @@
       "properties": {
         "id": {
           "minLength": 1,
+          "pattern": "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}",
           "type": "string",
           "example": "UUID",
           "x-ms-summary": "ID"
@@ -11249,27 +13167,190 @@
         "value-path": "schema"
       }
     },
+    "TaskManagementLinkPatchRequest": {
+      "type": "object",
+      "properties": {
+        "projectPeriodInTool": {
+          "$ref": "#/definitions/ProjectPeriodInTool"
+        }
+      }
+    },
+    "ProjectSegmentUpdateRequest": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string",
+          "example": "Here is an example of a segment description.",
+          "x-ms-summary": "Description"
+        },
+        "finish": {
+          "format": "date",
+          "pattern": "format: YYYY-MM-DD",
+          "type": "string",
+          "example": "2019-12-31",
+          "x-ms-summary": "Finish"
+        },
+        "segmentKey": {
+          "type": "string",
+          "example": "MPSEG-1",
+          "x-ms-summary": "Segment Key"
+        },
+        "phase": {
+          "$ref": "#/definitions/SingleValueFieldRequest"
+        }
+      },
+      "x-ms-dynamic-schema": {
+        "operationId": "GetDynamicSchemaForEntity",
+        "parameters": {
+          "entityType": "SEGMENT",
+          "mode": "UPDATE_INPUT"
+        },
+        "value-path": "schema"
+      },
+      "x-ms-summary": "ProjectSegment"
+    },
+    "PhaseResponse": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "string",
+          "example": "Initiation",
+          "x-ms-summary": "Value"
+        }
+      },
+      "x-ms-summary": "Project Phase"
+    },
+    "ProjectSegmentResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "example": "UUID",
+          "x-ms-summary": "ID"
+        },
+        "description": {
+          "type": "string",
+          "example": "Here is an example of a segment description.",
+          "x-ms-summary": "Description"
+        },
+        "finish": {
+          "format": "date",
+          "pattern": "format: YYYY-MM-DD",
+          "type": "string",
+          "example": "2019-12-31",
+          "x-ms-summary": "Finish"
+        },
+        "segmentKey": {
+          "type": "string",
+          "example": "MPSEG-1",
+          "x-ms-summary": "Segment Key"
+        },
+        "phase": {
+          "$ref": "#/definitions/PhaseResponse"
+        },
+        "start": {
+          "format": "date",
+          "pattern": "format: YYYY-MM-DD",
+          "type": "string",
+          "example": "2019-01-31",
+          "x-ms-summary": "Start"
+        }
+      },
+      "x-ms-dynamic-schema": {
+        "operationId": "GetDynamicSchemaForEntity",
+        "parameters": {
+          "entityType": "SEGMENT",
+          "mode": "OUTPUT"
+        },
+        "value-path": "schema"
+      },
+      "x-ms-summary": "ProjectSegment"
+    },
+    "RiskUpdateRequest": {
+      "type": "object",
+      "properties": {
+        "impact": {
+          "$ref": "#/definitions/RiskImpactRequest"
+        },
+        "riskKey": {
+          "description": "Must be unique. If empty, value will be generated.",
+          "type": "string",
+          "example": "MPRSK-1",
+          "x-ms-summary": "Risk Key"
+        },
+        "likelihood": {
+          "$ref": "#/definitions/RiskLikelihoodRequest"
+        },
+        "name": {
+          "description": "Risk name.",
+          "type": "string",
+          "example": "Decision Bottlenecks",
+          "x-ms-summary": "Name"
+        },
+        "owner": {
+          "$ref": "#/definitions/GenericResourceReferenceRequest"
+        },
+        "customFields": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/CustomFieldRequest"
+          },
+          "x-ms-summary": "Custom Fields"
+        }
+      },
+      "x-ms-dynamic-schema": {
+        "operationId": "GetDynamicSchemaForEntity",
+        "parameters": {
+          "entityType": "RISK",
+          "mode": "UPDATE_INPUT"
+        },
+        "value-path": "schema"
+      },
+      "x-ms-summary": "Risk"
+    },
     "MilestoneUpdateRequest": {
       "type": "object",
       "properties": {
+        "date": {
+          "format": "date",
+          "description": "Must be within the project's start and finish date.",
+          "pattern": "format: YYYY-MM-DD",
+          "type": "string",
+          "example": "2019-01-31",
+          "x-ms-summary": "Date"
+        },
+        "milestoneKey": {
+          "type": "string",
+          "x-ms-summary": "Milestone Key"
+        },
+        "projectPhase": {
+          "$ref": "#/definitions/ProjectPhase"
+        },
         "name": {
           "type": "string",
           "example": "Completion Initiation Phase",
           "x-ms-summary": "Name"
         },
-        "date": {
-          "description": "format: YYYY-MM-DD",
-          "type": "string",
-          "example": "2019-01-31",
-          "x-ms-summary": "Date"
-        },
-        "projectPhase": {
-          "$ref": "#/definitions/ProjectPhase"
-        },
         "status": {
           "$ref": "#/definitions/MilestoneStatus"
+        },
+        "customFields": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/CustomFieldRequest"
+          },
+          "x-ms-summary": "Custom Fields"
         }
-      }
+      },
+      "x-ms-dynamic-schema": {
+        "operationId": "GetDynamicSchemaForEntity",
+        "parameters": {
+          "entityType": "MILESTONE",
+          "mode": "UPDATE_INPUT"
+        },
+        "value-path": "schema"
+      },
+      "x-ms-summary": "Milestone"
     },
     "FinancialsUpdateRequest": {
       "type": "object",
@@ -11364,22 +13445,22 @@
         "goal": {
           "$ref": "#/definitions/BusinessGoal"
         },
-        "name": {
-          "type": "string",
-          "example": "Release road map",
-          "x-ms-summary": "Name"
-        },
         "programKey": {
           "description": "Must be unique. If empty, value will be generated.",
           "type": "string",
           "example": "MPPRG-1",
           "x-ms-summary": "Program Key"
         },
+        "name": {
+          "type": "string",
+          "example": "Release road map",
+          "x-ms-summary": "Name"
+        },
         "manager": {
           "$ref": "#/definitions/GenericResourceReferenceRequest"
         },
         "status": {
-          "$ref": "#/definitions/SingleValueFieldRequest"
+          "$ref": "#/definitions/ProgramStatusRequest"
         },
         "customFields": {
           "type": "object",
@@ -11594,7 +13675,15 @@
           ],
           "x-ms-summary": "Cost Rates"
         }
-      }
+      },
+      "x-ms-dynamic-schema": {
+        "operationId": "GetResourcesDynamicSchema",
+        "parameters": {
+          "mode": "UPDATE_INPUT"
+        },
+        "value-path": "schema"
+      },
+      "x-ms-summary": "Resource"
     },
     "UpdateAbsenceRequest": {
       "type": "object",
@@ -11830,13 +13919,13 @@
       },
       "x-ms-summary": "User"
     },
-    "PaginatedResponseTeamResponse": {
+    "PaginatedResponseTeamGetAllResponse": {
       "type": "object",
       "properties": {
         "items": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/TeamResponse"
+            "$ref": "#/definitions/TeamGetAllResponse"
           },
           "x-ms-summary": "Items"
         },
@@ -11845,6 +13934,117 @@
         }
       },
       "x-ms-summary": "Paginated"
+    },
+    "TeamGetAllResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "example": "UUID",
+          "x-ms-summary": "ID"
+        },
+        "resourceKey": {
+          "type": "string",
+          "example": "KMY",
+          "x-ms-summary": "Resource Key"
+        },
+        "name": {
+          "type": "string",
+          "example": "Team Integration",
+          "x-ms-summary": "Name"
+        },
+        "resourceManager": {
+          "$ref": "#/definitions/ResourceManagerResponse"
+        },
+        "primaryRole": {
+          "$ref": "#/definitions/MinimalPrimaryRoleResponse"
+        },
+        "costPerHour": {
+          "format": "double",
+          "type": "number",
+          "example": 12.5,
+          "x-ms-summary": "Cost Per Hour"
+        },
+        "costRates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CostRateResponse"
+          },
+          "example": [
+            {
+              "costPerHour": 0.9,
+              "costPerHourValidFrom": null
+            },
+            {
+              "costPerHour": 10,
+              "costPerHourValidFrom": "2026-05-01"
+            }
+          ],
+          "x-ms-summary": "Cost Rates"
+        },
+        "standardBillingRatePerHour": {
+          "format": "double",
+          "type": "number",
+          "example": 25,
+          "x-ms-summary": "Standard Billing Rate Per Hour"
+        },
+        "obsUnits": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/ObsUnitReferenceResponse"
+          },
+          "example": {
+            "Department": {
+              "id": "UUID",
+              "path": "Services/Consulting/IT",
+              "displayName": "Services > Consulting > IT"
+            }
+          },
+          "x-ms-dynamic-schema": {
+            "operationId": "GetObsDynamicSchema",
+            "parameters": {
+              "mode": "OUTPUT"
+            },
+            "value-path": "schema"
+          }
+        },
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "example": "[\"Java\",\"Kotlin\"]",
+            "x-ms-summary": "Skills"
+          },
+          "example": [
+            "Java",
+            "Kotlin"
+          ],
+          "x-ms-summary": "Skills"
+        },
+        "status": {
+          "enum": [
+            "ACTIVE",
+            "INACTIVE",
+            "FUTURE"
+          ],
+          "type": "string",
+          "example": "ACTIVE",
+          "x-ms-summary": "Status"
+        },
+        "velocity": {
+          "$ref": "#/definitions/VelocityResponse"
+        },
+        "period": {
+          "$ref": "#/definitions/TeamPeriodResponse"
+        }
+      },
+      "x-ms-dynamic-schema": {
+        "operationId": "GetTeamsDynamicSchema",
+        "parameters": {
+          "mode": "OUTPUT"
+        },
+        "value-path": "schema"
+      }
     },
     "SprintResponse": {
       "type": "object",
@@ -12171,9 +14371,6 @@
       }
     },
     "TaskAssigmentEntityResponse": {
-      "required": [
-        "id"
-      ],
       "type": "object",
       "properties": {
         "id": {
@@ -12324,18 +14521,119 @@
         "value-path": "schema"
       }
     },
-    "ListResponseMilestoneResponse": {
+    "ListResponseProjectSegmentResponse": {
       "type": "object",
       "properties": {
         "items": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/MilestoneResponse"
+            "$ref": "#/definitions/ProjectSegmentResponse"
           },
           "x-ms-summary": "Items"
         }
       },
       "x-ms-summary": "List"
+    },
+    "PaginatedResponseRiskResponse": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RiskResponse"
+          },
+          "x-ms-summary": "Items"
+        },
+        "_pagination": {
+          "$ref": "#/definitions/Pagination"
+        }
+      },
+      "x-ms-summary": "Paginated"
+    },
+    "ListResponseMilestoneGetAllResponse": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/MilestoneGetAllResponse"
+          },
+          "x-ms-summary": "Items"
+        }
+      },
+      "x-ms-summary": "List"
+    },
+    "MilestoneGetAllResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "example": "UUID",
+          "x-ms-summary": "ID"
+        },
+        "date": {
+          "format": "date",
+          "description": "Must be within the project's start and finish date.",
+          "pattern": "format: YYYY-MM-DD",
+          "type": "string",
+          "example": "2019-01-31",
+          "x-ms-summary": "Date"
+        },
+        "milestoneKey": {
+          "type": "string",
+          "x-ms-summary": "Milestone Key"
+        },
+        "projectPhase": {
+          "$ref": "#/definitions/ProjectPhaseResponse"
+        },
+        "name": {
+          "type": "string",
+          "example": "Completion Initiation Phase",
+          "x-ms-summary": "Name"
+        },
+        "status": {
+          "$ref": "#/definitions/StatusResponse"
+        },
+        "customFields": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/CustomFieldResponse"
+          },
+          "example": {
+            "cust_stage_gate": {
+              "value": "Approved"
+            },
+            "cust_risk": {
+              "value": "Medium"
+            },
+            "cust_resource": {
+              "id": "UUID",
+              "resourceKey": "KMY"
+            },
+            "cust_direction": {
+              "display": "North, East",
+              "items": [
+                {
+                  "value": "North"
+                },
+                {
+                  "value": "East"
+                }
+              ]
+            }
+          },
+          "x-ms-summary": "Custom Fields"
+        }
+      },
+      "x-ms-dynamic-schema": {
+        "operationId": "GetDynamicSchemaForEntity",
+        "parameters": {
+          "entityType": "MILESTONE",
+          "mode": "OUTPUT"
+        },
+        "value-path": "schema"
+      },
+      "x-ms-summary": "Milestone"
     },
     "ListResponseFinancialsResponse": {
       "type": "object",
@@ -12404,7 +14702,8 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/UserRefResponse"
-          }
+          },
+          "x-ms-summary": "Mentions"
         }
       },
       "x-ms-summary": "Project Comment"
@@ -12571,10 +14870,6 @@
       "x-ms-summary": "Paginated"
     },
     "ProgramGetAllResponse": {
-      "required": [
-        "name",
-        "programKey"
-      ],
       "type": "object",
       "properties": {
         "id": {
@@ -12582,16 +14877,16 @@
           "example": "UUID",
           "x-ms-summary": "ID"
         },
-        "name": {
-          "type": "string",
-          "example": "Release road map",
-          "x-ms-summary": "Name"
-        },
         "programKey": {
           "description": "Must be unique. If empty, value will be generated.",
           "type": "string",
           "example": "MPPRG-1",
           "x-ms-summary": "Program Key"
+        },
+        "name": {
+          "type": "string",
+          "example": "Release road map",
+          "x-ms-summary": "Name"
         }
       },
       "x-ms-summary": "Program"
@@ -12658,13 +14953,13 @@
       },
       "x-ms-summary": "List"
     },
-    "PaginatedResponseResourceResponse": {
+    "PaginatedResponseResourceGetAllResponse": {
       "type": "object",
       "properties": {
         "items": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/ResourceResponse"
+            "$ref": "#/definitions/ResourceGetAllResponse"
           },
           "x-ms-summary": "Items"
         },
@@ -12673,6 +14968,125 @@
         }
       },
       "x-ms-summary": "Paginated"
+    },
+    "ResourceGetAllResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "example": "UUID",
+          "x-ms-summary": "ID"
+        },
+        "resourceKey": {
+          "type": "string",
+          "example": "KMY",
+          "x-ms-summary": "Resource Key"
+        },
+        "firstName": {
+          "type": "string",
+          "example": "Jane",
+          "x-ms-summary": "First Name"
+        },
+        "lastName": {
+          "type": "string",
+          "example": "Doe",
+          "x-ms-summary": "Last Name"
+        },
+        "externalId": {
+          "type": "string",
+          "example": "myCustomID",
+          "x-ms-summary": "External ID"
+        },
+        "emailAddress": {
+          "type": "string",
+          "example": "jane.doe@meisterplan.com",
+          "x-ms-summary": "Email Address"
+        },
+        "postalAddress": {
+          "$ref": "#/definitions/PostalAddressResponse"
+        },
+        "employmentPeriod": {
+          "$ref": "#/definitions/EmploymentPeriodResponse"
+        },
+        "externalResource": {
+          "type": "boolean",
+          "x-ms-summary": "External Resource"
+        },
+        "costPerHour": {
+          "format": "double",
+          "type": "number",
+          "example": 12.5,
+          "x-ms-summary": "Cost Per Hour"
+        },
+        "primaryRole": {
+          "$ref": "#/definitions/PrimaryRoleResponse"
+        },
+        "calendar": {
+          "$ref": "#/definitions/ResourceCalendarResponse"
+        },
+        "obsUnits": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/ObsUnitReferenceResponse"
+          },
+          "example": {
+            "Department": {
+              "id": "UUID",
+              "path": "Services/Consulting/IT",
+              "displayName": "Services > Consulting > IT"
+            }
+          },
+          "x-ms-dynamic-schema": {
+            "operationId": "GetObsDynamicSchema",
+            "parameters": {
+              "mode": "OUTPUT"
+            },
+            "value-path": "schema"
+          }
+        },
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "example": "[\"Java\",\"Kotlin\"]",
+            "x-ms-summary": "Skills"
+          },
+          "example": [
+            "Java",
+            "Kotlin"
+          ],
+          "x-ms-summary": "Skills"
+        },
+        "resourceManager": {
+          "$ref": "#/definitions/ResourceManagerResponse"
+        },
+        "costRates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CostRateResponse"
+          },
+          "example": [
+            {
+              "costPerHour": 0.9,
+              "costPerHourValidFrom": null
+            },
+            {
+              "costPerHour": 10,
+              "costPerHourValidFrom": "2026-05-01"
+            }
+          ],
+          "x-ms-summary": "Cost Rates"
+        }
+      },
+      "x-ms-dynamic-schema": {
+        "operationId": "GetResourcesDynamicSchema",
+        "parameters": {
+          "mode": "OUTPUT",
+          "includeTeamContributions": false
+        },
+        "value-path": "schema"
+      },
+      "x-ms-summary": "Resource"
     },
     "ListResponseAbsenceResponse": {
       "type": "object",
@@ -12743,23 +15157,31 @@
       "x-ms-summary": "List"
     },
     "DynamicSchemaPropertiesResponse": {
+      "required": [
+        "properties"
+      ],
       "type": "object",
       "properties": {
         "properties": {
           "type": "object",
           "additionalProperties": {
             "$ref": "#/definitions/DynamicSchemaPropertyResponse"
-          },
-          "x-ms-summary": "Properties"
+          }
         }
       }
     },
     "DynamicSchemaPropertyResponse": {
+      "required": [
+        "type"
+      ],
       "type": "object",
       "properties": {
         "type": {
           "type": "string",
           "x-ms-summary": "Type"
+        },
+        "nullable": {
+          "type": "boolean"
         },
         "x-ms-summary": {
           "type": "string",
@@ -12799,8 +15221,7 @@
           "type": "string",
           "x-ms-summary": "Format"
         }
-      },
-      "x-ms-summary": "Properties"
+      }
     },
     "DynamicSchemaResponse": {
       "type": "object",
@@ -13009,6 +15430,10 @@
       "description": "Operations on users and user groups. A Premium Edition is required to use these operations. The administrative right to manage users and user groups is required. You can use these operations to implement automatic user provisioning. If you want to create and update a linked resource when a user is created or updated, send the createOrUpdateLinkedResource parameter with true. In this case resource information like first name or email are updated along the user information. A specific logic applies for the resource termination date: If you send one via linkedResourceTerminationDate, this value is set on the linked resource. If not, the service checks if the resource has a termination date. In case there is no termination date set and the user is inactive, the resource termination date is set to today."
     },
     {
+      "name": "Risks",
+      "description": "Operations on Risks"
+    },
+    {
       "name": "Me",
       "description": "Connected user details."
     },
@@ -13023,6 +15448,10 @@
     {
       "name": "Portfolios",
       "description": "Operations on Portfolios"
+    },
+    {
+      "name": "Project Segments",
+      "description": "Operations on Project Segments"
     },
     {
       "name": "Programs",
