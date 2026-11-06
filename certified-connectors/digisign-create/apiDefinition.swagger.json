@@ -1,0 +1,2846 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Digisign - Create",
+    "description": "Provides actions for envelope and document creation. Supports exchanging credentials for a token, creating envelope drafts, uploading files, linking documents to envelopes, performing unified document uploads, adding recipients (Signers, Approvers, CCs), placing signature tags, sending envelopes, and making universal calls.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "DigiSign Support",
+      "email": "podpora@digisign.cz",
+      "url": "https://www.digisign.cz/"
+    }
+  },
+  "host": "api.digisign.org",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "x-ms-connection-parameters": {
+    "username": {
+      "type": "securestring",
+      "uiDefinition": {
+        "displayName": "Access Key (accessKey)",
+        "description": "API Access Key from Digisign",
+        "tooltip": "Enter your Digisign accessKey"
+      },
+      "constraints": {
+        "required": "true"
+      }
+    },
+    "password": {
+      "type": "securestring",
+      "uiDefinition": {
+        "displayName": "Secret Key (secretKey)",
+        "description": "API Secret Key from Digisign",
+        "tooltip": "Enter your Digisign secretKey",
+        "uiControl": "password"
+      },
+      "constraints": {
+        "required": "true"
+      }
+    },
+    "environment": {
+      "type": "string",
+      "uiDefinition": {
+        "displayName": "Environment URL",
+        "description": "Base URL of the Digisign API.",
+        "tooltip": "Select Staging or Production, or enter a custom URL",
+        "constraints": {
+          "required": "true",
+          "allowedValues": [
+            {
+              "text": "Production (https://api.digisign.org)",
+              "value": "https://api.digisign.org"
+            },
+            {
+              "text": "Staging (https://api.staging.digisign.org)",
+              "value": "https://api.staging.digisign.org"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "basicAuth": {
+      "type": "basic",
+      "description": "Username = accessKey, Password = secretKey"
+    }
+  },
+  "security": [
+    {
+      "basicAuth": []
+    }
+  ],
+  "x-code": {
+    "className": "CustomConnectorCode",
+    "methodName": "PreRequest"
+  },
+  "paths": {
+    "/api/auth-token": {
+      "post": {
+        "summary": "Exchange Keys for Bearer Token",
+        "description": "Exchanges your API accessKey and secretKey for a short-lived Bearer token to authorize subsequent requests.",
+        "operationId": "authToken",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "accessKey": {
+                  "type": "string",
+                  "x-ms-summary": "Access Key",
+                  "description": "API Access Key from Digisign",
+                  "example": "019ee470-a0c2-72a9-a666-9ced47485a9b"
+                },
+                "secretKey": {
+                  "type": "string",
+                  "x-ms-summary": "Secret Key",
+                  "description": "API Secret Key from Digisign",
+                  "example": "c76a5bf4d284a0c8b3e8ee9fbc5a01d3"
+                }
+              },
+              "required": [
+                "accessKey",
+                "secretKey"
+              ],
+              "example": {
+                "accessKey": "019ee470-a0c2-72a9-a666-9ced47485a9b",
+                "secretKey": "c76a5bf4d284a0c8b3e8ee9fbc5a01d3"
+              }
+            },
+            "description": "Request Body",
+            "x-ms-body-example": {
+              "accessKey": "019ee470-a0c2-72a9-a666-9ced47485a9b",
+              "secretKey": "c76a5bf4d284a0c8b3e8ee9fbc5a01d3"
+            },
+            "x-ms-summary": "Parameters"
+          },
+          {
+            "name": "x-environment",
+            "in": "header",
+            "required": false,
+            "type": "string",
+            "default": "https://api.digisign.org",
+            "x-ms-visibility": "advanced",
+            "description": "Target Environment URL",
+            "x-ms-summary": "X Environment"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token returned",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "token": {
+                  "type": "string"
+                },
+                "expiresIn": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid parameters or request body."
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid credentials."
+          },
+          "403": {
+            "description": "Forbidden - Access denied."
+          },
+          "404": {
+            "description": "Not Found - The requested resource was not found."
+          },
+          "500": {
+            "description": "Internal Server Error - Something went wrong on the server."
+          }
+        },
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/envelopes": {
+      "post": {
+        "summary": "Create Envelope Draft",
+        "description": "Creates a new draft envelope with a custom name, email body, and sender details.",
+        "operationId": "createEnvelope",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "x-ms-summary": "Envelope Name",
+                  "description": "Descriptive name of the envelope",
+                  "maxLength": 255,
+                  "example": "Investment Term Sheet - Series A"
+                },
+                "emailBody": {
+                  "type": "string",
+                  "x-ms-summary": "Email Body",
+                  "description": "Email message body sent to recipients",
+                  "maxLength": 4096,
+                  "example": "Please review and sign the attached Investment Term Sheet for the Series A round of Frankfurt Capital Group."
+                },
+                "emailBodyCompleted": {
+                  "type": "string",
+                  "x-ms-summary": "Email Body Completed",
+                  "description": "Email message body sent to recipients when completed",
+                  "maxLength": 4096,
+                  "example": "The Investment Term Sheet has been successfully executed by all contracting parties of Frankfurt Capital."
+                },
+                "sender": {
+                  "type": "string",
+                  "x-ms-summary": "Sender",
+                  "description": "IRI or ID of the user who owns/sends this envelope (e.g. /api/users/UUID)",
+                  "example": "/api/users/019ee470-a0c2-72a9-a666-9ced47485a9b"
+                },
+                "senderName": {
+                  "type": "string",
+                  "x-ms-summary": "Sender Name",
+                  "description": "Display name of the sender",
+                  "maxLength": 255,
+                  "example": "Frankfurt Capital Backoffice"
+                },
+                "senderEmail": {
+                  "type": "string",
+                  "x-ms-summary": "Sender Email",
+                  "description": "Email address of the sender",
+                  "example": "backoffice@frankfurt-advisory.com"
+                },
+                "expiration": {
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-summary": "Expiration",
+                  "description": "Envelope expiration in days (0-365)",
+                  "minimum": 0,
+                  "maximum": 365,
+                  "example": 30
+                },
+                "metadata": {
+                  "type": "string",
+                  "x-ms-summary": "Metadata",
+                  "description": "Custom metadata for the envelope",
+                  "maxLength": 4096,
+                  "example": "sales_q2"
+                }
+              },
+              "required": [
+                "name",
+                "emailBody"
+              ],
+              "example": {
+                "name": "Investment Term Sheet - Series A",
+                "emailBody": "Please review and sign the attached Investment Term Sheet for the Series A round of Frankfurt Capital Group.",
+                "emailBodyCompleted": "The Investment Term Sheet has been successfully executed by all contracting parties of Frankfurt Capital.",
+                "sender": "/api/users/019ee470-a0c2-72a9-a666-9ced47485a9b",
+                "senderName": "Frankfurt Capital Backoffice",
+                "senderEmail": "backoffice@frankfurt-advisory.com",
+                "expiration": 30,
+                "metadata": "sales_q2"
+              }
+            },
+            "description": "Request Body",
+            "x-ms-body-example": {
+              "name": "Investment Term Sheet - Series A",
+              "emailBody": "Please review and sign the attached Investment Term Sheet for the Series A round of Frankfurt Capital Group.",
+              "emailBodyCompleted": "The Investment Term Sheet has been successfully executed by all contracting parties of Frankfurt Capital.",
+              "sender": "/api/users/019ee470-a0c2-72a9-a666-9ced47485a9b",
+              "senderName": "Frankfurt Capital Backoffice",
+              "senderEmail": "backoffice@frankfurt-advisory.com",
+              "expiration": 30,
+              "metadata": "sales_q2"
+            },
+            "x-ms-summary": "Parameters"
+          },
+          {
+            "name": "x-environment",
+            "in": "header",
+            "required": false,
+            "type": "string",
+            "default": "https://api.digisign.org",
+            "x-ms-visibility": "advanced",
+            "description": "Target Environment URL",
+            "x-ms-summary": "X Environment"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Envelope created",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Envelope ID"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Envelope Name"
+                },
+                "emailBody": {
+                  "type": "string",
+                  "description": "Email Body"
+                },
+                "emailBodyCompleted": {
+                  "type": "string",
+                  "description": "Email Body Completed"
+                },
+                "sender": {
+                  "type": "string",
+                  "description": "Sender IRI"
+                },
+                "senderName": {
+                  "type": "string",
+                  "description": "Sender Name"
+                },
+                "senderEmail": {
+                  "type": "string",
+                  "description": "Sender Email"
+                },
+                "expiration": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Expiration in days"
+                },
+                "metadata": {
+                  "type": "string",
+                  "description": "Metadata"
+                },
+                "status": {
+                  "type": "string",
+                  "description": "Status"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid parameters or request body."
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid credentials."
+          },
+          "403": {
+            "description": "Forbidden - Access denied."
+          },
+          "404": {
+            "description": "Not Found - The requested resource was not found."
+          },
+          "500": {
+            "description": "Internal Server Error - Something went wrong on the server."
+          },
+          "200": {
+            "description": "Envelope created",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Envelope ID"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Envelope Name"
+                },
+                "emailBody": {
+                  "type": "string",
+                  "description": "Email Body"
+                },
+                "emailBodyCompleted": {
+                  "type": "string",
+                  "description": "Email Body Completed"
+                },
+                "sender": {
+                  "type": "string",
+                  "description": "Sender IRI"
+                },
+                "senderName": {
+                  "type": "string",
+                  "description": "Sender Name"
+                },
+                "senderEmail": {
+                  "type": "string",
+                  "description": "Sender Email"
+                },
+                "expiration": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Expiration in days"
+                },
+                "metadata": {
+                  "type": "string",
+                  "description": "Metadata"
+                },
+                "status": {
+                  "type": "string",
+                  "description": "Status"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Envelopes"
+        ]
+      }
+    },
+    "/api/files": {
+      "post": {
+        "summary": "Upload File",
+        "description": "Uploads a raw binary file to Digisign storage to be linked to an envelope later. Returns a file ID.",
+        "operationId": "uploadDocument",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "parameters": [
+          {
+            "name": "file",
+            "in": "formData",
+            "required": false,
+            "type": "file",
+            "description": "Raw binary file stream to upload",
+            "x-ms-summary": "File"
+          },
+          {
+            "name": "x-environment",
+            "in": "header",
+            "required": false,
+            "type": "string",
+            "default": "https://api.digisign.org",
+            "x-ms-visibility": "advanced",
+            "description": "Target Environment URL",
+            "x-ms-summary": "X Environment"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Document created",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid parameters or request body."
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid credentials."
+          },
+          "403": {
+            "description": "Forbidden - Access denied."
+          },
+          "404": {
+            "description": "Not Found - The requested resource was not found."
+          },
+          "500": {
+            "description": "Internal Server Error - Something went wrong on the server."
+          },
+          "200": {
+            "description": "Document created",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
+    "/api/envelopes/{envelopeId}/documents": {
+      "post": {
+        "summary": "Link Document",
+        "description": "Links a previously uploaded file to an envelope using the file's resource identifier.",
+        "operationId": "linkDocument",
+        "parameters": [
+          {
+            "name": "envelopeId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Envelope ID",
+            "description": "Envelope ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "file": {
+                  "type": "string",
+                  "x-ms-summary": "File IRI",
+                  "description": "IRI of the uploaded file",
+                  "example": "/api/files/019ee50b-1c05-71cb-a29c-69831fc8dd15"
+                },
+                "name": {
+                  "type": "string",
+                  "x-ms-summary": "Document Name",
+                  "description": "Display name of the document in the envelope",
+                  "example": "Frankfurt_Partners_Investment_Agreement.pdf"
+                },
+                 "position": {
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-summary": "Position",
+                  "description": "Document ordering position (1-based index)",
+                  "example": 1
+                },
+                "labelPositioning": {
+                  "type": "string",
+                  "enum": [
+                    "none",
+                    "top_center",
+                    "top_left",
+                    "top_right",
+                    "bottom_left",
+                    "bottom_right",
+                    "bottom_center"
+                  ],
+                  "default": "none",
+                  "x-ms-summary": "Label Positioning",
+                  "description": "Positioning of the signature label."
+                },
+                "labelPositionX": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 0,
+                  "x-ms-summary": "Label Position X",
+                  "description": "X coordinate for signature label position."
+                },
+                "labelPositionY": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 0,
+                  "x-ms-summary": "Label Position Y",
+                  "description": "Y coordinate for signature label position."
+                }
+              },
+              "required": [
+                "file",
+                "name",
+                "labelPositioning",
+                "labelPositionX",
+                "labelPositionY"
+              ],
+              "example": {
+                "file": "/api/files/019ee50b-1c05-71cb-a29c-69831fc8dd15",
+                "name": "Frankfurt_Partners_Investment_Agreement.pdf",
+                "position": 1
+              }
+            },
+            "description": "Request Body",
+            "x-ms-body-example": {
+              "file": "/api/files/019ee50b-1c05-71cb-a29c-69831fc8dd15",
+              "name": "Frankfurt_Partners_Investment_Agreement.pdf",
+              "position": 1
+            },
+            "x-ms-summary": "Parameters"
+          },
+          {
+            "name": "x-environment",
+            "in": "header",
+            "required": false,
+            "type": "string",
+            "default": "https://api.digisign.org",
+            "x-ms-visibility": "advanced",
+            "description": "Target Environment URL",
+            "x-ms-summary": "X Environment"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Document linked",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Document ID"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Document Name"
+                },
+                "metadata": {
+                  "type": "string",
+                  "description": "Metadata"
+                },
+                "position": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Position"
+                },
+                "signable": {
+                  "type": "boolean",
+                  "description": "Signable"
+                },
+                "fromTemplate": {
+                  "type": "boolean",
+                  "description": "From Template"
+                },
+                "labelPositioning": {
+                  "type": "string",
+                  "description": "Label Positioning"
+                },
+                "labelPositionX": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Label Position X"
+                },
+                "labelPositionY": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Label Position Y"
+                },
+                "signatureValidity": {
+                  "type": "string",
+                  "description": "Signature Validity"
+                },
+                "invalidatedAt": {
+                  "type": "string",
+                  "description": "Invalidated At"
+                },
+                "invalidate": {
+                  "type": "boolean",
+                  "description": "Invalidate"
+                },
+                "hasSignatures": {
+                  "type": "boolean",
+                  "description": "Has Signatures"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "description": "Created At"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "description": "Updated At"
+                },
+                "file": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "File ID"
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "File Name"
+                    },
+                    "originalName": {
+                      "type": "string",
+                      "description": "Original File Name"
+                    },
+                    "mimeType": {
+                      "type": "string",
+                      "description": "Mime Type"
+                    },
+                    "size": {
+                      "type": "integer",
+                      "format": "int32",
+                      "description": "Size in bytes"
+                    },
+                    "sha1Checksum": {
+                      "type": "string",
+                      "description": "SHA1 Checksum"
+                    },
+                    "category": {
+                      "type": "string",
+                      "description": "Category"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "description": "Created At"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "description": "Updated At"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid parameters or request body."
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid credentials."
+          },
+          "403": {
+            "description": "Forbidden - Access denied."
+          },
+          "404": {
+            "description": "Not Found - The requested resource was not found."
+          },
+          "500": {
+            "description": "Internal Server Error - Something went wrong on the server."
+          },
+          "200": {
+            "description": "Document linked",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Document ID"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Document Name"
+                },
+                "metadata": {
+                  "type": "string",
+                  "description": "Metadata"
+                },
+                "position": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Position"
+                },
+                "signable": {
+                  "type": "boolean",
+                  "description": "Signable"
+                },
+                "fromTemplate": {
+                  "type": "boolean",
+                  "description": "From Template"
+                },
+                "labelPositioning": {
+                  "type": "string",
+                  "description": "Label Positioning"
+                },
+                "labelPositionX": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Label Position X"
+                },
+                "labelPositionY": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Label Position Y"
+                },
+                "signatureValidity": {
+                  "type": "string",
+                  "description": "Signature Validity"
+                },
+                "invalidatedAt": {
+                  "type": "string",
+                  "description": "Invalidated At"
+                },
+                "invalidate": {
+                  "type": "boolean",
+                  "description": "Invalidate"
+                },
+                "hasSignatures": {
+                  "type": "boolean",
+                  "description": "Has Signatures"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "description": "Created At"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "description": "Updated At"
+                },
+                "file": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "File ID"
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "File Name"
+                    },
+                    "originalName": {
+                      "type": "string",
+                      "description": "Original File Name"
+                    },
+                    "mimeType": {
+                      "type": "string",
+                      "description": "Mime Type"
+                    },
+                    "size": {
+                      "type": "integer",
+                      "format": "int32",
+                      "description": "Size in bytes"
+                    },
+                    "sha1Checksum": {
+                      "type": "string",
+                      "description": "SHA1 Checksum"
+                    },
+                    "category": {
+                      "type": "string",
+                      "description": "Category"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "description": "Created At"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "description": "Updated At"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
+    "/api/envelopes/{envelopeId}/documents/unified-upload": {
+      "post": {
+        "summary": "Unified Upload Document",
+        "description": "Uploads and links a document to the specified envelope in a single step using base64 encoded content.",
+        "operationId": "unifiedUpload",
+        "parameters": [
+          {
+            "name": "envelopeId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Envelope ID",
+            "description": "Envelope ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "fileName": {
+                  "type": "string",
+                  "x-ms-summary": "File Name",
+                  "description": "Name of the file with extension",
+                  "example": "Frankfurt_Partners_Investment_Agreement.pdf"
+                },
+                "fileContent": {
+                  "type": "string",
+                  "format": "byte",
+                  "x-ms-summary": "File Content",
+                  "description": "Base64 encoded binary contents of the file",
+                  "example": "JVBERi0xLjEKMSAwIG9iago..."
+                },
+                "position": {
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-summary": "Position",
+                  "description": "Ordering position of the document (1-based index)",
+                  "example": 1
+                },
+                "metadata": {
+                  "type": "string",
+                  "x-ms-summary": "Metadata",
+                  "description": "Optional custom metadata string",
+                  "example": "frankfurt_investment_round_a"
+                },
+                "labelPositioning": {
+                  "type": "string",
+                  "enum": [
+                    "none",
+                    "top_center",
+                    "top_left",
+                    "top_right",
+                    "bottom_left",
+                    "bottom_right",
+                    "bottom_center"
+                  ],
+                  "default": "none",
+                  "x-ms-summary": "Label Positioning",
+                  "description": "Positioning of the signature label."
+                },
+                "labelPositionX": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 0,
+                  "x-ms-summary": "Label Position X",
+                  "description": "X coordinate for signature label position."
+                },
+                "labelPositionY": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 0,
+                  "x-ms-summary": "Label Position Y",
+                  "description": "Y coordinate for signature label position."
+                }
+              },
+              "required": [
+                "fileName",
+                "fileContent"
+              ],
+              "example": {
+                "fileName": "Frankfurt_Partners_Investment_Agreement.pdf",
+                "fileContent": "JVBERi0xLjEKMSAwIG9iago...",
+                "position": 1,
+                "metadata": "frankfurt_investment_round_a"
+              }
+            },
+            "description": "Request Body",
+            "x-ms-body-example": {
+              "fileName": "Frankfurt_Partners_Investment_Agreement.pdf",
+              "fileContent": "JVBERi0xLjEKMSAwIG9iago...",
+              "position": 1,
+              "metadata": "frankfurt_investment_round_a"
+            },
+            "x-ms-summary": "Parameters"
+          },
+          {
+            "name": "x-environment",
+            "in": "header",
+            "required": false,
+            "type": "string",
+            "default": "https://api.digisign.org",
+            "x-ms-visibility": "advanced",
+            "description": "Target Environment URL",
+            "x-ms-summary": "X Environment"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File successfully uploaded and linked",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Document ID"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Document Name"
+                },
+                "metadata": {
+                  "type": "string",
+                  "description": "Metadata"
+                },
+                "position": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Position"
+                },
+                "signable": {
+                  "type": "boolean",
+                  "description": "Signable"
+                },
+                "fromTemplate": {
+                  "type": "boolean",
+                  "description": "From Template"
+                },
+                "labelPositioning": {
+                  "type": "string",
+                  "description": "Label Positioning"
+                },
+                "labelPositionX": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Label Position X"
+                },
+                "labelPositionY": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Label Position Y"
+                },
+                "signatureValidity": {
+                  "type": "string",
+                  "description": "Signature Validity"
+                },
+                "invalidatedAt": {
+                  "type": "string",
+                  "description": "Invalidated At"
+                },
+                "invalidate": {
+                  "type": "boolean",
+                  "description": "Invalidate"
+                },
+                "hasSignatures": {
+                  "type": "boolean",
+                  "description": "Has Signatures"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "description": "Created At"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "description": "Updated At"
+                },
+                "file": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "File ID"
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "File Name"
+                    },
+                    "originalName": {
+                      "type": "string",
+                      "description": "Original File Name"
+                    },
+                    "mimeType": {
+                      "type": "string",
+                      "description": "Mime Type"
+                    },
+                    "size": {
+                      "type": "integer",
+                      "format": "int32",
+                      "description": "Size in bytes"
+                    },
+                    "sha1Checksum": {
+                      "type": "string",
+                      "description": "SHA1 Checksum"
+                    },
+                    "category": {
+                      "type": "string",
+                      "description": "Category"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "description": "Created At"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "description": "Updated At"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid parameters or request body."
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid credentials."
+          },
+          "403": {
+            "description": "Forbidden - Access denied."
+          },
+          "404": {
+            "description": "Not Found - The requested resource was not found."
+          },
+          "500": {
+            "description": "Internal Server Error - Something went wrong on the server."
+          }
+        },
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
+    "/api/envelopes/{envelopeId}/recipients/signer": {
+      "post": {
+        "summary": "Add Recipient: Signer",
+        "description": "Adds a signing recipient to the draft envelope.",
+        "operationId": "addRecipientSigner",
+        "parameters": [
+          {
+            "name": "envelopeId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Envelope ID",
+            "description": "Envelope ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "role": {
+                  "type": "string",
+                  "x-ms-summary": "Role",
+                  "enum": [
+                    "signer",
+                    "in_person",
+                    "autosign",
+                    "semi_autosign"
+                  ],
+                  "default": "signer",
+                  "description": "Recipient role in envelope workflow",
+                  "example": "signer"
+                },
+                "name": {
+                  "type": "string",
+                  "x-ms-summary": "Full Name",
+                  "maxLength": 255,
+                  "description": "Full name of the recipient",
+                  "example": "Dr. Alexander Weber"
+                },
+                "email": {
+                  "type": "string",
+                  "x-ms-summary": "Email Address",
+                  "maxLength": 320,
+                  "description": "Email address of the recipient",
+                  "example": "alexander.weber@frankfurt-advisory.com"
+                },
+                "mobile": {
+                  "type": "string",
+                  "x-ms-summary": "Mobile Phone",
+                  "description": "Mobile number in E.164 format (required for SMS 2FA)",
+                  "example": "+420777111222"
+                },
+                "signatureType": {
+                  "type": "string",
+                  "x-ms-summary": "Signature Type",
+                  "enum": [
+                    "simple",
+                    "biometric",
+                    "bank_id_sign",
+                    "bank_id_qsign",
+                    "certificate",
+                    "certificate_akv",
+                    "certificate_file",
+                    "certificate_remote_sign",
+                    "by_scenario"
+                  ],
+                  "default": "simple",
+                  "description": "Type of signature required",
+                  "example": "simple"
+                },
+                "authenticationOnOpen": {
+                  "type": "string",
+                  "x-ms-summary": "Authentication on Open",
+                  "enum": [
+                    "none",
+                    "sms",
+                    "bankId",
+                    "sms_or_bankId",
+                    "identify",
+                    "by_scenario"
+                  ],
+                  "default": "none",
+                  "description": "Authentication method required to open envelope",
+                  "example": "none"
+                },
+                "authenticationOnSignature": {
+                  "type": "string",
+                  "x-ms-summary": "Authentication on Signature",
+                  "enum": [
+                    "none",
+                    "sms",
+                    "bankId",
+                    "sms_or_bankId",
+                    "identify",
+                    "by_scenario"
+                  ],
+                  "default": "none",
+                  "description": "Authentication method required to sign envelope",
+                  "example": "none"
+                },
+                "emailBody": {
+                  "type": "string",
+                  "x-ms-summary": "Email Body",
+                  "maxLength": 4096,
+                  "description": "Custom email body for this recipient",
+                  "example": "Please review and sign the attached document."
+                },
+                "birthdate": {
+                  "type": "string",
+                  "x-ms-summary": "Birthdate",
+                  "format": "date",
+                  "description": "Birthdate of recipient (YYYY-MM-DD)",
+                  "example": "1990-01-01"
+                },
+                "company": {
+                  "type": "string",
+                  "x-ms-summary": "Company Name",
+                  "maxLength": 255,
+                  "description": "Company name",
+                  "example": "Acme Corp"
+                },
+                "function": {
+                  "type": "string",
+                  "x-ms-summary": "Job Title / Position",
+                  "maxLength": 255,
+                  "description": "Job function / position",
+                  "example": "Director"
+                },
+                "contractingParty": {
+                  "type": "string",
+                  "x-ms-summary": "Contracting Party",
+                  "maxLength": 255,
+                  "description": "Contracting party identification",
+                  "example": "Seller"
+                },
+                "identificationNumber": {
+                  "type": "string",
+                  "x-ms-summary": "Company ID",
+                  "maxLength": 8,
+                  "description": "Company registration number.",
+                  "example": "12345678"
+                },
+                "birthnumber": {
+                  "type": "string",
+                  "x-ms-summary": "Personal ID",
+                  "maxLength": 255,
+                  "description": "Personal identification number.",
+                  "example": "900101/1234"
+                },
+                "address": {
+                  "type": "string",
+                  "x-ms-summary": "Address",
+                  "maxLength": 255,
+                  "description": "Address of recipient",
+                  "example": "Prague, Czech Republic"
+                },
+                "signingOrder": {
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-summary": "Signing Order",
+                  "minimum": 1,
+                  "maximum": 255,
+                  "description": "Order of signing (1-based index)",
+                  "example": 1
+                },
+                "metadata": {
+                  "type": "string",
+                  "x-ms-summary": "Metadata",
+                  "maxLength": 4096,
+                  "description": "Custom metadata for this recipient",
+                  "example": "signer_1"
+                }
+              },
+              "required": [
+                "role",
+                "name",
+                "email",
+                "mobile",
+                "signatureType",
+                "authenticationOnOpen",
+                "authenticationOnSignature"
+              ],
+              "example": {
+                "role": "signer",
+                "name": "Dr. Alexander Weber",
+                "email": "alexander.weber@frankfurt-advisory.com",
+                "mobile": "+420777111222",
+                "signatureType": "simple",
+                "authenticationOnOpen": "none",
+                "authenticationOnSignature": "none",
+                "emailBody": "Please review and sign the attached document.",
+                "birthdate": "1990-01-01",
+                "company": "Acme Corp",
+                "function": "Director",
+                "contractingParty": "Seller",
+                "identificationNumber": "12345678",
+                "birthnumber": "900101/1234",
+                "address": "Prague, Czech Republic",
+                "signingOrder": 1,
+                "metadata": "signer_1"
+              }
+            },
+            "description": "Request Body",
+            "x-ms-body-example": {
+              "role": "signer",
+              "name": "Dr. Alexander Weber",
+              "email": "alexander.weber@frankfurt-advisory.com",
+              "mobile": "+420777111222",
+              "signatureType": "simple",
+              "authenticationOnOpen": "none",
+              "authenticationOnSignature": "none",
+              "emailBody": "Please review and sign the attached document.",
+              "birthdate": "1990-01-01",
+              "company": "Acme Corp",
+              "function": "Director",
+              "contractingParty": "Seller",
+              "identificationNumber": "12345678",
+              "birthnumber": "900101/1234",
+              "address": "Prague, Czech Republic",
+              "signingOrder": 1,
+              "metadata": "signer_1"
+            },
+            "x-ms-summary": "Parameters"
+          },
+          {
+            "name": "x-environment",
+            "in": "header",
+            "required": false,
+            "type": "string",
+            "default": "https://api.digisign.org",
+            "x-ms-visibility": "advanced",
+            "description": "Target Environment URL",
+            "x-ms-summary": "X Environment"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Recipient created",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Recipient ID"
+                },
+                "status": {
+                  "type": "string",
+                  "description": "Status"
+                },
+                "metadata": {
+                  "type": "string",
+                  "description": "Metadata"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Name"
+                },
+                "email": {
+                  "type": "string",
+                  "description": "Email"
+                },
+                "mobile": {
+                  "type": "string",
+                  "description": "Mobile"
+                },
+                "company": {
+                  "type": "string",
+                  "description": "Company"
+                },
+                "function": {
+                  "type": "string",
+                  "description": "Function"
+                },
+                "contractingParty": {
+                  "type": "string",
+                  "description": "Contracting Party"
+                },
+                "birthdate": {
+                  "type": "string",
+                  "description": "Birthdate"
+                },
+                "birthnumber": {
+                  "type": "string",
+                  "description": "Birth Number / Personal ID"
+                },
+                "role": {
+                  "type": "string",
+                  "description": "Role"
+                },
+                "signatureType": {
+                  "type": "string",
+                  "description": "Signature Type"
+                },
+                "authenticationOnOpen": {
+                  "type": "string",
+                  "description": "Auth on Open"
+                },
+                "authenticationOnSignature": {
+                  "type": "string",
+                  "description": "Auth on Signature"
+                },
+                "emailBody": {
+                  "type": "string",
+                  "description": "Custom Email Body"
+                },
+                "language": {
+                  "type": "string",
+                  "description": "Language"
+                },
+                "signingOrder": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Signing Order"
+                },
+                "identificationNumber": {
+                  "type": "string",
+                  "description": "Company ID"
+                },
+                "address": {
+                  "type": "string",
+                  "description": "Address"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "description": "Created At"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "description": "Updated At"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid parameters or request body."
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid credentials."
+          },
+          "403": {
+            "description": "Forbidden - Access denied."
+          },
+          "404": {
+            "description": "Not Found - The requested resource was not found."
+          },
+          "500": {
+            "description": "Internal Server Error - Something went wrong on the server."
+          },
+          "200": {
+            "description": "Recipient created",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Recipient ID"
+                },
+                "status": {
+                  "type": "string",
+                  "description": "Status"
+                },
+                "metadata": {
+                  "type": "string",
+                  "description": "Metadata"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Name"
+                },
+                "email": {
+                  "type": "string",
+                  "description": "Email"
+                },
+                "mobile": {
+                  "type": "string",
+                  "description": "Mobile"
+                },
+                "company": {
+                  "type": "string",
+                  "description": "Company"
+                },
+                "function": {
+                  "type": "string",
+                  "description": "Function"
+                },
+                "contractingParty": {
+                  "type": "string",
+                  "description": "Contracting Party"
+                },
+                "birthdate": {
+                  "type": "string",
+                  "description": "Birthdate"
+                },
+                "birthnumber": {
+                  "type": "string",
+                  "description": "Birth Number / Personal ID"
+                },
+                "role": {
+                  "type": "string",
+                  "description": "Role"
+                },
+                "signatureType": {
+                  "type": "string",
+                  "description": "Signature Type"
+                },
+                "authenticationOnOpen": {
+                  "type": "string",
+                  "description": "Auth on Open"
+                },
+                "authenticationOnSignature": {
+                  "type": "string",
+                  "description": "Auth on Signature"
+                },
+                "emailBody": {
+                  "type": "string",
+                  "description": "Custom Email Body"
+                },
+                "language": {
+                  "type": "string",
+                  "description": "Language"
+                },
+                "signingOrder": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Signing Order"
+                },
+                "identificationNumber": {
+                  "type": "string",
+                  "description": "Company ID"
+                },
+                "address": {
+                  "type": "string",
+                  "description": "Address"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "description": "Created At"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "description": "Updated At"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Recipients"
+        ]
+      }
+    },
+    "/api/envelopes/{envelopeId}/recipients/approver": {
+      "post": {
+        "summary": "Add Recipient: Approver",
+        "description": "Adds an approving recipient to the draft envelope.",
+        "operationId": "addRecipientApprover",
+        "parameters": [
+          {
+            "name": "envelopeId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Envelope ID",
+            "description": "Envelope ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "role": {
+                  "type": "string",
+                  "enum": [
+                    "approver"
+                  ],
+                  "default": "approver",
+                  "x-ms-summary": "Role",
+                  "description": "Recipient role in envelope workflow",
+                  "example": "approver"
+                },
+                "name": {
+                  "type": "string",
+                  "x-ms-summary": "Name",
+                  "maxLength": 255,
+                  "description": "Full name of the recipient",
+                  "example": "Dr. Alexander Weber"
+                },
+                "email": {
+                  "type": "string",
+                  "x-ms-summary": "Email",
+                  "maxLength": 320,
+                  "description": "Email address of the recipient",
+                  "example": "alexander.weber@frankfurt-advisory.com"
+                },
+                "mobile": {
+                  "type": "string",
+                  "x-ms-summary": "Mobile",
+                  "description": "Mobile number in E.164 format",
+                  "example": "+420777111222"
+                },
+                "approvalMode": {
+                  "type": "string",
+                  "enum": [
+                    "per_envelope",
+                    "per_document",
+                    "per_document_hidden"
+                  ],
+                  "default": "per_envelope",
+                  "x-ms-summary": "Approval Mode",
+                  "description": "Mode of approval",
+                  "example": "per_envelope"
+                },
+                "authenticationOnOpen": {
+                  "type": "string",
+                  "enum": [
+                    "none",
+                    "sms",
+                    "bankId",
+                    "sms_or_bankId",
+                    "identify",
+                    "by_scenario"
+                  ],
+                  "default": "none",
+                  "x-ms-summary": "Authentication On Open",
+                  "description": "Authentication method required to open envelope",
+                  "example": "none"
+                },
+                "authenticationOnSignature": {
+                  "type": "string",
+                  "enum": [
+                    "none",
+                    "sms",
+                    "bankId",
+                    "sms_or_bankId",
+                    "identify",
+                    "by_scenario"
+                  ],
+                  "default": "none",
+                  "x-ms-summary": "Authentication On Signature",
+                  "description": "Authentication method required to approve",
+                  "example": "none"
+                },
+                "emailBody": {
+                  "type": "string",
+                  "x-ms-summary": "Email Body",
+                  "maxLength": 4096,
+                  "description": "Custom email body for this recipient",
+                  "example": "Please review and sign the attached document."
+                },
+                "birthdate": {
+                  "type": "string",
+                  "x-ms-summary": "Birthdate",
+                  "format": "date",
+                  "description": "Birthdate of recipient (YYYY-MM-DD)",
+                  "example": "1990-01-01"
+                },
+                "company": {
+                  "type": "string",
+                  "x-ms-summary": "Company",
+                  "maxLength": 255,
+                  "description": "Company name",
+                  "example": "Acme Corp"
+                },
+                "function": {
+                  "type": "string",
+                  "x-ms-summary": "Function",
+                  "maxLength": 255,
+                  "description": "Job function / position",
+                  "example": "Director"
+                },
+                "contractingParty": {
+                  "type": "string",
+                  "x-ms-summary": "Contracting Party",
+                  "maxLength": 255,
+                  "description": "Contracting party identification",
+                  "example": "Seller"
+                },
+                "identificationNumber": {
+                  "type": "string",
+                  "x-ms-summary": "Identification Number",
+                  "maxLength": 8,
+                  "description": "Company registration number.",
+                  "example": "12345678"
+                },
+                "birthnumber": {
+                  "type": "string",
+                  "x-ms-summary": "Birth Number",
+                  "maxLength": 255,
+                  "description": "Personal identification number.",
+                  "example": "900101/1234"
+                },
+                "address": {
+                  "type": "string",
+                  "x-ms-summary": "Address",
+                  "maxLength": 255,
+                  "description": "Address of recipient",
+                  "example": "Prague, Czech Republic"
+                },
+                "signingOrder": {
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-summary": "Signing Order",
+                  "minimum": 1,
+                  "maximum": 255,
+                  "description": "Order of signing (1-based index)",
+                  "example": 1
+                },
+                "metadata": {
+                  "type": "string",
+                  "x-ms-summary": "Metadata",
+                  "maxLength": 4096,
+                  "description": "Custom metadata for this recipient",
+                  "example": "approver_1"
+                }
+              },
+              "required": [
+                "role",
+                "name",
+                "email",
+                "mobile",
+                "approvalMode",
+                "authenticationOnOpen",
+                "authenticationOnSignature"
+              ],
+              "example": {
+                "role": "approver",
+                "name": "Dr. Alexander Weber",
+                "email": "alexander.weber@frankfurt-advisory.com",
+                "mobile": "+420777111222",
+                "approvalMode": "per_envelope",
+                "authenticationOnOpen": "none",
+                "authenticationOnSignature": "none",
+                "emailBody": "Please review and sign the attached document.",
+                "birthdate": "1990-01-01",
+                "company": "Acme Corp",
+                "function": "Director",
+                "contractingParty": "Seller",
+                "identificationNumber": "12345678",
+                "birthnumber": "900101/1234",
+                "address": "Prague, Czech Republic",
+                "signingOrder": 1,
+                "metadata": "approver_1"
+              }
+            },
+            "description": "Request Body",
+            "x-ms-body-example": {
+              "role": "approver",
+              "name": "Dr. Alexander Weber",
+              "email": "alexander.weber@frankfurt-advisory.com",
+              "mobile": "+420777111222",
+              "approvalMode": "per_envelope",
+              "authenticationOnOpen": "none",
+              "authenticationOnSignature": "none",
+              "emailBody": "Please review and sign the attached document.",
+              "birthdate": "1990-01-01",
+              "company": "Acme Corp",
+              "function": "Director",
+              "contractingParty": "Seller",
+              "identificationNumber": "12345678",
+              "birthnumber": "900101/1234",
+              "address": "Prague, Czech Republic",
+              "signingOrder": 1,
+              "metadata": "approver_1"
+            },
+            "x-ms-summary": "Parameters"
+          },
+          {
+            "name": "x-environment",
+            "in": "header",
+            "required": false,
+            "type": "string",
+            "default": "https://api.digisign.org",
+            "x-ms-visibility": "advanced",
+            "description": "Target Environment URL",
+            "x-ms-summary": "X Environment"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Recipient created",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Recipient ID"
+                },
+                "status": {
+                  "type": "string",
+                  "description": "Status"
+                },
+                "metadata": {
+                  "type": "string",
+                  "description": "Metadata"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Name"
+                },
+                "email": {
+                  "type": "string",
+                  "description": "Email"
+                },
+                "mobile": {
+                  "type": "string",
+                  "description": "Mobile"
+                },
+                "company": {
+                  "type": "string",
+                  "description": "Company"
+                },
+                "function": {
+                  "type": "string",
+                  "description": "Function"
+                },
+                "contractingParty": {
+                  "type": "string",
+                  "description": "Contracting Party"
+                },
+                "birthdate": {
+                  "type": "string",
+                  "description": "Birthdate"
+                },
+                "birthnumber": {
+                  "type": "string",
+                  "description": "Birth Number / Personal ID"
+                },
+                "role": {
+                  "type": "string",
+                  "description": "Role"
+                },
+                "signatureType": {
+                  "type": "string",
+                  "description": "Signature Type"
+                },
+                "authenticationOnOpen": {
+                  "type": "string",
+                  "description": "Auth on Open"
+                },
+                "authenticationOnSignature": {
+                  "type": "string",
+                  "description": "Auth on Signature"
+                },
+                "emailBody": {
+                  "type": "string",
+                  "description": "Custom Email Body"
+                },
+                "language": {
+                  "type": "string",
+                  "description": "Language"
+                },
+                "signingOrder": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Signing Order"
+                },
+                "identificationNumber": {
+                  "type": "string",
+                  "description": "Company ID"
+                },
+                "address": {
+                  "type": "string",
+                  "description": "Address"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "description": "Created At"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "description": "Updated At"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid parameters or request body."
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid credentials."
+          },
+          "403": {
+            "description": "Forbidden - Access denied."
+          },
+          "404": {
+            "description": "Not Found - The requested resource was not found."
+          },
+          "500": {
+            "description": "Internal Server Error - Something went wrong on the server."
+          },
+          "200": {
+            "description": "Recipient created",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Recipient ID"
+                },
+                "status": {
+                  "type": "string",
+                  "description": "Status"
+                },
+                "metadata": {
+                  "type": "string",
+                  "description": "Metadata"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Name"
+                },
+                "email": {
+                  "type": "string",
+                  "description": "Email"
+                },
+                "mobile": {
+                  "type": "string",
+                  "description": "Mobile"
+                },
+                "company": {
+                  "type": "string",
+                  "description": "Company"
+                },
+                "function": {
+                  "type": "string",
+                  "description": "Function"
+                },
+                "contractingParty": {
+                  "type": "string",
+                  "description": "Contracting Party"
+                },
+                "birthdate": {
+                  "type": "string",
+                  "description": "Birthdate"
+                },
+                "birthnumber": {
+                  "type": "string",
+                  "description": "Birth Number / Personal ID"
+                },
+                "role": {
+                  "type": "string",
+                  "description": "Role"
+                },
+                "signatureType": {
+                  "type": "string",
+                  "description": "Signature Type"
+                },
+                "authenticationOnOpen": {
+                  "type": "string",
+                  "description": "Auth on Open"
+                },
+                "authenticationOnSignature": {
+                  "type": "string",
+                  "description": "Auth on Signature"
+                },
+                "emailBody": {
+                  "type": "string",
+                  "description": "Custom Email Body"
+                },
+                "language": {
+                  "type": "string",
+                  "description": "Language"
+                },
+                "signingOrder": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Signing Order"
+                },
+                "identificationNumber": {
+                  "type": "string",
+                  "description": "Company ID"
+                },
+                "address": {
+                  "type": "string",
+                  "description": "Address"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "description": "Created At"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "description": "Updated At"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Recipients"
+        ]
+      }
+    },
+    "/api/envelopes/{envelopeId}/recipients/cc": {
+      "post": {
+        "summary": "Add Recipient: CC",
+        "description": "Adds a copy (CC) recipient to the draft envelope.",
+        "operationId": "addRecipientCC",
+        "parameters": [
+          {
+            "name": "envelopeId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Envelope ID",
+            "description": "Envelope ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "role": {
+                  "type": "string",
+                  "enum": [
+                    "cc"
+                  ],
+                  "default": "cc",
+                  "x-ms-summary": "Role",
+                  "description": "Recipient role in envelope workflow",
+                  "example": "cc"
+                },
+                "name": {
+                  "type": "string",
+                  "x-ms-summary": "Name",
+                  "maxLength": 255,
+                  "description": "Full name of the recipient",
+                  "example": "Dr. Alexander Weber"
+                },
+                "email": {
+                  "type": "string",
+                  "x-ms-summary": "Email",
+                  "maxLength": 320,
+                  "description": "Email address of the recipient",
+                  "example": "alexander.weber@frankfurt-advisory.com"
+                },
+                "mobile": {
+                  "type": "string",
+                  "x-ms-summary": "Mobile",
+                  "description": "Mobile number in E.164 format",
+                  "example": "+420777111222"
+                },
+                "authenticationOnOpen": {
+                  "type": "string",
+                  "enum": [
+                    "none",
+                    "sms",
+                    "bankId",
+                    "sms_or_bankId",
+                    "identify",
+                    "by_scenario"
+                  ],
+                  "default": "none",
+                  "x-ms-summary": "Authentication On Open",
+                  "description": "Authentication method required to open envelope",
+                  "example": "none"
+                },
+                "emailBody": {
+                  "type": "string",
+                  "x-ms-summary": "Email Body",
+                  "maxLength": 4096,
+                  "description": "Custom email body for this recipient",
+                  "example": "Please review and sign the attached document."
+                },
+                "birthdate": {
+                  "type": "string",
+                  "x-ms-summary": "Birthdate",
+                  "format": "date",
+                  "description": "Birthdate of recipient (YYYY-MM-DD)",
+                  "example": "1990-01-01"
+                },
+                "company": {
+                  "type": "string",
+                  "x-ms-summary": "Company",
+                  "maxLength": 255,
+                  "description": "Company name",
+                  "example": "Acme Corp"
+                },
+                "function": {
+                  "type": "string",
+                  "x-ms-summary": "Function",
+                  "maxLength": 255,
+                  "description": "Job function / position",
+                  "example": "Director"
+                },
+                "contractingParty": {
+                  "type": "string",
+                  "x-ms-summary": "Contracting Party",
+                  "maxLength": 255,
+                  "description": "Contracting party identification",
+                  "example": "Seller"
+                },
+                "identificationNumber": {
+                  "type": "string",
+                  "x-ms-summary": "Identification Number",
+                  "maxLength": 8,
+                  "description": "Company registration number.",
+                  "example": "12345678"
+                },
+                "birthnumber": {
+                  "type": "string",
+                  "x-ms-summary": "Birth Number",
+                  "maxLength": 255,
+                  "description": "Personal identification number.",
+                  "example": "900101/1234"
+                },
+                "address": {
+                  "type": "string",
+                  "x-ms-summary": "Address",
+                  "maxLength": 255,
+                  "description": "Address of recipient",
+                  "example": "Prague, Czech Republic"
+                },
+                "signingOrder": {
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-summary": "Signing Order",
+                  "minimum": 1,
+                  "maximum": 255,
+                  "description": "Order of signing (1-based index)",
+                  "example": 1
+                },
+                "metadata": {
+                  "type": "string",
+                  "x-ms-summary": "Metadata",
+                  "maxLength": 4096,
+                  "description": "Custom metadata for this recipient",
+                  "example": "cc_1"
+                }
+              },
+              "required": [
+                "role",
+                "name",
+                "email",
+                "mobile"
+              ],
+              "example": {
+                "role": "cc",
+                "name": "Dr. Alexander Weber",
+                "email": "alexander.weber@frankfurt-advisory.com",
+                "mobile": "+420777111222",
+                "birthdate": "1990-01-01",
+                "company": "Acme Corp",
+                "function": "Director",
+                "contractingParty": "Seller",
+                "identificationNumber": "12345678",
+                "birthnumber": "900101/1234",
+                "address": "Prague, Czech Republic",
+                "signingOrder": 1,
+                "metadata": "cc_1"
+              }
+            },
+            "description": "Request Body",
+            "x-ms-body-example": {
+              "role": "cc",
+              "name": "Dr. Alexander Weber",
+              "email": "alexander.weber@frankfurt-advisory.com",
+              "mobile": "+420777111222",
+              "birthdate": "1990-01-01",
+              "company": "Acme Corp",
+              "function": "Director",
+              "contractingParty": "Seller",
+              "identificationNumber": "12345678",
+              "birthnumber": "900101/1234",
+              "address": "Prague, Czech Republic",
+              "signingOrder": 1,
+              "metadata": "cc_1"
+            },
+            "x-ms-summary": "Parameters"
+          },
+          {
+            "name": "x-environment",
+            "in": "header",
+            "required": false,
+            "type": "string",
+            "default": "https://api.digisign.org",
+            "x-ms-visibility": "advanced",
+            "description": "Target Environment URL",
+            "x-ms-summary": "X Environment"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Recipient created",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Recipient ID"
+                },
+                "status": {
+                  "type": "string",
+                  "description": "Status"
+                },
+                "metadata": {
+                  "type": "string",
+                  "description": "Metadata"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Name"
+                },
+                "email": {
+                  "type": "string",
+                  "description": "Email"
+                },
+                "mobile": {
+                  "type": "string",
+                  "description": "Mobile"
+                },
+                "company": {
+                  "type": "string",
+                  "description": "Company"
+                },
+                "function": {
+                  "type": "string",
+                  "description": "Function"
+                },
+                "contractingParty": {
+                  "type": "string",
+                  "description": "Contracting Party"
+                },
+                "birthdate": {
+                  "type": "string",
+                  "description": "Birthdate"
+                },
+                "birthnumber": {
+                  "type": "string",
+                  "description": "Birth Number / Personal ID"
+                },
+                "role": {
+                  "type": "string",
+                  "description": "Role"
+                },
+                "signatureType": {
+                  "type": "string",
+                  "description": "Signature Type"
+                },
+                "authenticationOnOpen": {
+                  "type": "string",
+                  "description": "Auth on Open"
+                },
+                "authenticationOnSignature": {
+                  "type": "string",
+                  "description": "Auth on Signature"
+                },
+                "emailBody": {
+                  "type": "string",
+                  "description": "Custom Email Body"
+                },
+                "language": {
+                  "type": "string",
+                  "description": "Language"
+                },
+                "signingOrder": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Signing Order"
+                },
+                "identificationNumber": {
+                  "type": "string",
+                  "description": "Company ID"
+                },
+                "address": {
+                  "type": "string",
+                  "description": "Address"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "description": "Created At"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "description": "Updated At"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid parameters or request body."
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid credentials."
+          },
+          "403": {
+            "description": "Forbidden - Access denied."
+          },
+          "404": {
+            "description": "Not Found - The requested resource was not found."
+          },
+          "500": {
+            "description": "Internal Server Error - Something went wrong on the server."
+          },
+          "200": {
+            "description": "Recipient created",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Recipient ID"
+                },
+                "status": {
+                  "type": "string",
+                  "description": "Status"
+                },
+                "metadata": {
+                  "type": "string",
+                  "description": "Metadata"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Name"
+                },
+                "email": {
+                  "type": "string",
+                  "description": "Email"
+                },
+                "mobile": {
+                  "type": "string",
+                  "description": "Mobile"
+                },
+                "company": {
+                  "type": "string",
+                  "description": "Company"
+                },
+                "function": {
+                  "type": "string",
+                  "description": "Function"
+                },
+                "contractingParty": {
+                  "type": "string",
+                  "description": "Contracting Party"
+                },
+                "birthdate": {
+                  "type": "string",
+                  "description": "Birthdate"
+                },
+                "birthnumber": {
+                  "type": "string",
+                  "description": "Birth Number / Personal ID"
+                },
+                "role": {
+                  "type": "string",
+                  "description": "Role"
+                },
+                "signatureType": {
+                  "type": "string",
+                  "description": "Signature Type"
+                },
+                "authenticationOnOpen": {
+                  "type": "string",
+                  "description": "Auth on Open"
+                },
+                "authenticationOnSignature": {
+                  "type": "string",
+                  "description": "Auth on Signature"
+                },
+                "emailBody": {
+                  "type": "string",
+                  "description": "Custom Email Body"
+                },
+                "language": {
+                  "type": "string",
+                  "description": "Language"
+                },
+                "signingOrder": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Signing Order"
+                },
+                "identificationNumber": {
+                  "type": "string",
+                  "description": "Company ID"
+                },
+                "address": {
+                  "type": "string",
+                  "description": "Address"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "description": "Created At"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "description": "Updated At"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Recipients"
+        ]
+      }
+    },
+    "/api/envelopes/{envelopeId}/tags": {
+      "post": {
+        "summary": "Add Signature Tag",
+        "description": "Adds a signature tag positioning block to a document for a specific recipient.",
+        "operationId": "addTag",
+        "parameters": [
+          {
+            "name": "envelopeId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Envelope ID",
+            "description": "Envelope ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "document": {
+                  "type": "string",
+                  "x-ms-summary": "Document",
+                  "description": "IRI or UUID of the document within the envelope",
+                  "example": "/api/envelopes/019ee50a-850f-73cc-bca6-a284a01519cd/documents/019ee50b-1cdb-7102-82b2-3e8ee937bffa"
+                },
+                "recipient": {
+                  "type": "string",
+                  "x-ms-summary": "Recipient",
+                  "description": "IRI or UUID of the recipient within the envelope",
+                  "example": "/api/envelopes/019ee50a-850f-73cc-bca6-a284a01519cd/recipients/019ee50b-bc5c-71d0-b7ce-a2ed65837ab9"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "signature",
+                    "document",
+                    "text",
+                    "checkbox",
+                    "attachment",
+                    "radio_button",
+                    "approval",
+                    "date_of_signature"
+                  ],
+                  "default": "signature",
+                  "x-ms-summary": "Type",
+                  "description": "Tag type",
+                  "example": "signature"
+                },
+                "placeholder": {
+                  "type": "string",
+                  "x-ms-summary": "Placeholder",
+                  "description": "Text placeholder in document to auto-position tag (e.g. {signer1})",
+                  "example": "{signer1}"
+                },
+                "page": {
+                  "type": "integer",
+                  "x-ms-summary": "Page",
+                  "description": "Page number (1-based index) if positioning by coordinates",
+                  "example": 1
+                },
+                "xPosition": {
+                  "type": "integer",
+                  "x-ms-summary": "X Position",
+                  "description": "Horizontal coordinate in points if positioning by coordinates",
+                  "example": 150
+                },
+                "yPosition": {
+                  "type": "integer",
+                  "x-ms-summary": "Y Position",
+                  "description": "Vertical coordinate in points if positioning by coordinates",
+                  "example": 200
+                },
+                "positioning": {
+                  "type": "string",
+                  "enum": [
+                    "top_left",
+                    "bottom_left",
+                    "middle_left",
+                    "top_right",
+                    "bottom_right",
+                    "middle_right",
+                    "top_center",
+                    "bottom_center",
+                    "center"
+                  ],
+                  "default": "top_left",
+                  "x-ms-summary": "Positioning",
+                  "description": "How the Tag is aligned relative to coordinates or placeholder",
+                  "example": "top_left"
+                },
+                "required": {
+                  "type": "boolean",
+                  "default": true,
+                  "x-ms-summary": "Required",
+                  "description": "Is this tag required to complete envelope",
+                  "example": true
+                },
+                "scale": {
+                  "type": "integer",
+                  "minimum": 20,
+                  "maximum": 1000,
+                  "default": 100,
+                  "x-ms-summary": "Scale",
+                  "description": "Resize percentage of signature tag (20 to 1000)",
+                  "example": 100
+                }
+              },
+              "required": [
+                "document",
+                "recipient",
+                "type"
+              ],
+              "example": {
+                "document": "/api/envelopes/019ee50a-850f-73cc-bca6-a284a01519cd/documents/019ee50b-1cdb-7102-82b2-3e8ee937bffa",
+                "recipient": "/api/envelopes/019ee50a-850f-73cc-bca6-a284a01519cd/recipients/019ee50b-bc5c-71d0-b7ce-a2ed65837ab9",
+                "type": "signature",
+                "placeholder": "{signer1}",
+                "page": 1,
+                "xPosition": 150,
+                "yPosition": 200,
+                "positioning": "top_left",
+                "required": true,
+                "scale": 100
+              }
+            },
+            "description": "Request Body",
+            "x-ms-body-example": {
+              "document": "/api/envelopes/019ee50a-850f-73cc-bca6-a284a01519cd/documents/019ee50b-1cdb-7102-82b2-3e8ee937bffa",
+              "recipient": "/api/envelopes/019ee50a-850f-73cc-bca6-a284a01519cd/recipients/019ee50b-bc5c-71d0-b7ce-a2ed65837ab9",
+              "type": "signature",
+              "placeholder": "{signer1}",
+              "page": 1,
+              "xPosition": 150,
+              "yPosition": 200,
+              "positioning": "top_left",
+              "required": true,
+              "scale": 100
+            },
+            "x-ms-summary": "Parameters"
+          },
+          {
+            "name": "x-environment",
+            "in": "header",
+            "required": false,
+            "type": "string",
+            "default": "https://api.digisign.org",
+            "x-ms-visibility": "advanced",
+            "description": "Target Environment URL",
+            "x-ms-summary": "X Environment"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Tag created",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Tag ID"
+                },
+                "scale": {
+                  "type": "integer",
+                  "description": "Scale"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "Type"
+                },
+                "resolved": {
+                  "type": "boolean",
+                  "description": "Resolved"
+                },
+                "placeholder": {
+                  "type": "string",
+                  "description": "Placeholder"
+                },
+                "page": {
+                  "type": "integer",
+                  "description": "Page"
+                },
+                "xPosition": {
+                  "type": "integer",
+                  "description": "X Position"
+                },
+                "yPosition": {
+                  "type": "integer",
+                  "description": "Y Position"
+                },
+                "positioning": {
+                  "type": "string",
+                  "description": "Positioning"
+                },
+                "required": {
+                  "type": "boolean",
+                  "description": "Required"
+                },
+                "fromTemplate": {
+                  "type": "boolean",
+                  "description": "From Template"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "description": "Created At"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "description": "Updated At"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid parameters or request body."
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid credentials."
+          },
+          "403": {
+            "description": "Forbidden - Access denied."
+          },
+          "404": {
+            "description": "Not Found - The requested resource was not found."
+          },
+          "500": {
+            "description": "Internal Server Error - Something went wrong on the server."
+          },
+          "200": {
+            "description": "Tag created",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Tag ID"
+                },
+                "scale": {
+                  "type": "integer",
+                  "description": "Scale"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "Type"
+                },
+                "resolved": {
+                  "type": "boolean",
+                  "description": "Resolved"
+                },
+                "placeholder": {
+                  "type": "string",
+                  "description": "Placeholder"
+                },
+                "page": {
+                  "type": "integer",
+                  "description": "Page"
+                },
+                "xPosition": {
+                  "type": "integer",
+                  "description": "X Position"
+                },
+                "yPosition": {
+                  "type": "integer",
+                  "description": "Y Position"
+                },
+                "positioning": {
+                  "type": "string",
+                  "description": "Positioning"
+                },
+                "required": {
+                  "type": "boolean",
+                  "description": "Required"
+                },
+                "fromTemplate": {
+                  "type": "boolean",
+                  "description": "From Template"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "description": "Created At"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "description": "Updated At"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Tags"
+        ]
+      }
+    },
+    "/api/envelopes/{envelopeId}/send": {
+      "post": {
+        "summary": "Send Envelope",
+        "description": "Finalizes the draft and sends the envelope to all recipients for signing.",
+        "operationId": "sendEnvelope",
+        "parameters": [
+          {
+            "name": "envelopeId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Envelope ID",
+            "description": "Envelope ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "x-environment",
+            "in": "header",
+            "required": false,
+            "type": "string",
+            "default": "https://api.digisign.org",
+            "x-ms-visibility": "advanced",
+            "description": "Target Environment URL",
+            "x-ms-summary": "X Environment"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Envelope sent successfully",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid parameters or request body."
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid credentials."
+          },
+          "403": {
+            "description": "Forbidden - Access denied."
+          },
+          "404": {
+            "description": "Not Found - The requested resource was not found."
+          },
+          "500": {
+            "description": "Internal Server Error - Something went wrong on the server."
+          }
+        },
+        "tags": [
+          "Envelopes"
+        ]
+      }
+    },
+    "/api/call-api": {
+      "post": {
+        "summary": "Universal API Call",
+        "description": "Performs an authenticated HTTP request to any Digisign API endpoint.",
+        "operationId": "callApi",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "x-ms-summary": "Method",
+                  "enum": [
+                    "GET",
+                    "POST"
+                  ],
+                  "default": "GET",
+                  "description": "HTTP method for the request",
+                  "example": "GET"
+                },
+                "path": {
+                  "type": "string",
+                  "x-ms-summary": "Path",
+                  "description": "Relative API path starting with slash (e.g. /api/envelopes)",
+                  "example": "/api/envelopes"
+                },
+                "queryString": {
+                  "type": "string",
+                  "x-ms-summary": "Query String",
+                  "description": "Query parameters (e.g. page=1&itemsPerPage=30)",
+                  "example": "page=1"
+                },
+                "body": {
+                  "type": "object",
+                  "x-ms-summary": "Body",
+                  "description": "JSON request body payload for POST requests",
+                  "example": {}
+                }
+              },
+              "required": [
+                "method",
+                "path"
+              ],
+              "example": {
+                "method": "GET",
+                "path": "/api/envelopes",
+                "queryString": "page=1",
+                "body": {}
+              }
+            },
+            "description": "Request Body",
+            "x-ms-body-example": {
+              "method": "GET",
+              "path": "/api/envelopes",
+              "queryString": "page=1",
+              "body": {}
+            },
+            "x-ms-summary": "Parameters"
+          },
+          {
+            "name": "x-environment",
+            "in": "header",
+            "required": false,
+            "type": "string",
+            "default": "https://api.digisign.org",
+            "x-ms-visibility": "advanced",
+            "description": "Target Environment URL",
+            "x-ms-summary": "X Environment"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "API call completed",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid parameters or request body."
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid credentials."
+          },
+          "403": {
+            "description": "Forbidden - Access denied."
+          },
+          "404": {
+            "description": "Not Found - The requested resource was not found."
+          },
+          "500": {
+            "description": "Internal Server Error - Something went wrong on the server."
+          }
+        },
+        "tags": [
+          "Utility"
+        ]
+      }
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.digisign.cz/"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.digisign.cz/gdpr.pdf"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Content and Files;Productivity"
+    }
+  ],
+  "x-developer": "Lukáš Toman (https://github.com/toman-lukas85)",
+  "x-author": "Lukáš Toman (https://github.com/toman-lukas85)"
+}

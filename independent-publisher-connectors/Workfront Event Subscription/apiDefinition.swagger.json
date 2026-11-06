@@ -1,0 +1,254 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Workfront Event Subscription",
+    "version": "1.0.0",
+    "description": "Custom connector for Adobe Workfront.",
+    "contact": {
+      "name": "P-Product",
+      "email": "partners@p-product.com"
+    }
+  },
+  "schemes": [
+    "https"
+  ],
+  "host": "example.123.com",
+  "basePath": "/",
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://business.adobe.com/products/workfront.html"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.adobe.com/privacy.html"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Productivity;Collaboration"
+    }
+  ],
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "X-WORKFRONT-API-KEY"
+    }
+  },
+  "security": [],
+  
+  "paths": {
+    "/attask/eventsubscription/api/v1/subscriptions": {
+      "x-ms-notification-content": {
+        "description": "Workfront event notification",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "eventType": {
+              "type": "string",
+              "description": "Type of event (CREATE, UPDATE, DELETE)"
+            },
+            "subscriptionId": {
+              "type": "string",
+              "description": "ID of the subscription"
+            },
+            "eventTime": {
+              "type": "object",
+              "description": "Time when event occurred",
+              "properties": {
+                "epochSecond": {
+                  "type": "integer",
+                  "description": "Unix timestamp in seconds"
+                },
+                "nano": {
+                  "type": "integer",
+                  "description": "Nanosecond precision"
+                }
+              }
+            },
+            "newState": {
+              "type": "object",
+              "description": "New state of the object",
+              "additionalProperties": true
+            },
+            "oldState": {
+              "type": "object",
+              "description": "Previous state of the object (empty for CREATE events)",
+              "additionalProperties": true
+            },
+            "customerId": {
+              "type": "string",
+              "description": "Workfront customer ID"
+            },
+            "userId": {
+              "type": "string",
+              "description": "ID of the user who triggered the event"
+            },
+            "subscriptionVersion": {
+              "type": "string",
+              "description": "Version of the subscription (v1 or v2)"
+            },
+            "eventVersion": {
+              "type": "string",
+              "description": "Version of the event format (v1 or v2)"
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "When a Workfront event occurs",
+        "description": "Triggers when a CREATE, UPDATE, or DELETE event occurs in Workfront",
+        "operationId": "OnWorkfrontEvent",
+        "x-ms-trigger": "single",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "objCode",
+                "eventType",
+                "url"
+              ],
+              "properties": {
+                "objCode": {
+                  "type": "string",
+                  "description": "Workfront object type",
+                  "title": "Object Type",
+                  "x-ms-summary": "Object Type",
+                  "enum": [
+                    "PROJ",
+                    "TASK",
+                    "OPTASK",
+                    "USER",
+                    "DOCU",
+                    "PORT",
+                    "PRGM",
+                    "TMPL",
+                    "TMTSK",
+                    "HOUR",
+                    "NOTE",
+                    "APPROVAL",
+                    "ASSGN",
+                    "EXPNS",
+                    "CUSTRECORD"
+                  ],
+                  "x-ms-visibility": "important"
+                },
+                "eventType": {
+                  "type": "string",
+                  "description": "Type of event to trigger on",
+                  "title": "Event Type",
+                  "x-ms-summary": "Event Type",
+                  "enum": [
+                    "CREATE",
+                    "UPDATE",
+                    "DELETE"
+                  ],
+                  "x-ms-visibility": "important"
+                },
+                "url": {
+                  "type": "string",
+                  "description": "Webhook callback URL",
+                  "title": "Callback URL",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal"
+                },
+                "filters": {
+                  "type": "array",
+                  "description": "Optional filters to apply to events",
+                  "title": "Filters (Optional)",
+                  "x-ms-summary": "Event Filters",
+                  "x-ms-visibility": "advanced",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "fieldName": {
+                        "type": "string",
+                        "description": "Field name to filter on (e.g., projectID, status, lastUpdatedByID)",
+                        "title": "Field Name",
+                        "x-ms-summary": "Field Name"
+                      },
+                      "fieldValue": {
+                        "type": "string",
+                        "description": "Value to compare against",
+                        "title": "Field Value",
+                        "x-ms-summary": "Field Value"
+                      },
+                      "state": {
+                        "type": "string",
+                        "description": "State to check (newState or oldState)",
+                        "title": "State",
+                        "x-ms-summary": "State",
+                        "enum": [
+                          "newState",
+                          "oldState"
+                        ],
+                        "default": "newState"
+                      },
+                      "comparison": {
+                        "type": "string",
+                        "description": "Comparison operator",
+                        "title": "Comparison",
+                        "x-ms-summary": "Comparison Operator",
+                        "enum": [
+                          "eq",
+                          "ne",
+                          "lt",
+                          "lte",
+                          "gt",
+                          "gte",
+                          "contains"
+                        ],
+                        "default": "eq"
+                      }
+                    },
+                    "required": [
+                      "fieldName",
+                      "fieldValue"
+                    ]
+                  }
+                },
+                "filterConnector": {
+                  "type": "string",
+                  "description": "Logical connector for multiple filters",
+                  "title": "Filter Connector",
+                  "x-ms-summary": "Filter Connector",
+                  "enum": [
+                    "AND",
+                    "OR"
+                  ],
+                  "default": "AND",
+                  "x-ms-visibility": "advanced"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Subscription created",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Subscription ID"
+                },
+                "version": {
+                  "type": "string",
+                  "description": "Event subscription version assigned by Workfront"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }  
+}

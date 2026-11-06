@@ -1,0 +1,840 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "AI TeamsMaestro",
+    "description": "AI TeamsMaestro records, transcribes, and summarizes your meetings across Microsoft Teams, Google Meet, and Zoom. Two triggers are available: one fires when a transcript finishes processing, the other when the summary and action items are ready. Each delivery includes the meeting details, attendees, and the summary or transcript, so you can route them into Teams, Planner, SharePoint, Outlook, or anywhere else in your flow.",
+    "version": "1.0",
+    "contact": {
+      "name": "Maestro Labs Support",
+      "url": "https://maestrolabs.com",
+      "email": "support@maestrolabs.com"
+    }
+  },
+  "host": "teams-app.maestrolabs.com",
+  "basePath": "/integrations/partners",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/subscriptions/meeting-summarized/": {
+      "x-ms-notification-content": {
+        "description": "Meeting summary",
+        "schema": {
+          "$ref": "#/definitions/MeetingSummarizedNotification"
+        }
+      },
+      "post": {
+        "operationId": "OnMeetingSummarized",
+        "summary": "When a meeting is summarized",
+        "description": "Triggers once for each meeting TeamsMaestro finishes summarizing, with the summary text and any action items it found.",
+        "x-ms-trigger": "single",
+        "x-ms-visibility": "important",
+        "x-ms-trigger-hint": "To see it work now, end a recorded meeting and wait for its summary to arrive.",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SubscriptionRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Subscribed. The Location header addresses this subscription and is what removing the flow deletes.",
+            "schema": {
+              "$ref": "#/definitions/Subscription"
+            },
+            "headers": {
+              "Location": {
+                "type": "string",
+                "description": "Absolute URL of the new subscription."
+              }
+            }
+          },
+          "400": {
+            "description": "The callback URL was rejected.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "The connection is no longer signed in.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "This account's plan does not include webhooks.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions/meeting-transcribed/": {
+      "x-ms-notification-content": {
+        "description": "Meeting transcript",
+        "schema": {
+          "$ref": "#/definitions/MeetingTranscribedNotification"
+        }
+      },
+      "post": {
+        "operationId": "OnMeetingTranscribed",
+        "summary": "When a meeting is transcribed",
+        "description": "Triggers once for each meeting TeamsMaestro finishes transcribing, with the full transcript. Fires earlier than the summary trigger, and fires even for meetings that are never summarized.",
+        "x-ms-trigger": "single",
+        "x-ms-visibility": "important",
+        "x-ms-trigger-hint": "To see it work now, end a recorded meeting and wait for its transcript to arrive.",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SubscriptionRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Subscribed. The Location header addresses this subscription and is what removing the flow deletes.",
+            "schema": {
+              "$ref": "#/definitions/Subscription"
+            },
+            "headers": {
+              "Location": {
+                "type": "string",
+                "description": "Absolute URL of the new subscription."
+              }
+            }
+          },
+          "400": {
+            "description": "The callback URL was rejected.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "The connection is no longer signed in.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "This account's plan does not include webhooks.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions/{subscriptionId}/": {
+      "delete": {
+        "operationId": "DeleteSubscription",
+        "summary": "Stop sending meeting events",
+        "description": "Removes a subscription so no further meeting events are delivered to it. Called automatically when a flow using one of the triggers is deleted or turned off.",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Identifier of the subscription to remove.",
+            "x-ms-summary": "Subscription ID"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Removed. No further events will be delivered."
+          },
+          "401": {
+            "description": "The connection is no longer signed in.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "No such subscription, or it belongs to someone else.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/me/": {
+      "get": {
+        "operationId": "GetCurrentUser",
+        "summary": "Get the connected account",
+        "description": "Returns the TeamsMaestro account this connection belongs to. Used to confirm the connection works.",
+        "x-ms-visibility": "internal",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The connected account.",
+            "schema": {
+              "$ref": "#/definitions/Account"
+            }
+          },
+          "401": {
+            "description": "The connection is no longer signed in.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/filter-schema/": {
+      "get": {
+        "operationId": "GetFilterSchema",
+        "summary": "Get the filter form",
+        "description": "Returns the filter fields to show for a trigger. Answered by the connector's own custom code - there is no backend behind this path, so the script has to be enabled for this operation. Called while a flow is being written; nothing at run time uses it.",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "description": "Whether the maker asked for filters.",
+            "x-ms-summary": "Enabled",
+            "x-ms-visibility": "internal"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The filter form.",
+            "schema": {
+              "$ref": "#/definitions/FilterSchemaResponse"
+            }
+          },
+          "401": {
+            "description": "The connection is no longer signed in.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "SubscriptionRequest": {
+      "type": "object",
+      "required": [
+        "target_url"
+      ],
+      "properties": {
+        "target_url": {
+          "type": "string",
+          "title": "Callback URL",
+          "description": "Where meeting events are delivered. Generated automatically.",
+          "x-ms-notification-url": true,
+          "x-ms-visibility": "internal"
+        },
+        "apply_filters": {
+          "type": "boolean",
+          "title": "Apply filters to selected meetings",
+          "description": "Run this flow for only some meetings. Tick to choose which.",
+          "default": false,
+          "x-ms-summary": "Apply filters to selected meetings"
+        },
+        "filter_options": {
+          "type": "object",
+          "title": "Filters",
+          "description": "Which meetings this flow runs for.",
+          "x-ms-summary": "Filters",
+          "x-ms-dynamic-schema": {
+            "operationId": "GetFilterSchema",
+            "parameters": {
+              "enabled": {
+                "parameter": "apply_filters"
+              }
+            },
+            "value-path": "schema"
+          },
+          "x-ms-dynamic-properties": {
+            "operationId": "GetFilterSchema",
+            "parameters": {
+              "enabled": {
+                "parameterReference": "body/apply_filters"
+              }
+            },
+            "itemValuePath": "schema"
+          }
+        }
+      }
+    },
+    "Subscription": {
+      "type": "object",
+      "description": "A live subscription to one or more meeting events.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Identifier of this subscription.",
+          "x-ms-summary": "Subscription ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name shown in TeamsMaestro.",
+          "x-ms-summary": "Name"
+        },
+        "source": {
+          "type": "string",
+          "description": "Platform this subscription was created through.",
+          "x-ms-summary": "Source"
+        },
+        "target_url": {
+          "type": "string",
+          "description": "Where events are delivered.",
+          "x-ms-summary": "Callback URL"
+        },
+        "event_types": {
+          "type": "array",
+          "description": "Meeting events this subscription listens to.",
+          "items": {
+            "type": "string",
+            "enum": [
+              "meeting.transcribed",
+              "meeting.summarized"
+            ]
+          },
+          "x-ms-summary": "Event types"
+        },
+        "status": {
+          "type": "string",
+          "description": "Whether this subscription is currently delivering.",
+          "enum": [
+            "active",
+            "inactive",
+            "disabled",
+            "expired"
+          ],
+          "x-ms-summary": "Status"
+        },
+        "filter_match": {
+          "type": "string",
+          "description": "Whether all filter conditions must match, or any one of them.",
+          "x-ms-summary": "Filter match"
+        },
+        "filters": {
+          "type": "array",
+          "description": "Conditions a meeting must meet to be delivered.",
+          "items": {
+            "$ref": "#/definitions/FilterCondition"
+          },
+          "x-ms-summary": "Filters"
+        },
+        "payload_version": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Contract version of the payloads this subscription receives.",
+          "x-ms-summary": "Payload version"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When this subscription was created.",
+          "x-ms-summary": "Created at"
+        }
+      }
+    },
+    "FilterCondition": {
+      "type": "object",
+      "description": "One condition a meeting must meet.",
+      "properties": {
+        "field": {
+          "type": "string",
+          "description": "What the condition looks at.",
+          "x-ms-summary": "Field"
+        },
+        "operator": {
+          "type": "string",
+          "description": "How the values are compared.",
+          "x-ms-summary": "Operator"
+        },
+        "value": {
+          "type": "array",
+          "description": "Values the field is compared against.",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-summary": "Value"
+        }
+      }
+    },
+    "Account": {
+      "type": "object",
+      "description": "The TeamsMaestro account a connection belongs to.",
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "Email address of the connected account.",
+          "x-ms-summary": "Email"
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name of the connected account.",
+          "x-ms-summary": "Name"
+        },
+        "organization": {
+          "type": "string",
+          "description": "Organization the account belongs to, if any.",
+          "x-nullable": true,
+          "x-ms-summary": "Organization"
+        },
+        "partner": {
+          "type": "string",
+          "description": "Platform this connection was made from.",
+          "x-ms-summary": "Partner"
+        },
+        "can_create_webhooks": {
+          "type": "boolean",
+          "description": "Whether this account's plan allows meeting events to be sent out.",
+          "x-ms-summary": "Can create webhooks"
+        }
+      }
+    },
+    "NotificationAccount": {
+      "type": "object",
+      "description": "The account the meeting belongs to.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Always 'individual'.",
+          "x-ms-summary": "Account type"
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the account.",
+          "x-ms-summary": "Account email"
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name of the account.",
+          "x-ms-summary": "Account name"
+        },
+        "organization": {
+          "type": "string",
+          "description": "Organization the account belongs to. Always empty today.",
+          "x-nullable": true,
+          "x-ms-summary": "Account organization"
+        }
+      }
+    },
+    "Person": {
+      "type": "object",
+      "description": "Someone who took part in the meeting.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Their display name, falling back to their email address.",
+          "x-nullable": true,
+          "x-ms-summary": "Name"
+        },
+        "email": {
+          "type": "string",
+          "description": "Their email address.",
+          "x-nullable": true,
+          "x-ms-summary": "Email"
+        },
+        "is_external": {
+          "type": "boolean",
+          "description": "Whether they are outside the connected account's organization.",
+          "x-ms-summary": "Is external"
+        },
+        "company": {
+          "type": "string",
+          "description": "Domain of their email address, or empty if they have none.",
+          "x-ms-summary": "Company"
+        }
+      }
+    },
+    "Meeting": {
+      "type": "object",
+      "description": "The meeting this event is about. Identical for both triggers, so one meeting's transcript and summary can be matched on Meeting ID.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Identifier of the meeting.",
+          "x-ms-summary": "Meeting ID"
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the meeting.",
+          "x-nullable": true,
+          "x-ms-summary": "Title"
+        },
+        "platform": {
+          "type": "string",
+          "description": "Where the meeting was held, such as teams, google_meet or zoom.",
+          "x-nullable": true,
+          "x-ms-summary": "Platform"
+        },
+        "url": {
+          "type": "string",
+          "description": "Join link for the meeting.",
+          "x-nullable": true,
+          "x-ms-summary": "Meeting URL"
+        },
+        "started_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When recording started, in UTC.",
+          "x-nullable": true,
+          "x-ms-summary": "Started at"
+        },
+        "ended_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When recording ended, in UTC.",
+          "x-nullable": true,
+          "x-ms-summary": "Ended at"
+        },
+        "duration_seconds": {
+          "type": "integer",
+          "format": "int32",
+          "description": "How long the recording ran, in seconds.",
+          "x-nullable": true,
+          "x-ms-summary": "Duration (seconds)"
+        },
+        "organizer": {
+          "$ref": "#/definitions/Person"
+        },
+        "attendees": {
+          "type": "array",
+          "description": "Everyone in the meeting who had an email address.",
+          "items": {
+            "$ref": "#/definitions/Person"
+          },
+          "x-ms-summary": "Attendees"
+        }
+      }
+    },
+    "Summary": {
+      "type": "object",
+      "description": "The summary TeamsMaestro produced.",
+      "properties": {
+        "template": {
+          "type": "string",
+          "description": "Which summary template produced this, such as basic or custom.",
+          "x-ms-summary": "Template"
+        },
+        "template_id": {
+          "type": "string",
+          "description": "Identifier of the custom template behind the summary. Empty for built-in templates.",
+          "x-nullable": true,
+          "x-ms-summary": "Template ID"
+        },
+        "text": {
+          "type": "string",
+          "description": "The summary itself, as Markdown.",
+          "x-ms-summary": "Summary text"
+        }
+      }
+    },
+    "Assignee": {
+      "type": "object",
+      "description": "Who an action item belongs to.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Their name.",
+          "x-nullable": true,
+          "x-ms-summary": "Assignee name"
+        },
+        "email": {
+          "type": "string",
+          "description": "Their email address, empty when the meeting matched no participant.",
+          "x-nullable": true,
+          "x-ms-summary": "Assignee email"
+        }
+      }
+    },
+    "ActionItem": {
+      "type": "object",
+      "description": "Something the meeting agreed someone would do.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Identifier of the action item.",
+          "x-ms-summary": "Action item ID"
+        },
+        "title": {
+          "type": "string",
+          "description": "What is to be done.",
+          "x-ms-summary": "Title"
+        },
+        "status": {
+          "type": "string",
+          "description": "Whether it is still outstanding, such as todo or done.",
+          "x-ms-summary": "Status"
+        },
+        "assignee": {
+          "$ref": "#/definitions/Assignee"
+        }
+      }
+    },
+    "TranscriptSegment": {
+      "type": "object",
+      "description": "One utterance. Speaker, language and timings are each absent when the recording did not capture them.",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "What was said.",
+          "x-ms-summary": "Text"
+        },
+        "speaker": {
+          "type": "string",
+          "description": "Who said it, when the recording identified them.",
+          "x-ms-summary": "Speaker"
+        },
+        "language": {
+          "type": "string",
+          "description": "Language this utterance was spoken in.",
+          "x-ms-summary": "Language"
+        },
+        "start": {
+          "type": "number",
+          "format": "float",
+          "description": "Seconds from the start of the recording.",
+          "x-ms-summary": "Start (seconds)"
+        },
+        "end": {
+          "type": "number",
+          "format": "float",
+          "description": "Seconds from the start of the recording.",
+          "x-ms-summary": "End (seconds)"
+        }
+      }
+    },
+    "Transcript": {
+      "type": "object",
+      "description": "What was said in the meeting.",
+      "properties": {
+        "language": {
+          "type": "string",
+          "description": "Main language of the meeting.",
+          "x-nullable": true,
+          "x-ms-summary": "Language"
+        },
+        "duration_seconds": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Time spent speaking, excluding pauses. Normally shorter than the meeting duration.",
+          "x-ms-summary": "Speech duration (seconds)"
+        },
+        "words_count": {
+          "type": "integer",
+          "format": "int32",
+          "description": "How many words were spoken.",
+          "x-ms-summary": "Word count"
+        },
+        "speakers": {
+          "type": "array",
+          "description": "Speaker labels the recording distinguished. Not the same as attendees, and they carry no email address.",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-summary": "Speakers"
+        },
+        "text": {
+          "type": "string",
+          "description": "The whole transcript as one block of text, one timestamped line per utterance. Always present when anything was said.",
+          "x-nullable": true,
+          "x-ms-summary": "Transcript text"
+        },
+        "segments": {
+          "type": "array",
+          "description": "The transcript split into utterances. Empty when the transcript came from meeting captions, which carry no per-utterance detail; read Transcript text in that case.",
+          "items": {
+            "$ref": "#/definitions/TranscriptSegment"
+          },
+          "x-ms-summary": "Segments"
+        }
+      }
+    },
+    "MeetingSummarizedData": {
+      "type": "object",
+      "properties": {
+        "meeting": {
+          "$ref": "#/definitions/Meeting"
+        },
+        "summary": {
+          "$ref": "#/definitions/Summary"
+        },
+        "action_items": {
+          "type": "array",
+          "description": "Action items found in the meeting.",
+          "items": {
+            "$ref": "#/definitions/ActionItem"
+          },
+          "x-ms-summary": "Action items"
+        }
+      }
+    },
+    "MeetingTranscribedData": {
+      "type": "object",
+      "properties": {
+        "meeting": {
+          "$ref": "#/definitions/Meeting"
+        },
+        "transcript": {
+          "$ref": "#/definitions/Transcript"
+        }
+      }
+    },
+    "MeetingSummarizedNotification": {
+      "type": "object",
+      "description": "Delivered once for each meeting TeamsMaestro summarizes.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Identifier of this delivery. Stable across retries, so it can be used to discard duplicates.",
+          "x-ms-summary": "Event ID"
+        },
+        "event": {
+          "type": "string",
+          "description": "Always meeting.summarized.",
+          "x-ms-summary": "Event"
+        },
+        "version": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Contract version of this payload.",
+          "x-ms-summary": "Version"
+        },
+        "sent_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When this delivery was sent, in UTC.",
+          "x-ms-summary": "Sent at"
+        },
+        "webhook_id": {
+          "type": "string",
+          "description": "Identifier of the subscription that produced this delivery.",
+          "x-ms-summary": "Webhook ID"
+        },
+        "account": {
+          "$ref": "#/definitions/NotificationAccount"
+        },
+        "data": {
+          "$ref": "#/definitions/MeetingSummarizedData"
+        }
+      }
+    },
+    "MeetingTranscribedNotification": {
+      "type": "object",
+      "description": "Delivered once for each meeting TeamsMaestro transcribes.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Identifier of this delivery. Stable across retries, so it can be used to discard duplicates.",
+          "x-ms-summary": "Event ID"
+        },
+        "event": {
+          "type": "string",
+          "description": "Always meeting.transcribed.",
+          "x-ms-summary": "Event"
+        },
+        "version": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Contract version of this payload.",
+          "x-ms-summary": "Version"
+        },
+        "sent_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When this delivery was sent, in UTC.",
+          "x-ms-summary": "Sent at"
+        },
+        "webhook_id": {
+          "type": "string",
+          "description": "Identifier of the subscription that produced this delivery.",
+          "x-ms-summary": "Webhook ID"
+        },
+        "account": {
+          "$ref": "#/definitions/NotificationAccount"
+        },
+        "data": {
+          "$ref": "#/definitions/MeetingTranscribedData"
+        }
+      }
+    },
+    "Error": {
+      "type": "object",
+      "description": "Why a request was refused.",
+      "properties": {
+        "detail": {
+          "type": "string",
+          "description": "What went wrong.",
+          "x-ms-summary": "Detail"
+        }
+      }
+    },
+    "FilterSchemaResponse": {
+      "type": "object",
+      "description": "A JSON Schema describing the filter fields.",
+      "properties": {
+        "schema": {
+          "type": "object",
+          "description": "The fields to render, or an empty object when filters are off.",
+          "x-ms-summary": "Schema"
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "oauth2_auth": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://teams-app.maestrolabs.com/oauth/authorize/",
+      "tokenUrl": "https://teams-app.maestrolabs.com/oauth/token/",
+      "scopes": {}
+    }
+  },
+  "security": [
+    {
+      "oauth2_auth": []
+    }
+  ],
+  "x-ms-capabilities": {
+    "testConnection": {
+      "operationId": "GetCurrentUser",
+      "parameters": {}
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://maestrolabs.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://maestrolabs.com/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Productivity;Collaboration"
+    }
+  ]
+}

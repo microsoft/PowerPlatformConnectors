@@ -6,13 +6,17 @@ namespace SnowflakeV2CoreLogic.Providers
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net;
     using System.Net.Http;
     using System.Web;
+    using System.Web.Http;
     using Microsoft.Azure.Connectors.SnowflakeV2Contracts.Constants;
     using Microsoft.Azure.Connectors.SnowflakeV2Contracts.Interfaces;
     using Microsoft.Extensions.Logging;
     using SnowflakeV2CoreLogic;
+    using SnowflakeV2CoreLogic.Exceptions;
     using SnowflakeV2CoreLogic.Models;
+    using SnowflakeV2CoreLogic.Utilities;
 
     public class SnowflakeConnectionParametersProvider
     {
@@ -94,6 +98,11 @@ namespace SnowflakeV2CoreLogic.Providers
             return connectionParametersProvider.GetReferrerUri();
         }
 
+        /// <summary>
+        /// Combines the server and database of the dataset with the ones configured on the connection.
+        /// A value present on only one side is used as is. A value present on both sides must match,
+        /// otherwise the request is rejected. An empty or "default" dataset part counts as absent.
+        /// </summary>
         public static SnowflakeConnectionParameters UpdateConnParametersToUseDataset(
            HttpRequestMessage request,
            string dataset,
@@ -128,13 +137,57 @@ namespace SnowflakeV2CoreLogic.Providers
             string decodedServer = HttpUtility.UrlDecode(HttpUtility.UrlDecode(datasources[0]));
             string decodedDatabase = HttpUtility.UrlDecode(HttpUtility.UrlDecode(datasources[1]));
 
-            if (snowflakeConnectionParameters.AuthenticationType == AuthenticationType.AAD)
-            {
-                snowflakeConnectionParameters.Server = decodedServer;
-                snowflakeConnectionParameters.Database = decodedDatabase;
-            }
+            snowflakeConnectionParameters.Server = CoalesceDatasetValue(decodedServer, snowflakeConnectionParameters.Server, StringComparison.OrdinalIgnoreCase, "server");
+            snowflakeConnectionParameters.Database = CoalesceDatasetValue(decodedDatabase, snowflakeConnectionParameters.Database, StringComparison.Ordinal, "database");
 
             return snowflakeConnectionParameters;
+        }
+
+        /// <summary>
+        /// Rejects a table name whose database or schema qualifier does not match the database and
+        /// schema in use. Qualifiers with nothing to compare against are let through.
+        /// </summary>
+        public static void EnsureTableWithinConnection(
+            string table,
+            SnowflakeConnectionParameters snowflakeConnectionParameters)
+        {
+            try
+            {
+                table.EnsureQualifiedIdentifierWithinScope(snowflakeConnectionParameters.Database, snowflakeConnectionParameters.Schema, "Table Name");
+            }
+            catch (ArgumentException ex)
+            {
+                throw CreateBadRequestException(ex.Message);
+            }
+        }
+
+        private static string CoalesceDatasetValue(
+            string datasetValue,
+            string connectionValue,
+            StringComparison comparison,
+            string name)
+        {
+            if (string.IsNullOrWhiteSpace(datasetValue) || string.Equals(datasetValue, StringConstants.DefaultDataSet, StringComparison.OrdinalIgnoreCase))
+            {
+                return connectionValue;
+            }
+
+            if (string.IsNullOrWhiteSpace(connectionValue))
+            {
+                return datasetValue;
+            }
+
+            if (!string.Equals(datasetValue, connectionValue, comparison))
+            {
+                throw CreateBadRequestException($"The dataset {name} does not match the {name} configured on the connection.");
+            }
+
+            return connectionValue;
+        }
+
+        private static HttpResponseException CreateBadRequestException(string message)
+        {
+            return new HttpResponseException(SnowflakeHttpException.CreateHttpResponseMessage(HttpStatusCode.BadRequest, message));
         }
     }
 }

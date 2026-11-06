@@ -1,0 +1,1066 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Digisign - Update",
+    "description": "Provides actions to update envelopes, documents, recipients, and signature tags. Supports updating notification settings, exchanging credentials for access tokens, and changing positions of signature tags. Allows making direct API requests to update active elements inside draft envelopes.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "DigiSign podpora",
+      "email": "podpora@digisign.cz",
+      "url": "https://www.digisign.cz/"
+    }
+  },
+  "host": "api.digisign.org",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "x-ms-connection-parameters": {
+    "username": {
+      "type": "securestring",
+      "uiDefinition": {
+        "displayName": "Access Key (accessKey)",
+        "description": "API Access Key from Digisign",
+        "tooltip": "Enter your Digisign accessKey"
+      },
+      "constraints": {
+        "required": "true"
+      }
+    },
+    "password": {
+      "type": "securestring",
+      "uiDefinition": {
+        "displayName": "Secret Key (secretKey)",
+        "description": "API Secret Key from Digisign",
+        "tooltip": "Enter your Digisign secretKey",
+        "uiControl": "password"
+      },
+      "constraints": {
+        "required": "true"
+      }
+    },
+    "environment": {
+      "type": "string",
+      "uiDefinition": {
+        "displayName": "Environment URL",
+        "description": "Base URL of the Digisign API.",
+        "tooltip": "Select Staging or Production, or enter a custom URL",
+        "constraints": {
+          "required": "true",
+          "allowedValues": [
+            {
+              "text": "Production (https://api.digisign.org)",
+              "value": "https://api.digisign.org"
+            },
+            {
+              "text": "Staging (https://api.staging.digisign.org)",
+              "value": "https://api.staging.digisign.org"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "basicAuth": {
+      "type": "basic",
+      "description": "Username = accessKey, Password = secretKey"
+    }
+  },
+  "security": [
+    {
+      "basicAuth": []
+    }
+  ],
+  "x-code": {
+    "className": "CustomConnectorCode",
+    "methodName": "PreRequest"
+  },
+  "paths": {
+    "/api/auth-token": {
+      "post": {
+        "summary": "Exchange Keys for Bearer Token",
+        "description": "Exchanges your API accessKey and secretKey for a short-lived Bearer token to authorize subsequent requests.",
+        "operationId": "authToken",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "accessKey": {
+                  "type": "string",
+                  "x-ms-summary": "Access Key",
+                  "description": "API Access Key from Digisign",
+                  "example": "019ee470-a0c2-72a9-a666-9ced47485a9b"
+                },
+                "secretKey": {
+                  "type": "string",
+                  "x-ms-summary": "Secret Key",
+                  "description": "API Secret Key from Digisign",
+                  "example": "c76a5bf4d284a0c8b3e8ee9fbc5a01d3"
+                }
+              },
+              "required": [
+                "accessKey",
+                "secretKey"
+              ],
+              "example": {
+                "accessKey": "019ee470-a0c2-72a9-a666-9ced47485a9b",
+                "secretKey": "c76a5bf4d284a0c8b3e8ee9fbc5a01d3"
+              }
+            },
+            "description": "Request Body",
+            "x-ms-body-example": {
+              "accessKey": "019ee470-a0c2-72a9-a666-9ced47485a9b",
+              "secretKey": "c76a5bf4d284a0c8b3e8ee9fbc5a01d3"
+            },
+            "x-ms-summary": "Parameters"
+          },
+          {
+            "name": "x-environment",
+            "in": "header",
+            "required": false,
+            "type": "string",
+            "default": "https://api.digisign.org",
+            "x-ms-visibility": "advanced",
+            "description": "Target Environment URL",
+            "x-ms-summary": "X Environment"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token returned",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "token": {
+                  "type": "string"
+                },
+                "expiresIn": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid parameters or request body."
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid credentials."
+          },
+          "403": {
+            "description": "Forbidden - Access denied."
+          },
+          "404": {
+            "description": "Not Found - The requested resource was not found."
+          },
+          "500": {
+            "description": "Internal Server Error - Something went wrong on the server."
+          }
+        },
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/envelopes/{envelopeId}": {
+      "put": {
+        "summary": "Update Envelope",
+        "description": "Updates properties of a draft envelope. Note: the 'sender' field cannot be modified after creation.",
+        "operationId": "updateEnvelope",
+        "parameters": [
+          {
+            "name": "envelopeId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "UUID of the envelope to update",
+            "x-ms-summary": "Envelope ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "x-ms-summary": "Name",
+                  "description": "Descriptive name of the envelope",
+                  "maxLength": 255,
+                  "example": "Investment Term Sheet - Series A - Updated"
+                },
+                "emailBody": {
+                  "type": "string",
+                  "x-ms-summary": "Email Body",
+                  "description": "Email message body sent to recipients",
+                  "maxLength": 4096,
+                  "example": "Please review and sign the updated final version of the Investment Term Sheet."
+                },
+                "emailBodyCompleted": {
+                  "type": "string",
+                  "x-ms-summary": "Email Body Completed",
+                  "description": "Email message body sent to recipients when envelope is completed",
+                  "maxLength": 4096,
+                  "example": "The Investment Term Sheet has been successfully executed by all parties."
+                },
+                "senderName": {
+                  "type": "string",
+                  "x-ms-summary": "Sender Name",
+                  "description": "Display name of the sender",
+                  "maxLength": 255,
+                  "example": "Frankfurt Capital Backoffice"
+                },
+                "senderEmail": {
+                  "type": "string",
+                  "x-ms-summary": "Sender Email",
+                  "description": "Email address of the sender",
+                  "maxLength": 255,
+                  "example": "backoffice@frankfurt-advisory.com"
+                },
+                "expiration": {
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-summary": "Expiration",
+                  "description": "Envelope expiration in days (0-365)",
+                  "minimum": 0,
+                  "maximum": 365,
+                  "example": 30
+                },
+                "metadata": {
+                  "type": "string",
+                  "x-ms-summary": "Metadata",
+                  "description": "Custom metadata string for the envelope",
+                  "maxLength": 4096,
+                  "example": "updated_sales_q2"
+                }
+              },
+              "example": {
+                "name": "Investment Term Sheet - Series A - Updated",
+                "emailBody": "Please review and sign the updated final version of the Investment Term Sheet.",
+                "emailBodyCompleted": "The Investment Term Sheet has been successfully executed by all parties.",
+                "senderName": "Frankfurt Capital Backoffice",
+                "senderEmail": "backoffice@frankfurt-advisory.com",
+                "expiration": 30,
+                "metadata": "updated_sales_q2"
+              }
+            },
+            "description": "Request Body",
+            "x-ms-body-example": {
+              "name": "Investment Term Sheet - Series A - Updated",
+              "emailBody": "Please review and sign the updated final version of the Investment Term Sheet.",
+              "senderName": "Frankfurt Capital Backoffice",
+              "expiration": 30,
+              "metadata": "updated_sales_q2"
+            },
+            "x-ms-summary": "Parameters"
+          },
+          {
+            "name": "x-environment",
+            "in": "header",
+            "required": false,
+            "type": "string",
+            "default": "https://api.digisign.org",
+            "x-ms-visibility": "advanced",
+            "description": "Target Environment URL",
+            "x-ms-summary": "X Environment"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Envelope updated successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid parameters or request body."
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid credentials."
+          },
+          "403": {
+            "description": "Forbidden - Access denied."
+          },
+          "404": {
+            "description": "Not Found - The requested resource was not found."
+          },
+          "500": {
+            "description": "Internal Server Error - Something went wrong on the server."
+          }
+        },
+        "tags": [
+          "Envelopes"
+        ]
+      }
+    },
+    "/api/envelopes/{envelopeId}/documents/{documentId}": {
+      "put": {
+        "summary": "Update Document",
+        "description": "Updates properties of a document linked to an envelope (name, position, metadata).",
+        "operationId": "updateDocument",
+        "parameters": [
+          {
+            "name": "envelopeId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "UUID of the envelope",
+            "x-ms-summary": "Envelope ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "documentId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "UUID of the document to update",
+            "x-ms-summary": "Document ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "x-ms-summary": "Name",
+                  "description": "Display name of the document in the envelope",
+                  "example": "Frankfurt_Partners_Investment_Agreement_v2.pdf"
+                },
+                 "position": {
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-summary": "Position",
+                  "description": "Document ordering position (1-based index)",
+                  "example": 1
+                },
+                "metadata": {
+                  "type": "string",
+                  "x-ms-summary": "Metadata",
+                  "description": "Custom metadata for the document",
+                  "example": "updated_investment_doc"
+                },
+                "labelPositioning": {
+                  "type": "string",
+                  "enum": [
+                    "none",
+                    "top_center",
+                    "top_left",
+                    "top_right",
+                    "bottom_left",
+                    "bottom_right",
+                    "bottom_center"
+                  ],
+                  "default": "none",
+                  "x-ms-summary": "Label Positioning",
+                  "description": "Positioning of the signature label."
+                },
+                "labelPositionX": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 0,
+                  "x-ms-summary": "Label Position X",
+                  "description": "X coordinate for signature label position."
+                },
+                "labelPositionY": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 0,
+                  "x-ms-summary": "Label Position Y",
+                  "description": "Y coordinate for signature label position."
+                }
+              },
+              "required": [
+                "name",
+                "position",
+                "labelPositioning",
+                "labelPositionX",
+                "labelPositionY"
+              ],
+              "example": {
+                "name": "Frankfurt_Partners_Investment_Agreement_v2.pdf",
+                "position": 1,
+                "metadata": "updated_investment_doc",
+                "labelPositioning": "none",
+                "labelPositionX": 0,
+                "labelPositionY": 0
+              }
+            },
+            "description": "Request Body",
+            "x-ms-body-example": {
+              "name": "Frankfurt_Partners_Investment_Agreement_v2.pdf",
+              "position": 1,
+              "metadata": "updated_investment_doc"
+            },
+            "x-ms-summary": "Parameters"
+          },
+          {
+            "name": "x-environment",
+            "in": "header",
+            "required": false,
+            "type": "string",
+            "default": "https://api.digisign.org",
+            "x-ms-visibility": "advanced",
+            "description": "Target Environment URL",
+            "x-ms-summary": "X Environment"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Document updated successfully",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid parameters or request body."
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid credentials."
+          },
+          "403": {
+            "description": "Forbidden - Access denied."
+          },
+          "404": {
+            "description": "Not Found - The requested resource was not found."
+          },
+          "500": {
+            "description": "Internal Server Error - Something went wrong on the server."
+          }
+        },
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
+    "/api/envelopes/{envelopeId}/recipients/{recipientId}": {
+      "put": {
+        "summary": "Update Recipient",
+        "description": "Updates details of a specific recipient in an envelope draft. All fields are optional – send only the fields you want to change.",
+        "operationId": "updateRecipient",
+        "parameters": [
+          {
+            "name": "envelopeId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "UUID of the envelope",
+            "x-ms-summary": "Envelope ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "recipientId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "UUID of the recipient to update",
+            "x-ms-summary": "Recipient ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "x-ms-summary": "Name",
+                  "description": "Full name of the recipient",
+                  "maxLength": 255,
+                  "example": "Ing. Jan Novák Jr."
+                },
+                "email": {
+                  "type": "string",
+                  "x-ms-summary": "Email",
+                  "description": "Email address of the recipient",
+                  "example": "jan.novak.jr@firma.cz"
+                },
+                "mobile": {
+                  "type": "string",
+                  "x-ms-summary": "Mobile",
+                  "description": "Mobile number in E.164 format (required for SMS 2FA)",
+                  "example": "+420777999888"
+                },
+                "role": {
+                  "type": "string",
+                  "enum": [
+                    "signer",
+                    "in_person",
+                    "cc",
+                    "approver",
+                    "autosign",
+                    "semi_autosign"
+                  ],
+                  "x-ms-summary": "Role",
+                  "description": "Recipient role in envelope workflow",
+                  "example": "signer"
+                },
+                "signatureType": {
+                  "type": "string",
+                  "enum": [
+                    "simple",
+                    "biometric",
+                    "bank_id_sign",
+                    "bank_id_qsign",
+                    "certificate",
+                    "certificate_akv",
+                    "certificate_file",
+                    "certificate_remote_sign",
+                    "by_scenario"
+                  ],
+                  "x-ms-summary": "Signature Type",
+                  "description": "Type of electronic signature",
+                  "example": "simple"
+                },
+                "authenticationOnOpen": {
+                  "type": "string",
+                  "enum": [
+                    "none",
+                    "sms",
+                    "bankId",
+                    "sms_or_bankId",
+                    "identify",
+                    "by_scenario"
+                  ],
+                  "x-ms-summary": "Authentication On Open",
+                  "description": "Authentication method required when opening the envelope",
+                  "example": "none"
+                },
+                "authenticationOnSignature": {
+                  "type": "string",
+                  "enum": [
+                    "none",
+                    "sms",
+                    "bankId",
+                    "sms_or_bankId",
+                    "identify",
+                    "by_scenario"
+                  ],
+                  "x-ms-summary": "Authentication On Signature",
+                  "description": "Authentication method required when signing",
+                  "example": "none"
+                },
+                "approvalMode": {
+                  "type": "string",
+                  "enum": [
+                    "per_envelope",
+                    "per_document",
+                    "per_document_hidden"
+                  ],
+                  "x-ms-summary": "Approval Mode",
+                  "description": "Mode of approval",
+                  "example": "per_envelope"
+                },
+                "emailBody": {
+                  "type": "string",
+                  "x-ms-summary": "Email Body",
+                  "description": "Custom email text for this specific recipient",
+                  "maxLength": 4096,
+                  "example": "Updated: Please sign the revised agreement."
+                },
+                "birthdate": {
+                  "type": "string",
+                  "x-ms-summary": "Birthdate",
+                  "description": "Date of birth (YYYY-MM-DD format)",
+                  "example": "1980-05-15"
+                },
+                "company": {
+                  "type": "string",
+                  "x-ms-summary": "Company",
+                  "description": "Company name",
+                  "example": "Bohemian Capital a.s."
+                },
+                "function": {
+                  "type": "string",
+                  "x-ms-summary": "Function",
+                  "description": "Job title or function in the company",
+                  "example": "CEO"
+                },
+                "contractingParty": {
+                  "type": "string",
+                  "x-ms-summary": "Contracting Party",
+                  "description": "Contracting party label",
+                  "example": "Investor"
+                },
+                "identificationNumber": {
+                  "type": "string",
+                  "x-ms-summary": "Identification Number",
+                  "description": "Company registration number",
+                  "example": "12345678"
+                },
+                "birthnumber": {
+                  "type": "string",
+                  "x-ms-summary": "Birth Number",
+                  "description": "Birth number",
+                  "example": "800515/1234"
+                },
+                "address": {
+                  "type": "string",
+                  "x-ms-summary": "Address",
+                  "description": "Postal address",
+                  "example": "Wenceslas Square 1, Prague"
+                },
+                "signingOrder": {
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-summary": "Signing Order",
+                  "description": "Order in which this recipient signs (1-based)",
+                  "example": 1
+                },
+                "metadata": {
+                  "type": "string",
+                  "x-ms-summary": "Metadata",
+                  "description": "Custom metadata for the recipient",
+                  "example": "updated_investor_1"
+                }
+              },
+              "example": {
+                "name": "Ing. Jan Novák Jr.",
+                "email": "jan.novak.jr@firma.cz",
+                "mobile": "+420777999888",
+                "company": "Bohemian Capital a.s.",
+                "function": "CEO",
+                "signingOrder": 1,
+                "metadata": "updated_investor_1"
+              }
+            },
+            "description": "Request Body",
+            "x-ms-body-example": {
+              "name": "Ing. Jan Novák Jr.",
+              "email": "jan.novak.jr@firma.cz",
+              "company": "Bohemian Capital a.s.",
+              "signingOrder": 1
+            },
+            "x-ms-summary": "Parameters"
+          },
+          {
+            "name": "x-environment",
+            "in": "header",
+            "required": false,
+            "type": "string",
+            "default": "https://api.digisign.org",
+            "x-ms-visibility": "advanced",
+            "description": "Target Environment URL",
+            "x-ms-summary": "X Environment"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recipient updated successfully",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid parameters or request body."
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid credentials."
+          },
+          "403": {
+            "description": "Forbidden - Access denied."
+          },
+          "404": {
+            "description": "Not Found - The requested resource was not found."
+          },
+          "500": {
+            "description": "Internal Server Error - Something went wrong on the server."
+          }
+        },
+        "tags": [
+          "Recipients"
+        ]
+      }
+    },
+    "/api/envelopes/{envelopeId}/tags/{tagId}": {
+      "put": {
+        "summary": "Update Signature Tag",
+        "description": "Updates properties of an existing signature tag (position, page, type, label).",
+        "operationId": "updateTag",
+        "parameters": [
+          {
+            "name": "envelopeId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "UUID of the envelope",
+            "x-ms-summary": "Envelope ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "tagId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "UUID of the tag to update",
+            "x-ms-summary": "Tag ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "signature",
+                    "document",
+                    "text",
+                    "checkbox",
+                    "attachment",
+                    "radio_button",
+                    "approval",
+                    "date_of_signature"
+                  ],
+                  "x-ms-summary": "Type",
+                  "description": "Type of the signature tag",
+                  "example": "signature"
+                },
+                "page": {
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-summary": "Page",
+                  "description": "Page number (1-based index)",
+                  "example": 1
+                },
+                "xPosition": {
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-summary": "X Position",
+                  "description": "X coordinate in points (horizontal offset from left)",
+                  "example": 200
+                },
+                "yPosition": {
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-summary": "Y Position",
+                  "description": "Y coordinate in points (vertical offset from top)",
+                  "example": 350
+                },
+                "label": {
+                  "type": "string",
+                  "x-ms-summary": "Label",
+                  "description": "Display label for the tag",
+                  "example": "Investor Signature - Updated"
+                },
+                "required": {
+                  "type": "boolean",
+                  "x-ms-summary": "Required",
+                  "description": "Whether this tag must be filled by the recipient",
+                  "example": true
+                },
+                "metadata": {
+                  "type": "string",
+                  "x-ms-summary": "Metadata",
+                  "description": "Custom metadata for the tag",
+                  "example": "sig_tag_updated"
+                }
+              },
+              "example": {
+                "page": 1,
+                "xPosition": 200,
+                "yPosition": 350,
+                "label": "Investor Signature - Updated",
+                "required": true,
+                "metadata": "sig_tag_updated"
+              }
+            },
+            "description": "Request Body",
+            "x-ms-body-example": {
+              "page": 1,
+              "xPosition": 200,
+              "yPosition": 350,
+              "label": "Investor Signature - Updated"
+            },
+            "x-ms-summary": "Parameters"
+          },
+          {
+            "name": "x-environment",
+            "in": "header",
+            "required": false,
+            "type": "string",
+            "default": "https://api.digisign.org",
+            "x-ms-visibility": "advanced",
+            "description": "Target Environment URL",
+            "x-ms-summary": "X Environment"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Signature tag updated successfully",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid parameters or request body."
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid credentials."
+          },
+          "403": {
+            "description": "Forbidden - Access denied."
+          },
+          "404": {
+            "description": "Not Found - The requested resource was not found."
+          },
+          "500": {
+            "description": "Internal Server Error - Something went wrong on the server."
+          }
+        },
+        "tags": [
+          "Tags"
+        ]
+      }
+    },
+    "/api/envelopes/{envelopeId}/notifications/{notificationId}": {
+      "put": {
+        "summary": "Update Notification",
+        "description": "Updates a notification setting on an envelope (type, days).",
+        "operationId": "updateNotification",
+        "parameters": [
+          {
+            "name": "envelopeId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "UUID of the envelope",
+            "x-ms-summary": "Envelope ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "notificationId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "UUID of the notification to update",
+            "x-ms-summary": "Notification ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "toSignAfterSent",
+                    "toSignBeforeExpires"
+                  ],
+                  "x-ms-summary": "Type",
+                  "description": "Notification type",
+                  "example": "toSignAfterSent"
+                },
+                "days": {
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-summary": "Days",
+                  "description": "Number of days for the notification trigger",
+                  "example": 5
+                }
+              },
+              "example": {
+                "type": "toSignAfterSent",
+                "days": 5
+              }
+            },
+            "description": "Request Body",
+            "x-ms-body-example": {
+              "type": "toSignAfterSent",
+              "days": 5
+            },
+            "x-ms-summary": "Parameters"
+          },
+          {
+            "name": "x-environment",
+            "in": "header",
+            "required": false,
+            "type": "string",
+            "default": "https://api.digisign.org",
+            "x-ms-visibility": "advanced",
+            "description": "Target Environment URL",
+            "x-ms-summary": "X Environment"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notification updated successfully",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid parameters or request body."
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid credentials."
+          },
+          "403": {
+            "description": "Forbidden - Access denied."
+          },
+          "404": {
+            "description": "Not Found - The requested resource was not found."
+          },
+          "500": {
+            "description": "Internal Server Error - Something went wrong on the server."
+          }
+        },
+        "tags": [
+          "Envelopes"
+        ]
+      }
+    },
+    "/api/call-api": {
+      "post": {
+        "summary": "Universal API Call",
+        "description": "Performs an authenticated HTTP request to any Digisign API endpoint.",
+        "operationId": "callApi",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "GET",
+                    "PUT",
+                    "PATCH"
+                  ],
+                  "default": "GET",
+                  "x-ms-summary": "Method",
+                  "description": "HTTP method for the request",
+                  "example": "PUT"
+                },
+                "path": {
+                  "type": "string",
+                  "x-ms-summary": "Path",
+                  "description": "Relative API path starting with slash (e.g. /api/envelopes/{id})",
+                  "example": "/api/envelopes/019eea07-551f-7274-ae0f-53302cd3c835"
+                },
+                "queryString": {
+                  "type": "string",
+                  "x-ms-summary": "Query String",
+                  "description": "Query parameters (e.g. page=1&itemsPerPage=30)",
+                  "example": ""
+                },
+                "body": {
+                  "type": "object",
+                  "x-ms-summary": "Body",
+                  "description": "JSON request body payload for POST/PUT/PATCH requests",
+                  "example": {
+                    "name": "Updated Envelope Name"
+                  }
+                }
+              },
+              "required": [
+                "method",
+                "path"
+              ],
+              "example": {
+                "method": "PUT",
+                "path": "/api/envelopes/019eea07-551f-7274-ae0f-53302cd3c835",
+                "body": {
+                  "name": "Updated Envelope Name"
+                }
+              }
+            },
+            "description": "Request Body",
+            "x-ms-body-example": {
+              "method": "PUT",
+              "path": "/api/envelopes/019eea07-551f-7274-ae0f-53302cd3c835",
+              "body": {
+                "name": "Updated Envelope Name"
+              }
+            },
+            "x-ms-summary": "Parameters"
+          },
+          {
+            "name": "x-environment",
+            "in": "header",
+            "required": false,
+            "type": "string",
+            "default": "https://api.digisign.org",
+            "x-ms-visibility": "advanced",
+            "description": "Target Environment URL",
+            "x-ms-summary": "X Environment"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "API call completed",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid parameters or request body."
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid credentials."
+          },
+          "403": {
+            "description": "Forbidden - Access denied."
+          },
+          "404": {
+            "description": "Not Found - The requested resource was not found."
+          },
+          "500": {
+            "description": "Internal Server Error - Something went wrong on the server."
+          }
+        },
+        "tags": [
+          "Utility"
+        ]
+      }
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.digisign.cz/"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.digisign.cz/gdpr.pdf"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Content and Files;Productivity"
+    }
+  ],
+  "x-developer": "Lukáš Toman (https://github.com/toman-lukas85)",
+  "x-author": "Lukáš Toman (https://github.com/toman-lukas85)"
+}

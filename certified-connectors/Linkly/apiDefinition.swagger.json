@@ -1,0 +1,2138 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Linkly",
+    "description": "Linkly is a link shortener and click tracker. Create branded short links with custom domains, add UTM parameters and retargeting pixels, report conversions, and pull click analytics grouped by country, platform, referrer or campaign.",
+    "version": "1.0",
+    "contact": {
+      "name": "Linkly Support",
+      "url": "https://linklyhq.com/support",
+      "email": "support@linklyhq.com"
+    }
+  },
+  "host": "api.linklyhq.com",
+  "basePath": "/api/v1",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/conversions": {
+      "get": {
+        "summary": "List conversions",
+        "description": "Returns the most recent conversions recorded in the workspace.",
+        "operationId": "ListConversions",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "integer",
+            "format": "int32",
+            "x-ms-summary": "Limit",
+            "description": "The maximum number of conversions to return, between 1 and 1000."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The most recent conversions.",
+            "schema": {
+              "properties": {
+                "conversions": {
+                  "items": {
+                    "properties": {
+                      "amount_cents": {
+                        "x-nullable": true,
+                        "type": "integer",
+                        "format": "int32",
+                        "x-ms-summary": "Amount (Cents)",
+                        "description": "The value in the smallest currency unit. May be negative to record a refund."
+                      },
+                      "click_id": {
+                        "x-nullable": true,
+                        "type": "string",
+                        "x-ms-summary": "Click ID",
+                        "description": "The ID of the attributed click."
+                      },
+                      "country": {
+                        "x-nullable": true,
+                        "type": "string",
+                        "x-ms-summary": "Country",
+                        "description": "A two-letter ISO 3166-1 country code, for example US."
+                      },
+                      "currency": {
+                        "x-nullable": true,
+                        "type": "string",
+                        "x-ms-summary": "Currency",
+                        "description": "The ISO 4217 currency code. Defaults to USD."
+                      },
+                      "event_id": {
+                        "x-nullable": true,
+                        "type": "string",
+                        "x-ms-summary": "Event ID",
+                        "description": "Your identifier for the event. Reporting the same value twice does not create a second conversion."
+                      },
+                      "event_name": {
+                        "type": "string",
+                        "x-ms-summary": "Event Name",
+                        "description": "What happened, for example purchase, signup or trial_started."
+                      },
+                      "event_type": {
+                        "type": "string",
+                        "x-ms-summary": "Event Type",
+                        "description": "The coarse event type. Use lead to establish customer identity and sale to record revenue. Defaults to custom."
+                      },
+                      "external_id": {
+                        "x-nullable": true,
+                        "type": "string",
+                        "x-ms-summary": "Customer ID",
+                        "description": "Your identifier for the customer. Send it on every event so later sales can be linked to the original click."
+                      },
+                      "id": {
+                        "description": "The unique identifier of the conversion. IDs sort chronologically.",
+                        "type": "string",
+                        "x-ms-summary": "Conversion ID"
+                      },
+                      "inserted_at": {
+                        "format": "date-time",
+                        "type": "string",
+                        "x-ms-summary": "Inserted At",
+                        "description": "When the conversion was recorded."
+                      },
+                      "ip_source": {
+                        "description": "Whose address was recorded: visitor, server or unknown. Server means the connecting address belonged to your backend or a platform relay, so it is excluded from geographic reporting.",
+                        "enum": [
+                          "visitor",
+                          "server",
+                          "unknown"
+                        ],
+                        "type": "string",
+                        "x-ms-summary": "IP Source"
+                      },
+                      "link_id": {
+                        "description": "The ID of the attributed link, or null if the conversion could not be attributed to a link.",
+                        "x-nullable": true,
+                        "type": "integer",
+                        "format": "int32",
+                        "x-ms-summary": "Link ID"
+                      },
+                      "metadata": {
+                        "x-nullable": true,
+                        "type": "object",
+                        "x-ms-summary": "Metadata",
+                        "description": "Arbitrary JSON metadata, up to 10,000 bytes."
+                      },
+                      "occurred_at": {
+                        "format": "date-time",
+                        "type": "string",
+                        "x-ms-summary": "Occurred At",
+                        "description": "When the conversion happened, in ISO 8601 format. Defaults to now."
+                      },
+                      "source": {
+                        "description": "Which integration reported it.",
+                        "type": "string",
+                        "x-ms-summary": "Source"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "type": "array",
+                  "x-ms-summary": "Conversions",
+                  "description": "The conversions, most recent first."
+                }
+              },
+              "type": "object"
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Report a conversion",
+        "description": "Records a conversion such as a purchase, sign-up or custom event, and attributes it to the link that was clicked when an attribution token is supplied.",
+        "operationId": "CreateConversion",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "x-ms-summary": "Body",
+            "description": "The conversion to record.",
+            "schema": {
+              "description": "The conversion to record.",
+              "properties": {
+                "amount_cents": {
+                  "description": "Value in the smallest currency unit. May be negative to record a refund or chargeback, which nets against earlier revenue.",
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-summary": "Amount (Cents)"
+                },
+                "country": {
+                  "description": "Two-letter country code for the conversion. Inferred for browser-side calls; supply it explicitly from a server-side integration, where the connecting address is your own infrastructure rather than the customer's.",
+                  "type": "string",
+                  "x-ms-summary": "Country",
+                  "x-ms-visibility": "advanced"
+                },
+                "currency": {
+                  "description": "ISO 4217 currency code. Defaults to USD.",
+                  "type": "string",
+                  "x-ms-summary": "Currency"
+                },
+                "event_id": {
+                  "description": "Your identifier for this event. Used as an idempotency key; reporting the same value twice will not create a second conversion. Applies to any event type, not just purchases.",
+                  "type": "string",
+                  "x-ms-summary": "Event ID"
+                },
+                "event_name": {
+                  "description": "What happened, e.g. purchase, signup, trial_started.",
+                  "type": "string",
+                  "x-ms-summary": "Event Name"
+                },
+                "event_type": {
+                  "description": "Coarse type driving the funnel. lead establishes customer identity, sale records revenue. Defaults to custom.",
+                  "enum": [
+                    "lead",
+                    "sale",
+                    "custom"
+                  ],
+                  "type": "string",
+                  "x-ms-summary": "Event Type"
+                },
+                "external_id": {
+                  "description": "Your identifier for the customer. Send it on every event: it is what links a later server-side sale back to the click that produced the signup.",
+                  "type": "string",
+                  "x-ms-summary": "Customer ID"
+                },
+                "linkly_cid": {
+                  "description": "The attribution token captured from the landing page URL. Omit if unavailable; the conversion is then recorded without a link attribution.",
+                  "type": "string",
+                  "x-ms-summary": "Attribution Token"
+                },
+                "metadata": {
+                  "description": "Arbitrary JSON, up to 10,000 bytes encoded.",
+                  "type": "object",
+                  "x-ms-summary": "Metadata",
+                  "x-ms-visibility": "advanced"
+                },
+                "occurred_at": {
+                  "description": "When the conversion happened. Defaults to now.",
+                  "format": "date-time",
+                  "type": "string",
+                  "x-ms-summary": "Occurred At",
+                  "x-ms-visibility": "advanced"
+                },
+                "visitor_ip": {
+                  "description": "The end customer's IP, when your server has it. Omit unless you do; for server-side calls Linkly otherwise records the connecting address as your server, not the customer, and excludes it from geographic reporting. Sending this asserts you have a lawful basis to share it. Never returned by the API.",
+                  "type": "string",
+                  "x-ms-summary": "Visitor IP",
+                  "x-ms-visibility": "advanced"
+                }
+              },
+              "required": [
+                "event_name"
+              ],
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The recorded conversion. If the event ID was already reported, the existing conversion is returned.",
+            "schema": {
+              "properties": {
+                "amount_cents": {
+                  "x-nullable": true,
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-summary": "Amount (Cents)",
+                  "description": "The value in the smallest currency unit. May be negative to record a refund."
+                },
+                "click_id": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Click ID",
+                  "description": "The ID of the attributed click."
+                },
+                "country": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Country",
+                  "description": "A two-letter ISO 3166-1 country code, for example US."
+                },
+                "currency": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Currency",
+                  "description": "The ISO 4217 currency code. Defaults to USD."
+                },
+                "event_id": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Event ID",
+                  "description": "Your identifier for the event. Reporting the same value twice does not create a second conversion."
+                },
+                "event_name": {
+                  "type": "string",
+                  "x-ms-summary": "Event Name",
+                  "description": "What happened, for example purchase, signup or trial_started."
+                },
+                "event_type": {
+                  "type": "string",
+                  "x-ms-summary": "Event Type",
+                  "description": "The coarse event type. Use lead to establish customer identity and sale to record revenue. Defaults to custom."
+                },
+                "external_id": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Customer ID",
+                  "description": "Your identifier for the customer. Send it on every event so later sales can be linked to the original click."
+                },
+                "id": {
+                  "description": "The unique identifier of the conversion. IDs sort chronologically.",
+                  "type": "string",
+                  "x-ms-summary": "Conversion ID"
+                },
+                "inserted_at": {
+                  "format": "date-time",
+                  "type": "string",
+                  "x-ms-summary": "Inserted At",
+                  "description": "When the conversion was recorded."
+                },
+                "ip_source": {
+                  "description": "Whose address was recorded: visitor, server or unknown. Server means the connecting address belonged to your backend or a platform relay, so it is excluded from geographic reporting.",
+                  "enum": [
+                    "visitor",
+                    "server",
+                    "unknown"
+                  ],
+                  "type": "string",
+                  "x-ms-summary": "IP Source"
+                },
+                "link_id": {
+                  "description": "The ID of the attributed link, or null if the conversion could not be attributed to a link.",
+                  "x-nullable": true,
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-summary": "Link ID"
+                },
+                "metadata": {
+                  "x-nullable": true,
+                  "type": "object",
+                  "x-ms-summary": "Metadata",
+                  "description": "Arbitrary JSON metadata, up to 10,000 bytes."
+                },
+                "occurred_at": {
+                  "format": "date-time",
+                  "type": "string",
+                  "x-ms-summary": "Occurred At",
+                  "description": "When the conversion happened, in ISO 8601 format. Defaults to now."
+                },
+                "source": {
+                  "description": "Which integration reported it.",
+                  "type": "string",
+                  "x-ms-summary": "Source"
+                }
+              },
+              "type": "object"
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          }
+        ]
+      }
+    },
+    "/link": {
+      "post": {
+        "summary": "Create or update a link",
+        "description": "Creates a new short link, or updates an existing one when a link ID is supplied. Supports custom domains and slugs, UTM parameters, retargeting pixels and Open Graph metadata.",
+        "operationId": "CreateOrUpdateLink",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "x-ms-summary": "Body",
+            "description": "The link to create or update.",
+            "schema": {
+              "description": "The link to create or update.",
+              "properties": {
+                "url": {
+                  "description": "The destination URL that the short link redirects to. Required to create a new link.",
+                  "format": "uri",
+                  "type": "string",
+                  "x-ms-summary": "Destination URL"
+                },
+                "id": {
+                  "description": "The ID of an existing link to update. Leave blank to create a new link.",
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-summary": "Link ID"
+                },
+                "name": {
+                  "description": "A nickname for the link, shown in the dashboard.",
+                  "type": "string",
+                  "x-ms-summary": "Name"
+                },
+                "domain": {
+                  "description": "The custom domain to use for the short link, without a trailing slash.",
+                  "type": "string",
+                  "x-ms-summary": "Domain"
+                },
+                "slug": {
+                  "description": "A custom path for the short link. It must start with a slash.",
+                  "type": "string",
+                  "x-ms-summary": "Slug"
+                },
+                "enabled": {
+                  "description": "Whether the link is active.",
+                  "type": "boolean",
+                  "x-ms-summary": "Enabled"
+                },
+                "note": {
+                  "description": "A private note about the link.",
+                  "type": "string",
+                  "x-ms-summary": "Note"
+                },
+                "utm_source": {
+                  "description": "The utm_source parameter appended to the destination URL.",
+                  "type": "string",
+                  "x-ms-summary": "UTM Source"
+                },
+                "utm_medium": {
+                  "description": "The utm_medium parameter appended to the destination URL.",
+                  "type": "string",
+                  "x-ms-summary": "UTM Medium"
+                },
+                "utm_campaign": {
+                  "description": "The utm_campaign parameter appended to the destination URL.",
+                  "type": "string",
+                  "x-ms-summary": "UTM Campaign"
+                },
+                "utm_content": {
+                  "description": "The utm_content parameter appended to the destination URL.",
+                  "type": "string",
+                  "x-ms-summary": "UTM Content",
+                  "x-ms-visibility": "advanced"
+                },
+                "utm_term": {
+                  "description": "The utm_term parameter appended to the destination URL.",
+                  "type": "string",
+                  "x-ms-summary": "UTM Term",
+                  "x-ms-visibility": "advanced"
+                },
+                "fb_pixel_id": {
+                  "description": "The Meta (Facebook) Pixel ID to fire when the link is clicked.",
+                  "type": "string",
+                  "x-ms-summary": "Meta Pixel ID"
+                },
+                "ga4_tag_id": {
+                  "description": "The Google Analytics 4 measurement ID to fire when the link is clicked.",
+                  "type": "string",
+                  "x-ms-summary": "Google Analytics 4 Tag ID"
+                },
+                "gtm_id": {
+                  "description": "The Google Tag Manager container ID to load when the link is clicked.",
+                  "type": "string",
+                  "x-ms-summary": "Google Tag Manager ID"
+                },
+                "block_bots": {
+                  "description": "Whether to block known bots from following the link.",
+                  "type": "boolean",
+                  "x-ms-summary": "Block Bots",
+                  "x-ms-visibility": "advanced"
+                },
+                "body_tags": {
+                  "description": "Custom HTML or tracking tags inserted into the body of the redirect page.",
+                  "type": "string",
+                  "x-ms-summary": "Body Tags",
+                  "x-ms-visibility": "advanced"
+                },
+                "cloaking": {
+                  "description": "Whether to hide the destination by opening it inside a frame.",
+                  "type": "boolean",
+                  "x-ms-summary": "Cloaking",
+                  "x-ms-visibility": "advanced"
+                },
+                "forward_params": {
+                  "description": "Whether to forward query parameters from the short link to the destination.",
+                  "type": "boolean",
+                  "x-ms-summary": "Forward Parameters",
+                  "x-ms-visibility": "advanced"
+                },
+                "head_tags": {
+                  "description": "Custom HTML or tracking tags inserted into the head of the redirect page.",
+                  "type": "string",
+                  "x-ms-summary": "Head Tags",
+                  "x-ms-visibility": "advanced"
+                },
+                "hide_referrer": {
+                  "description": "Whether to hide the referrer from the destination site.",
+                  "type": "boolean",
+                  "x-ms-summary": "Hide Referrer",
+                  "x-ms-visibility": "advanced"
+                },
+                "og_description": {
+                  "description": "The description shown when the link is shared on social media.",
+                  "type": "string",
+                  "x-ms-summary": "Open Graph Description",
+                  "x-ms-visibility": "advanced"
+                },
+                "og_image": {
+                  "description": "The image URL shown when the link is shared on social media.",
+                  "type": "string",
+                  "x-ms-summary": "Open Graph Image",
+                  "x-ms-visibility": "advanced"
+                },
+                "og_title": {
+                  "description": "The title shown when the link is shared on social media.",
+                  "type": "string",
+                  "x-ms-summary": "Open Graph Title",
+                  "x-ms-visibility": "advanced"
+                },
+                "tiktok_pixel_id": {
+                  "description": "The TikTok Pixel ID to fire when the link is clicked.",
+                  "type": "string",
+                  "x-ms-summary": "TikTok Pixel ID",
+                  "x-ms-visibility": "advanced"
+                }
+              },
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The link.",
+            "schema": {
+              "description": "The link.",
+              "properties": {
+                "fb_pixel_id": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Meta Pixel ID",
+                  "description": "The Meta (Facebook) Pixel ID to fire when the link is clicked."
+                },
+                "linkedin_partner_id": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "LinkedIn Partner ID",
+                  "description": "The LinkedIn Insight Tag partner ID to fire when the link is clicked."
+                },
+                "microsoft_uet_tag_id": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Microsoft UET Tag ID",
+                  "description": "The Microsoft Advertising UET tag ID to fire when the link is clicked."
+                },
+                "reddit_pixel_id": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Reddit Pixel ID",
+                  "description": "The Reddit Pixel ID to fire when the link is clicked."
+                },
+                "tiktok_pixel_id": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "TikTok Pixel ID",
+                  "description": "The TikTok Pixel ID to fire when the link is clicked."
+                },
+                "hide_referrer": {
+                  "x-nullable": true,
+                  "type": "boolean",
+                  "x-ms-summary": "Hide Referrer",
+                  "description": "Whether to hide the referrer from the destination site."
+                },
+                "expiry_datetime": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Expiry Date",
+                  "description": "When the link stops working, in ISO 8601 format."
+                },
+                "expiry_destination": {
+                  "format": "uri",
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Expiry Destination",
+                  "description": "The URL to redirect to after the link expires. Leave blank to return a not-found page."
+                },
+                "rules": {
+                  "items": {
+                    "properties": {
+                      "matches": {
+                        "x-nullable": true,
+                        "type": "string",
+                        "x-ms-summary": "Matches",
+                        "description": "The condition value the rule matches against."
+                      },
+                      "percentage": {
+                        "x-nullable": true,
+                        "type": "integer",
+                        "format": "int32",
+                        "x-ms-summary": "Percentage",
+                        "description": "The percentage of traffic routed by the rule."
+                      },
+                      "url": {
+                        "x-nullable": true,
+                        "type": "string",
+                        "x-ms-summary": "Rule URL",
+                        "description": "The destination URL used when the rule matches."
+                      },
+                      "what": {
+                        "x-nullable": true,
+                        "type": "string",
+                        "x-ms-summary": "What",
+                        "description": "The type of condition, for example country or platform."
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "x-nullable": true,
+                  "type": "array",
+                  "x-ms-summary": "Rules",
+                  "description": "Conditional redirect rules applied to the link.",
+                  "x-ms-visibility": "internal"
+                },
+                "twitter_pixel_id": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "X Pixel ID",
+                  "description": "The X (Twitter) Pixel ID to fire when the link is clicked."
+                },
+                "cloaking": {
+                  "x-nullable": true,
+                  "type": "boolean",
+                  "x-ms-summary": "Cloaking",
+                  "description": "Whether to hide the destination by opening it inside a frame."
+                },
+                "linkify_words": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Linkify Words",
+                  "description": "Words that are automatically turned into this link in supported integrations.",
+                  "x-ms-visibility": "internal"
+                },
+                "full_url": {
+                  "format": "uri",
+                  "type": "string",
+                  "x-ms-summary": "Short URL",
+                  "description": "The complete short link URL."
+                },
+                "og_description": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Open Graph Description",
+                  "description": "The description shown when the link is shared on social media."
+                },
+                "skip_social_crawler_tracking": {
+                  "x-nullable": true,
+                  "type": "boolean",
+                  "x-ms-summary": "Skip Social Crawler Tracking",
+                  "description": "Whether to exclude social media preview crawlers from click tracking."
+                },
+                "body_tags": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Body Tags",
+                  "description": "Custom HTML or tracking tags inserted into the body of the redirect page."
+                },
+                "og_title": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Open Graph Title",
+                  "description": "The title shown when the link is shared on social media."
+                },
+                "note": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Note",
+                  "description": "A private note about the link."
+                },
+                "name": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Name",
+                  "description": "A nickname for the link, shown in the dashboard."
+                },
+                "id": {
+                  "x-nullable": true,
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-summary": "Link ID",
+                  "description": "The ID of an existing link to update. Leave blank to create a new link."
+                },
+                "gtm_id": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Google Tag Manager ID",
+                  "description": "The Google Tag Manager container ID to load when the link is clicked."
+                },
+                "og_image": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Open Graph Image",
+                  "description": "The image URL shown when the link is shared on social media."
+                },
+                "block_bots": {
+                  "x-nullable": true,
+                  "type": "boolean",
+                  "x-ms-summary": "Block Bots",
+                  "description": "Whether to block known bots from following the link."
+                },
+                "snapchat_pixel_id": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Snapchat Pixel ID",
+                  "description": "The Snapchat Pixel ID to fire when the link is clicked."
+                },
+                "utm_content": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "UTM Content",
+                  "description": "The utm_content parameter appended to the destination URL."
+                },
+                "enabled": {
+                  "x-nullable": true,
+                  "type": "boolean",
+                  "x-ms-summary": "Enabled",
+                  "description": "Whether the link is active."
+                },
+                "url": {
+                  "format": "uri",
+                  "type": "string",
+                  "x-ms-summary": "Destination URL",
+                  "description": "The destination URL that the short link redirects to. Required to create a new link."
+                },
+                "replacements": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Replacements",
+                  "description": "URL parameter replacement rules applied to the destination.",
+                  "x-ms-visibility": "internal"
+                },
+                "deleted": {
+                  "x-nullable": true,
+                  "type": "boolean",
+                  "x-ms-summary": "Deleted",
+                  "description": "Whether the link is in the trash."
+                },
+                "webhooks": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "x-nullable": true,
+                  "type": "array",
+                  "x-ms-summary": "Webhooks",
+                  "description": "The webhook URLs subscribed to clicks on this link."
+                },
+                "created_by_user_id": {
+                  "x-nullable": true,
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-summary": "Created By User ID",
+                  "description": "The ID of the user who created the link.",
+                  "x-ms-visibility": "internal"
+                },
+                "expiry_clicks": {
+                  "x-nullable": true,
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-summary": "Expiry Clicks",
+                  "description": "The number of clicks after which the link stops working."
+                },
+                "notify_slack": {
+                  "x-nullable": true,
+                  "type": "boolean",
+                  "x-ms-summary": "Notify Slack",
+                  "description": "Whether to send a Slack notification when the link is clicked."
+                },
+                "notify_user_ids": {
+                  "items": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "x-nullable": true,
+                  "type": "array",
+                  "x-ms-summary": "Notify User IDs",
+                  "description": "The IDs of workspace users to notify when the link is clicked.",
+                  "x-ms-visibility": "internal"
+                },
+                "workspace_id": {
+                  "x-nullable": true,
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-summary": "Workspace ID",
+                  "description": "The ID of the workspace."
+                },
+                "public_analytics": {
+                  "x-nullable": true,
+                  "type": "boolean",
+                  "x-ms-summary": "Public Analytics",
+                  "description": "Whether the analytics page for the link is publicly viewable."
+                },
+                "pinterest_tag_id": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Pinterest Tag ID",
+                  "description": "The Pinterest Tag ID to fire when the link is clicked."
+                },
+                "password": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Password",
+                  "description": "A password visitors must enter before being redirected.",
+                  "x-ms-visibility": "internal"
+                },
+                "utm_source": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "UTM Source",
+                  "description": "The utm_source parameter appended to the destination URL."
+                },
+                "slug": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Slug",
+                  "description": "A custom path for the short link. It must start with a slash."
+                },
+                "domain": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Domain",
+                  "description": "The custom domain to use for the short link, without a trailing slash."
+                },
+                "forward_params": {
+                  "x-nullable": true,
+                  "type": "boolean",
+                  "x-ms-summary": "Forward Parameters",
+                  "description": "Whether to forward query parameters from the short link to the destination."
+                },
+                "utm_medium": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "UTM Medium",
+                  "description": "The utm_medium parameter appended to the destination URL."
+                },
+                "head_tags": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Head Tags",
+                  "description": "Custom HTML or tracking tags inserted into the head of the redirect page."
+                },
+                "ga4_tag_id": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Google Analytics 4 Tag ID",
+                  "description": "The Google Analytics 4 measurement ID to fire when the link is clicked."
+                },
+                "utm_term": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "UTM Term",
+                  "description": "The utm_term parameter appended to the destination URL."
+                },
+                "utm_campaign": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "UTM Campaign",
+                  "description": "The utm_campaign parameter appended to the destination URL."
+                }
+              },
+              "type": "object"
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          }
+        ]
+      }
+    },
+    "/link/{id}": {
+      "get": {
+        "summary": "Get a link",
+        "description": "Retrieves a single link by its ID, including its destination, short URL and configuration.",
+        "operationId": "GetLink",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Link ID",
+            "description": "The ID of the link.",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The link.",
+            "schema": {
+              "description": "The link.",
+              "properties": {
+                "fb_pixel_id": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Meta Pixel ID",
+                  "description": "The Meta (Facebook) Pixel ID to fire when the link is clicked."
+                },
+                "linkedin_partner_id": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "LinkedIn Partner ID",
+                  "description": "The LinkedIn Insight Tag partner ID to fire when the link is clicked."
+                },
+                "microsoft_uet_tag_id": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Microsoft UET Tag ID",
+                  "description": "The Microsoft Advertising UET tag ID to fire when the link is clicked."
+                },
+                "reddit_pixel_id": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Reddit Pixel ID",
+                  "description": "The Reddit Pixel ID to fire when the link is clicked."
+                },
+                "tiktok_pixel_id": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "TikTok Pixel ID",
+                  "description": "The TikTok Pixel ID to fire when the link is clicked."
+                },
+                "hide_referrer": {
+                  "x-nullable": true,
+                  "type": "boolean",
+                  "x-ms-summary": "Hide Referrer",
+                  "description": "Whether to hide the referrer from the destination site."
+                },
+                "expiry_datetime": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Expiry Date",
+                  "description": "When the link stops working, in ISO 8601 format."
+                },
+                "expiry_destination": {
+                  "format": "uri",
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Expiry Destination",
+                  "description": "The URL to redirect to after the link expires. Leave blank to return a not-found page."
+                },
+                "rules": {
+                  "items": {
+                    "properties": {
+                      "matches": {
+                        "x-nullable": true,
+                        "type": "string",
+                        "x-ms-summary": "Matches",
+                        "description": "The condition value the rule matches against."
+                      },
+                      "percentage": {
+                        "x-nullable": true,
+                        "type": "integer",
+                        "format": "int32",
+                        "x-ms-summary": "Percentage",
+                        "description": "The percentage of traffic routed by the rule."
+                      },
+                      "url": {
+                        "x-nullable": true,
+                        "type": "string",
+                        "x-ms-summary": "Rule URL",
+                        "description": "The destination URL used when the rule matches."
+                      },
+                      "what": {
+                        "x-nullable": true,
+                        "type": "string",
+                        "x-ms-summary": "What",
+                        "description": "The type of condition, for example country or platform."
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "x-nullable": true,
+                  "type": "array",
+                  "x-ms-summary": "Rules",
+                  "description": "Conditional redirect rules applied to the link.",
+                  "x-ms-visibility": "internal"
+                },
+                "twitter_pixel_id": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "X Pixel ID",
+                  "description": "The X (Twitter) Pixel ID to fire when the link is clicked."
+                },
+                "cloaking": {
+                  "x-nullable": true,
+                  "type": "boolean",
+                  "x-ms-summary": "Cloaking",
+                  "description": "Whether to hide the destination by opening it inside a frame."
+                },
+                "linkify_words": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Linkify Words",
+                  "description": "Words that are automatically turned into this link in supported integrations.",
+                  "x-ms-visibility": "internal"
+                },
+                "full_url": {
+                  "format": "uri",
+                  "type": "string",
+                  "x-ms-summary": "Short URL",
+                  "description": "The complete short link URL."
+                },
+                "og_description": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Open Graph Description",
+                  "description": "The description shown when the link is shared on social media."
+                },
+                "skip_social_crawler_tracking": {
+                  "x-nullable": true,
+                  "type": "boolean",
+                  "x-ms-summary": "Skip Social Crawler Tracking",
+                  "description": "Whether to exclude social media preview crawlers from click tracking."
+                },
+                "body_tags": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Body Tags",
+                  "description": "Custom HTML or tracking tags inserted into the body of the redirect page."
+                },
+                "og_title": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Open Graph Title",
+                  "description": "The title shown when the link is shared on social media."
+                },
+                "note": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Note",
+                  "description": "A private note about the link."
+                },
+                "name": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Name",
+                  "description": "A nickname for the link, shown in the dashboard."
+                },
+                "id": {
+                  "x-nullable": true,
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-summary": "Link ID",
+                  "description": "The unique identifier of the link."
+                },
+                "gtm_id": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Google Tag Manager ID",
+                  "description": "The Google Tag Manager container ID to load when the link is clicked."
+                },
+                "og_image": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Open Graph Image",
+                  "description": "The image URL shown when the link is shared on social media."
+                },
+                "block_bots": {
+                  "x-nullable": true,
+                  "type": "boolean",
+                  "x-ms-summary": "Block Bots",
+                  "description": "Whether to block known bots from following the link."
+                },
+                "snapchat_pixel_id": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Snapchat Pixel ID",
+                  "description": "The Snapchat Pixel ID to fire when the link is clicked."
+                },
+                "utm_content": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "UTM Content",
+                  "description": "The utm_content parameter appended to the destination URL."
+                },
+                "enabled": {
+                  "x-nullable": true,
+                  "type": "boolean",
+                  "x-ms-summary": "Enabled",
+                  "description": "Whether the link is active."
+                },
+                "url": {
+                  "format": "uri",
+                  "type": "string",
+                  "x-ms-summary": "Destination URL",
+                  "description": "The destination URL that the short link redirects to."
+                },
+                "replacements": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Replacements",
+                  "description": "URL parameter replacement rules applied to the destination.",
+                  "x-ms-visibility": "internal"
+                },
+                "deleted": {
+                  "x-nullable": true,
+                  "type": "boolean",
+                  "x-ms-summary": "Deleted",
+                  "description": "Whether the link is in the trash."
+                },
+                "webhooks": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "x-nullable": true,
+                  "type": "array",
+                  "x-ms-summary": "Webhooks",
+                  "description": "The webhook URLs subscribed to clicks on this link."
+                },
+                "created_by_user_id": {
+                  "x-nullable": true,
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-summary": "Created By User ID",
+                  "description": "The ID of the user who created the link.",
+                  "x-ms-visibility": "internal"
+                },
+                "expiry_clicks": {
+                  "x-nullable": true,
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-summary": "Expiry Clicks",
+                  "description": "The number of clicks after which the link stops working."
+                },
+                "notify_slack": {
+                  "x-nullable": true,
+                  "type": "boolean",
+                  "x-ms-summary": "Notify Slack",
+                  "description": "Whether to send a Slack notification when the link is clicked."
+                },
+                "notify_user_ids": {
+                  "items": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "x-nullable": true,
+                  "type": "array",
+                  "x-ms-summary": "Notify User IDs",
+                  "description": "The IDs of workspace users to notify when the link is clicked.",
+                  "x-ms-visibility": "internal"
+                },
+                "workspace_id": {
+                  "x-nullable": true,
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-summary": "Workspace ID",
+                  "description": "The ID of the workspace."
+                },
+                "public_analytics": {
+                  "x-nullable": true,
+                  "type": "boolean",
+                  "x-ms-summary": "Public Analytics",
+                  "description": "Whether the analytics page for the link is publicly viewable."
+                },
+                "pinterest_tag_id": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Pinterest Tag ID",
+                  "description": "The Pinterest Tag ID to fire when the link is clicked."
+                },
+                "password": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Password",
+                  "description": "A password visitors must enter before being redirected.",
+                  "x-ms-visibility": "internal"
+                },
+                "utm_source": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "UTM Source",
+                  "description": "The utm_source parameter appended to the destination URL."
+                },
+                "slug": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Slug",
+                  "description": "A custom path for the short link. It must start with a slash."
+                },
+                "domain": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Domain",
+                  "description": "The custom domain to use for the short link, without a trailing slash."
+                },
+                "forward_params": {
+                  "x-nullable": true,
+                  "type": "boolean",
+                  "x-ms-summary": "Forward Parameters",
+                  "description": "Whether to forward query parameters from the short link to the destination."
+                },
+                "utm_medium": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "UTM Medium",
+                  "description": "The utm_medium parameter appended to the destination URL."
+                },
+                "head_tags": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Head Tags",
+                  "description": "Custom HTML or tracking tags inserted into the head of the redirect page."
+                },
+                "ga4_tag_id": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "Google Analytics 4 Tag ID",
+                  "description": "The Google Analytics 4 measurement ID to fire when the link is clicked."
+                },
+                "utm_term": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "UTM Term",
+                  "description": "The utm_term parameter appended to the destination URL."
+                },
+                "utm_campaign": {
+                  "x-nullable": true,
+                  "type": "string",
+                  "x-ms-summary": "UTM Campaign",
+                  "description": "The utm_campaign parameter appended to the destination URL."
+                }
+              },
+              "type": "object"
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          }
+        ]
+      }
+    },
+    "/workspace/{workspace_id}/clicks": {
+      "get": {
+        "summary": "Get click analytics",
+        "description": "Returns click counts over time for a workspace or for specific links, optionally filtered by date range, country, browser, platform, referrer or ISP.",
+        "operationId": "GetClicks",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Workspace",
+            "description": "The workspace to work in. Choose it from the list, or enter its ID.",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "ListWorkspaces",
+              "value-path": "id",
+              "value-title": "name"
+            }
+          },
+          {
+            "name": "link_id",
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Link ID",
+            "description": "The ID of a single link to filter by."
+          },
+          {
+            "name": "link_ids",
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Link IDs",
+            "description": "A hyphen-separated list of link IDs to filter by.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Start Date",
+            "description": "The start of the date range, in YYYY-MM-DD format."
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "End Date",
+            "description": "The end of the date range, in YYYY-MM-DD format."
+          },
+          {
+            "name": "country",
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Country",
+            "description": "A two-letter ISO 3166-1 country code, for example US.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "browser",
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Browser",
+            "description": "A browser name to filter by, for example Chrome, Firefox or Safari.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "platform",
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Platform",
+            "description": "A platform or operating system to filter by, for example Windows, Mac, iOS or Android.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "referer",
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Referrer",
+            "description": "A referring domain to filter by.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "isp",
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "ISP",
+            "description": "An internet service provider name to filter by.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "bots",
+            "in": "query",
+            "type": "boolean",
+            "x-ms-summary": "Include Bots",
+            "description": "Whether to include clicks identified as bots. Set to false to exclude them.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "unique",
+            "in": "query",
+            "type": "boolean",
+            "x-ms-summary": "Unique Only",
+            "description": "Whether to count only unique clicks.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "timezone",
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Time Zone",
+            "description": "The IANA time zone used for date calculations, for example Europe/London.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "frequency",
+            "in": "query",
+            "type": "string",
+            "enum": [
+              "day",
+              "hour"
+            ],
+            "default": "day",
+            "x-ms-summary": "Frequency",
+            "description": "The granularity of the time series, either day or hour.",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The click counts over time.",
+            "schema": {
+              "description": "The click counts over time.",
+              "properties": {
+                "traffic": {
+                  "items": {
+                    "description": "A single time bucket.",
+                    "properties": {
+                      "t": {
+                        "x-nullable": true,
+                        "type": "string",
+                        "x-ms-summary": "Bucket Start",
+                        "description": "The bucket start: YYYY-MM-DD for daily buckets or YYYY-MM-DDTHH:MM:SS for hourly buckets."
+                      },
+                      "y": {
+                        "x-nullable": true,
+                        "type": "integer",
+                        "format": "int32",
+                        "x-ms-summary": "Clicks",
+                        "description": "The number of clicks in the bucket."
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "type": "array",
+                  "x-ms-summary": "Traffic",
+                  "description": "The click counts over time."
+                }
+              },
+              "type": "object"
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          }
+        ]
+      }
+    },
+    "/workspace/{workspace_id}/clicks/counters/{counter}": {
+      "get": {
+        "summary": "Get click counts by dimension",
+        "description": "Returns click counts grouped by a dimension such as country, city, platform, referrer or UTM parameter, ordered by count descending.",
+        "operationId": "GetClickCounters",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Workspace",
+            "description": "The workspace to work in. Choose it from the list, or enter its ID.",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "ListWorkspaces",
+              "value-path": "id",
+              "value-title": "name"
+            }
+          },
+          {
+            "name": "counter",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "country",
+              "city",
+              "region",
+              "platform",
+              "destination",
+              "referer",
+              "bot_name",
+              "isp",
+              "remote_ip",
+              "top_params",
+              "ad_network",
+              "utm_source",
+              "utm_medium",
+              "utm_campaign",
+              "utm_content",
+              "utm_term"
+            ],
+            "x-ms-summary": "Dimension",
+            "description": "The dimension to group clicks by, for example country, city, platform, referer or utm_campaign.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "link_id",
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Link ID",
+            "description": "The ID of a single link to filter by."
+          },
+          {
+            "name": "link_ids",
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Link IDs",
+            "description": "A hyphen-separated list of link IDs to filter by.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Start Date",
+            "description": "The start of the date range, in YYYY-MM-DD format."
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "End Date",
+            "description": "The end of the date range, in YYYY-MM-DD format."
+          },
+          {
+            "name": "country",
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Country",
+            "description": "A two-letter ISO 3166-1 country code, for example US.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "bots",
+            "in": "query",
+            "type": "boolean",
+            "x-ms-summary": "Include Bots",
+            "description": "Whether to include clicks identified as bots. Set to false to exclude them.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "unique",
+            "in": "query",
+            "type": "boolean",
+            "x-ms-summary": "Unique Only",
+            "description": "Whether to count only unique clicks.",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The grouped click counts.",
+            "schema": {
+              "description": "The grouped click counts.",
+              "properties": {
+                "total": {
+                  "description": "Total clicks across all groups, including any not returned in values. When the result is truncated this is greater than the sum of count in values, so count / total still gives an accurate percentage.",
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-summary": "Total"
+                },
+                "values": {
+                  "description": "Grouped counts, ordered by count descending. Truncated to the top 10,000 values; if the dimension has more distinct values than that, the rest are not returned.",
+                  "items": {
+                    "properties": {
+                      "count": {
+                        "type": "integer",
+                        "format": "int32",
+                        "x-ms-summary": "Count",
+                        "description": "The number of clicks for this value."
+                      },
+                      "value": {
+                        "x-nullable": true,
+                        "type": "string",
+                        "x-ms-summary": "Value",
+                        "description": "The value of the dimension, for example a country code."
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "maxItems": 10000,
+                  "type": "array",
+                  "x-ms-summary": "Values"
+                }
+              },
+              "type": "object"
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          }
+        ]
+      }
+    },
+    "/workspace/{workspace_id}/domains": {
+      "get": {
+        "summary": "List custom domains",
+        "description": "Returns the custom domains configured for a workspace. These domain names can be used when creating links.",
+        "operationId": "ListDomains",
+        "parameters": [
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Workspace",
+            "description": "The workspace to work in. Choose it from the list, or enter its ID.",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "ListWorkspaces",
+              "value-path": "id",
+              "value-title": "name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The custom domains in the workspace.",
+            "schema": {
+              "description": "List of custom domains configured for a workspace.",
+              "properties": {
+                "domains": {
+                  "items": {
+                    "description": "A custom domain in a workspace.",
+                    "properties": {
+                      "name": {
+                        "x-nullable": true,
+                        "type": "string",
+                        "x-ms-summary": "Domain Name",
+                        "description": "The domain name, for example go.yourcompany.com."
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "type": "array",
+                  "x-ms-summary": "Domains",
+                  "description": "The custom domains in the workspace."
+                }
+              },
+              "type": "object"
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          }
+        ]
+      }
+    },
+    "/workspace/{workspace_id}/links/{id}": {
+      "delete": {
+        "summary": "Delete a link",
+        "description": "Moves a link to the trash. Its short URL stops redirecting, and the link can be restored later from the trash.",
+        "operationId": "DeleteLink",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Workspace",
+            "description": "The workspace to work in. Choose it from the list, or enter its ID.",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "ListWorkspaces",
+              "value-path": "id",
+              "value-title": "name"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32",
+            "x-ms-summary": "Link ID",
+            "description": "The ID of the link.",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The link was moved to the trash.",
+            "schema": {
+              "type": "string",
+              "description": "A confirmation message."
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          }
+        ]
+      }
+    },
+    "/workspace/{workspace_id}/list_links": {
+      "get": {
+        "summary": "List links",
+        "description": "Returns a paginated list of the links in a workspace, with click statistics. Supports search and sorting.",
+        "operationId": "ListLinks",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Workspace",
+            "description": "The workspace to work in. Choose it from the list, or enter its ID.",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "ListWorkspaces",
+              "value-path": "id",
+              "value-title": "name"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Search",
+            "description": "A search term to filter links by name, URL or slug."
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "type": "integer",
+            "format": "int32",
+            "default": 1,
+            "x-ms-summary": "Page",
+            "description": "The page number to return, starting at 1."
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "type": "integer",
+            "format": "int32",
+            "default": 1000,
+            "x-ms-summary": "Page Size",
+            "description": "The number of links to return per page."
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Sort By",
+            "description": "The field to sort by, for example clicks_total, name or inserted_at.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "sort_dir",
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Sort Direction",
+            "description": "The sort direction, either asc or desc.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "deleted",
+            "in": "query",
+            "type": "boolean",
+            "default": false,
+            "x-ms-summary": "Deleted",
+            "description": "Whether to return links that are in the trash instead of active links.",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The page of links.",
+            "schema": {
+              "description": "Paginated list of links in a workspace, with click statistics.",
+              "properties": {
+                "links": {
+                  "items": {
+                    "description": "A link with click statistics, as returned by workspace link endpoints.",
+                    "properties": {
+                      "fb_pixel_id": {
+                        "x-nullable": true,
+                        "type": "string",
+                        "x-ms-summary": "Meta Pixel ID",
+                        "description": "The Meta (Facebook) Pixel ID to fire when the link is clicked."
+                      },
+                      "human_clicks_total": {
+                        "description": "Lifetime clicks with no bot signal; the subset of clicks_total where neither a bot user-agent nor a verified-bot category was detected. Recorded from 2019 onward.",
+                        "type": "integer",
+                        "format": "int32",
+                        "x-ms-summary": "Human Clicks Total"
+                      },
+                      "sparkline": {
+                        "description": "Daily human clicks over the last 30 days, oldest first.",
+                        "items": {
+                          "type": "integer",
+                          "format": "int32"
+                        },
+                        "type": "array",
+                        "x-ms-summary": "Sparkline",
+                        "x-ms-visibility": "internal"
+                      },
+                      "clicks_thirty_days": {
+                        "description": "Clicks in the last 30 days, including bot traffic.",
+                        "type": "integer",
+                        "format": "int32",
+                        "x-ms-summary": "Clicks (30 Days)"
+                      },
+                      "tiktok_pixel_id": {
+                        "x-nullable": true,
+                        "type": "string",
+                        "x-ms-summary": "TikTok Pixel ID",
+                        "description": "The TikTok Pixel ID to fire when the link is clicked."
+                      },
+                      "hide_referrer": {
+                        "x-nullable": true,
+                        "type": "boolean",
+                        "x-ms-summary": "Hide Referrer",
+                        "description": "Whether to hide the referrer from the destination site."
+                      },
+                      "rules": {
+                        "items": {
+                          "properties": {
+                            "matches": {
+                              "x-nullable": true,
+                              "type": "string",
+                              "x-ms-summary": "Matches",
+                              "description": "The condition value the rule matches against."
+                            },
+                            "percentage": {
+                              "x-nullable": true,
+                              "type": "integer",
+                              "format": "int32",
+                              "x-ms-summary": "Percentage",
+                              "description": "The percentage of traffic routed by the rule."
+                            },
+                            "url": {
+                              "x-nullable": true,
+                              "type": "string",
+                              "x-ms-summary": "Rule URL",
+                              "description": "The destination URL used when the rule matches."
+                            },
+                            "what": {
+                              "x-nullable": true,
+                              "type": "string",
+                              "x-ms-summary": "What",
+                              "description": "The type of condition, for example country or platform."
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "x-nullable": true,
+                        "type": "array",
+                        "x-ms-summary": "Rules",
+                        "description": "Conditional redirect rules applied to the link.",
+                        "x-ms-visibility": "internal"
+                      },
+                      "cloaking": {
+                        "x-nullable": true,
+                        "type": "boolean",
+                        "x-ms-summary": "Cloaking",
+                        "description": "Whether to hide the destination by opening it inside a frame."
+                      },
+                      "linkify_words": {
+                        "x-nullable": true,
+                        "type": "string",
+                        "x-ms-summary": "Linkify Words",
+                        "description": "Words that are automatically turned into this link in supported integrations.",
+                        "x-ms-visibility": "internal"
+                      },
+                      "full_url": {
+                        "format": "uri",
+                        "type": "string",
+                        "x-ms-summary": "Short URL",
+                        "description": "The complete short link URL."
+                      },
+                      "clicks_today": {
+                        "description": "Clicks so far today (UTC), including bot traffic.",
+                        "type": "integer",
+                        "format": "int32",
+                        "x-ms-summary": "Clicks Today"
+                      },
+                      "og_description": {
+                        "x-nullable": true,
+                        "type": "string",
+                        "x-ms-summary": "Open Graph Description",
+                        "description": "The description shown when the link is shared on social media."
+                      },
+                      "body_tags": {
+                        "x-nullable": true,
+                        "type": "string",
+                        "x-ms-summary": "Body Tags",
+                        "description": "Custom HTML or tracking tags inserted into the body of the redirect page."
+                      },
+                      "og_title": {
+                        "x-nullable": true,
+                        "type": "string",
+                        "x-ms-summary": "Open Graph Title",
+                        "description": "The title shown when the link is shared on social media."
+                      },
+                      "note": {
+                        "x-nullable": true,
+                        "type": "string",
+                        "x-ms-summary": "Note",
+                        "description": "A private note about the link."
+                      },
+                      "name": {
+                        "x-nullable": true,
+                        "type": "string",
+                        "x-ms-summary": "Name",
+                        "description": "A nickname for the link, shown in the dashboard."
+                      },
+                      "id": {
+                        "x-nullable": true,
+                        "type": "integer",
+                        "format": "int32",
+                        "x-ms-summary": "Link ID",
+                        "description": "The unique identifier of the link."
+                      },
+                      "gtm_id": {
+                        "x-nullable": true,
+                        "type": "string",
+                        "x-ms-summary": "Google Tag Manager ID",
+                        "description": "The Google Tag Manager container ID to load when the link is clicked."
+                      },
+                      "og_image": {
+                        "x-nullable": true,
+                        "type": "string",
+                        "x-ms-summary": "Open Graph Image",
+                        "description": "The image URL shown when the link is shared on social media."
+                      },
+                      "block_bots": {
+                        "x-nullable": true,
+                        "type": "boolean",
+                        "x-ms-summary": "Block Bots",
+                        "description": "Whether to block known bots from following the link."
+                      },
+                      "clicks_total": {
+                        "description": "Lifetime clicks, including bot traffic.",
+                        "type": "integer",
+                        "format": "int32",
+                        "x-ms-summary": "Total Clicks"
+                      },
+                      "human_clicks_thirty_days": {
+                        "description": "Clicks in the last 30 days with no bot signal; the subset of clicks_thirty_days.",
+                        "type": "integer",
+                        "format": "int32",
+                        "x-ms-summary": "Human Clicks (30 Days)"
+                      },
+                      "utm_content": {
+                        "x-nullable": true,
+                        "type": "string",
+                        "x-ms-summary": "UTM Content",
+                        "description": "The utm_content parameter appended to the destination URL."
+                      },
+                      "human_clicks_today": {
+                        "description": "Clicks so far today (UTC) with no bot signal.",
+                        "type": "integer",
+                        "format": "int32",
+                        "x-ms-summary": "Human Clicks Today"
+                      },
+                      "enabled": {
+                        "x-nullable": true,
+                        "type": "boolean",
+                        "x-ms-summary": "Enabled",
+                        "description": "Whether the link is active."
+                      },
+                      "url": {
+                        "format": "uri",
+                        "type": "string",
+                        "x-ms-summary": "Destination URL",
+                        "description": "The destination URL that the short link redirects to."
+                      },
+                      "replacements": {
+                        "x-nullable": true,
+                        "type": "string",
+                        "x-ms-summary": "Replacements",
+                        "description": "URL parameter replacement rules applied to the destination.",
+                        "x-ms-visibility": "internal"
+                      },
+                      "deleted": {
+                        "x-nullable": true,
+                        "type": "boolean",
+                        "x-ms-summary": "Deleted",
+                        "description": "Whether the link is in the trash."
+                      },
+                      "workspace_id": {
+                        "x-nullable": true,
+                        "type": "integer",
+                        "format": "int32",
+                        "x-ms-summary": "Workspace ID",
+                        "description": "The ID of the workspace."
+                      },
+                      "public_analytics": {
+                        "x-nullable": true,
+                        "type": "boolean",
+                        "x-ms-summary": "Public Analytics",
+                        "description": "Whether the analytics page for the link is publicly viewable."
+                      },
+                      "utm_source": {
+                        "x-nullable": true,
+                        "type": "string",
+                        "x-ms-summary": "UTM Source",
+                        "description": "The utm_source parameter appended to the destination URL."
+                      },
+                      "slug": {
+                        "x-nullable": true,
+                        "type": "string",
+                        "x-ms-summary": "Slug",
+                        "description": "A custom path for the short link. It must start with a slash."
+                      },
+                      "domain": {
+                        "x-nullable": true,
+                        "type": "string",
+                        "x-ms-summary": "Domain",
+                        "description": "The custom domain to use for the short link, without a trailing slash."
+                      },
+                      "forward_params": {
+                        "x-nullable": true,
+                        "type": "boolean",
+                        "x-ms-summary": "Forward Parameters",
+                        "description": "Whether to forward query parameters from the short link to the destination."
+                      },
+                      "utm_medium": {
+                        "x-nullable": true,
+                        "type": "string",
+                        "x-ms-summary": "UTM Medium",
+                        "description": "The utm_medium parameter appended to the destination URL."
+                      },
+                      "head_tags": {
+                        "x-nullable": true,
+                        "type": "string",
+                        "x-ms-summary": "Head Tags",
+                        "description": "Custom HTML or tracking tags inserted into the head of the redirect page."
+                      },
+                      "ga4_tag_id": {
+                        "x-nullable": true,
+                        "type": "string",
+                        "x-ms-summary": "Google Analytics 4 Tag ID",
+                        "description": "The Google Analytics 4 measurement ID to fire when the link is clicked."
+                      },
+                      "utm_term": {
+                        "x-nullable": true,
+                        "type": "string",
+                        "x-ms-summary": "UTM Term",
+                        "description": "The utm_term parameter appended to the destination URL."
+                      },
+                      "utm_campaign": {
+                        "x-nullable": true,
+                        "type": "string",
+                        "x-ms-summary": "UTM Campaign",
+                        "description": "The utm_campaign parameter appended to the destination URL."
+                      },
+                      "human_clicks_previous_day": {
+                        "description": "Clicks yesterday (UTC) with no bot signal.",
+                        "type": "integer",
+                        "format": "int32",
+                        "x-ms-summary": "Human Clicks Yesterday"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "type": "array",
+                  "x-ms-summary": "Links",
+                  "description": "The links on this page."
+                },
+                "page_number": {
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-summary": "Page Number",
+                  "description": "The current page number."
+                },
+                "page_size": {
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-summary": "Page Size",
+                  "description": "The number of links to return per page."
+                },
+                "total_entries": {
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-summary": "Total Entries",
+                  "description": "The total number of links matching the request."
+                },
+                "total_pages": {
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-summary": "Total Pages",
+                  "description": "The total number of pages available."
+                },
+                "total_rows": {
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-summary": "Total Rows",
+                  "description": "The total number of rows."
+                },
+                "workspace_link_count": {
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-summary": "Workspace Link Count",
+                  "description": "The total number of links in the workspace."
+                }
+              },
+              "type": "object"
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          }
+        ]
+      }
+    },
+    "/workspaces": {
+      "get": {
+        "summary": "List workspaces",
+        "description": "Returns the workspaces available to this connection. Use it to find the workspace that other actions require.",
+        "operationId": "ListWorkspaces",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The workspaces available to this connection.",
+            "schema": {
+              "items": {
+                "properties": {
+                  "id": {
+                    "description": "The unique identifier of the workspace.",
+                    "type": "integer",
+                    "format": "int32",
+                    "x-ms-summary": "Workspace ID"
+                  },
+                  "name": {
+                    "description": "The name of the workspace.",
+                    "type": "string",
+                    "x-ms-summary": "Workspace Name"
+                  }
+                },
+                "type": "object"
+              },
+              "type": "array"
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          }
+        ]
+      }
+    }
+  },
+  "definitions": {},
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "oauth2": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://app.linklyhq.com/oauth/authorize",
+      "tokenUrl": "https://app.linklyhq.com/oauth/token",
+      "scopes": {}
+    }
+  },
+  "security": [
+    {
+      "oauth2": []
+    }
+  ],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://linklyhq.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://linklyhq.com/support/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Marketing;Website"
+    }
+  ]
+}

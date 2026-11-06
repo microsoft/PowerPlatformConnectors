@@ -5,6 +5,7 @@
 namespace SnowflakeV2CoreLogic.Utilities
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Text;
     using System.Web.OData.Query;
@@ -65,7 +66,7 @@ namespace SnowflakeV2CoreLogic.Utilities
             int? columnNameIndex = metadataResponse?.ResultSetMetaData?.RowType?.FindIndex(x => (x.Name != null && x.Name.Equals("COLUMN_NAME", StringComparison.OrdinalIgnoreCase)));
             int? isNullableIndex = metadataResponse?.ResultSetMetaData?.RowType?.FindIndex(x => (x.Name != null && x.Name.Equals("IS_NULLABLE", StringComparison.OrdinalIgnoreCase)));
             int? precisionToRightOfDecimalIndex = metadataResponse?.ResultSetMetaData?.RowType?.FindIndex(x => (x.Name != null && x.Name.Equals("NUMERIC_SCALE", StringComparison.OrdinalIgnoreCase)));
-            string? primaryKey = null;
+            int isIdentityIndex = metadataResponse?.ResultSetMetaData?.RowType?.FindIndex(x => (x.Name != null && x.Name.Equals("IS_IDENTITY", StringComparison.OrdinalIgnoreCase))) ?? -1;
 
             // Throw exceptions if dataTypeIndex, columnNameIndex, or isNullableIndex are null
             if (dataTypeIndex == null || columnNameIndex == null || isNullableIndex == null)
@@ -73,19 +74,13 @@ namespace SnowflakeV2CoreLogic.Utilities
                 throw new ArgumentNullException("Unable to parse table column data. dataTypeIndex, columnNameIndex, or isNullableIndex is null");
             }
 
-            try
+            // Every primary key column is marked as a key, with its position in the key (starting at 1) as the key order.
+            // If the primary key cannot be identified, no column is marked as a key.
+            var primaryKeyColumns = PrimaryKeyHelper.GetPrimaryKeyColumns(primaryKeyResponse);
+            var primaryKeyOrder = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            for (int i = 0; i < primaryKeyColumns.Count; i++)
             {
-                // Try and identify the primary key based on the response from the API
-                int? primaryKeyColumnNameIndex = primaryKeyResponse?.ResultSetMetaData?.RowType?.FindIndex(x => x.Name != null && x.Name.Equals("COLUMN_NAME", StringComparison.OrdinalIgnoreCase));
-
-                if (primaryKeyColumnNameIndex != null)
-                {
-                    primaryKey = (string?)primaryKeyResponse?.Data?[0][(int)primaryKeyColumnNameIndex];
-                }
-            }
-            catch
-            {
-                // Do nothing,  if the primary key cannot be identified, it will be null
+                primaryKeyOrder[primaryKeyColumns[i]] = i + 1;
             }
 
             var properties = new JObject();
@@ -118,17 +113,21 @@ namespace SnowflakeV2CoreLogic.Utilities
                     {
                         var columnName = (string)row[(int)columnNameIndex];
                         var isNullable = (string)row[(int)isNullableIndex];
-                        var isFieldRequired = false;
+                        var isIdentity = isIdentityIndex >= 0 && string.Equals((string?)row[isIdentityIndex], "YES", StringComparison.OrdinalIgnoreCase);
 
-                        if (isNullable != null && isNullable.Equals("NO", StringComparison.OrdinalIgnoreCase))
+                        // Snowflake generates identity (AUTOINCREMENT) values when they are omitted, so they are never required
+                        var isFieldRequired = !isIdentity && isNullable != null && isNullable.Equals("NO", StringComparison.OrdinalIgnoreCase);
+                        if (isFieldRequired)
                         {
                             requiredProperties.Add(new JValue(columnName));
-                            isFieldRequired = true;
                         }
 
                         // Identify if the current column is a primary key and set the KeyType accordingly
-                        var keyType = string.Equals(columnName, primaryKey, StringComparison.OrdinalIgnoreCase) ?
-                                               KeyType.Primary : KeyType.None;
+                        bool isPrimaryKey = primaryKeyOrder.TryGetValue(columnName, out int keyOrder);
+                        var keyType = isPrimaryKey ? KeyType.Primary : KeyType.None;
+
+                        // A key that is read-only and not required is server generated, so clients do not ask for its value
+                        var permission = isPrimaryKey && isIdentity ? "read-only" : "read-write";
 
                         ColumnCapabilitiesMetadata columnCapabilitiesMetadata = new ColumnCapabilitiesMetadata()
                         {
@@ -145,13 +144,18 @@ namespace SnowflakeV2CoreLogic.Utilities
                         {
                             [SchemaPropertyConstants.Type] = datatype.ConnectorDataType,
                             [SchemaPropertyConstants.Title] = columnName,
-                            [SchemaPropertyConstants.KeyOrder] = keyType == KeyType.Primary ? 1 : 0,
                             [SchemaPropertyConstants.Sort] = SortType.AscendingAndDescending,
-                            [SchemaPropertyConstants.Permission] = "read-write",
+                            [SchemaPropertyConstants.Permission] = permission,
                             [SchemaPropertyConstants.KeyType] = keyType,
                             [SchemaPropertyConstants.Required] = isFieldRequired,
                             [SchemaPropertyConstants.Capabilities] = columnCapabilitiesMetadataJson,
                         };
+
+                        // x-ms-keyOrder may only be set on primary key columns
+                        if (isPrimaryKey)
+                        {
+                            rowEntry.Add(SchemaPropertyConstants.KeyOrder, keyOrder);
+                        }
 
                         if (!string.IsNullOrEmpty(datatype.ConnectorDataFormat))
                         {

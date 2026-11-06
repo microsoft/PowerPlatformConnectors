@@ -151,11 +151,18 @@ namespace SnowflakeTestApp.Tests.Data
                 templateRecord.Balance * 0.8m
             );
 
-            var response = await HttpClient.PostAsync($"{BaseUrl}/datasets('{TestDataset}')/tables('{TestTable}')/items", 
-                CreateJsonContent(newItem));
+            try
+            {
+                var response = await HttpClient.PostAsync($"{BaseUrl}/datasets('{TestDataset}')/tables('{TestTable}')/items", 
+                    CreateJsonContent(newItem));
 
-            Assert.AreEqual(HttpStatusCode.Created, response.StatusCode, 
-                $"Should successfully create record based on template: {templateRecord.Name}");
+                Assert.AreEqual(HttpStatusCode.Created, response.StatusCode, 
+                    $"Should successfully create record based on template: {templateRecord.Name}");
+            }
+            finally
+            {
+                await DataSeeder.DeleteRecordById(newId);
+            }
         }
 
         /// <summary>
@@ -204,9 +211,16 @@ namespace SnowflakeTestApp.Tests.Data
             var json = JsonConvert.SerializeObject(updatedItem);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await HttpClient.PutAsync($"{BaseUrl}/datasets('{TestDataset}')/tables('{TestTable}')/items('{recordToUpdate.Id}')", content);
-            
-            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            try
+            {
+                var response = await HttpClient.PutAsync($"{BaseUrl}/datasets('{TestDataset}')/tables('{TestTable}')/items('{recordToUpdate.Id}')", content);
+                
+                Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            }
+            finally
+            {
+                await DataSeeder.RestoreRecord(recordToUpdate);
+            }
         }
 
         /// <summary>
@@ -241,9 +255,16 @@ namespace SnowflakeTestApp.Tests.Data
             HttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {testToken}");
             HttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            var response = await HttpClient.DeleteAsync($"{BaseUrl}/datasets('{TestDataset}')/tables('{TestTable}')/items('{recordToDelete.Id}')");
-            
-            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            try
+            {
+                var response = await HttpClient.DeleteAsync($"{BaseUrl}/datasets('{TestDataset}')/tables('{TestTable}')/items('{recordToDelete.Id}')");
+                
+                Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            }
+            finally
+            {
+                await DataSeeder.RestoreRecord(recordToDelete);
+            }
         }
 
         /// <summary>
@@ -431,6 +452,58 @@ namespace SnowflakeTestApp.Tests.Data
             Assert.IsTrue(
                 bothSidesData.Value.All(item => item.Name.Equals("John Doe")),
                 "All returned records should have NAME matching 'John Doe'");
+        }
+
+        /// <summary>
+        /// contains/startswith/endswith with a string literal search term (the form Power Apps and
+        /// Dataverse send) must keep working, including on a tolower()'d column. Checks seeded rows that
+        /// must and must not match rather than the exact result set, so it is not affected by rows other
+        /// tests insert while running.
+        /// </summary>
+        [DataTestMethod]
+        [DataRow("contains(NAME, 'Doe')", "John Doe")]
+        [DataRow("startswith(NAME, 'Jane')", "Jane Smith")]
+        [DataRow("endswith(NAME, 'Wilson')", "Charlie Wilson")]
+        [DataRow("contains(tolower(NAME), 'john doe')", "John Doe")]
+        [DataRow("startswith(NAME, 'Jane') and IS_ACTIVE eq true", "Jane Smith")]
+        public async Task GetItemsEndpoint_FilterWithLikeFunctionLiteral_ReturnsMatchingRecords(string filter, string expectedName)
+        {
+            var testToken = GetTestToken();
+            HttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {testToken}");
+            HttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            var response = await HttpClient.GetAsync(
+                $"{BaseUrl}/datasets('{TestDataset}')/tables('{TestTable}')/items?$filter={Uri.EscapeDataString(filter)}");
+            var content = await response.Content.ReadAsStringAsync();
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode, $"Filter '{filter}' should succeed. Body: {content}");
+
+            var data = JsonConvert.DeserializeObject<ODataResponse<TestDataRecord>>(content);
+            Assert.IsNotNull(data?.Value, $"Filter '{filter}' response should contain data");
+            Assert.IsTrue(data.Value.Any(item => item.Name == expectedName), $"Filter '{filter}' should return the seeded record '{expectedName}'");
+            Assert.IsFalse(data.Value.Any(item => item.Name == "Grace Lee"), $"Filter '{filter}' should not return the non-matching seeded record 'Grace Lee'");
+        }
+
+        /// <summary>
+        /// Quotes and SQL fragments inside a string literal search term must stay inside the LIKE literal:
+        /// the request succeeds (no SQL syntax error) and matches nothing in the seeded data.
+        /// </summary>
+        [DataTestMethod]
+        [DataRow("contains(NAME, 'O''Brien')")]
+        [DataRow("contains(NAME, ''' OR 1=1 --')")]
+        [DataRow("startswith(NAME, ''' OR ''1''=''1')")]
+        public async Task GetItemsEndpoint_FilterWithLikeFunctionQuotedLiteral_ReturnsNoRecords(string filter)
+        {
+            var testToken = GetTestToken();
+            HttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {testToken}");
+            HttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            var response = await HttpClient.GetAsync($"{BaseUrl}/datasets('{TestDataset}')/tables('{TestTable}')/items?$filter={Uri.EscapeDataString(filter)}");
+            var content = await response.Content.ReadAsStringAsync();
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode, $"Filter '{filter}' should succeed. Body: {content}");
+
+            var data = JsonConvert.DeserializeObject<ODataResponse<TestDataRecord>>(content);
+            Assert.IsNotNull(data?.Value, $"Filter '{filter}' response should be parseable");
+            Assert.AreEqual(0, data.Value.Count, $"Filter '{filter}' should not match any seeded record");
         }
 
         /// <summary>

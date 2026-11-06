@@ -1,0 +1,313 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "PushToDisplay",
+    "description": "Send real-time display updates to your PushToDisplay boards. Content is delivered instantly to every device linked to the board - phones, tablets, TVs, or any screen running the PushToDisplay app. Supports panel-targeted routing, multi-layout rendering, and styled text blocks.",
+    "version": "1.0",
+    "contact": {
+      "name": "PushToDisplay Support",
+      "url": "https://pushtodisplay.com",
+      "email": "hello@pushtodisplay.com"
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://pushtodisplay.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://pushtodisplay.com/privacy"
+    },
+    {
+      "propertyName": "Terms of use",
+      "propertyValue": "https://pushtodisplay.com/terms"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Communication"
+    }
+  ],
+  "host": "api.pushtodisplay.com",
+  "basePath": "/",
+  "schemes": ["https"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "paths": {
+    "/v1/updates": {
+      "post": {
+        "summary": "Send an update to devices",
+        "x-ms-summary": "Send an update to devices",
+        "operationId": "SendUpdate",
+        "description": "Send a message to a PushToDisplay board. The message is delivered in real time to every device linked to that board.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateRequest"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted - the update was queued for delivery.",
+            "schema": {
+              "$ref": "#/definitions/UpdateResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request - the request body failed validation (empty blocks, panelId out of range, invalid hex color)."
+          },
+          "401": {
+            "description": "Unauthorized - missing or invalid API key."
+          },
+          "403": {
+            "description": "Forbidden - no active subscription, or the API key doesn't have access to this board."
+          },
+          "404": {
+            "description": "Not found - the board doesn't exist, isn't owned by the caller, or has no active devices."
+          },
+          "409": {
+            "description": "Conflict - monthly message quota exceeded."
+          },
+          "429": {
+            "description": "Too many requests - rate limited. Wait and retry."
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "UpdateRequest": {
+      "type": "object",
+      "required": ["blocks"],
+      "properties": {
+        "boardId": {
+          "type": "string",
+          "x-ms-summary": "Board ID",
+          "title": "Board ID",
+          "x-ms-visibility": "important",
+          "description": "The board to update. If omitted, your default board is used. Find the Board ID in the PushToDisplay app or web portal."
+        },
+        "blocks": {
+          "type": "array",
+          "x-ms-summary": "Blocks",
+          "title": "Blocks",
+          "x-ms-visibility": "important",
+          "items": {
+            "$ref": "#/definitions/DisplayMessageBlock"
+          },
+          "minItems": 1,
+          "description": "One or more content blocks. At least one block is required."
+        },
+        "panelId": {
+          "type": "integer",
+          "x-ms-summary": "Target Panel",
+          "title": "Target Panel",
+          "x-ms-visibility": "important",
+          "format": "int32",
+          "enum": [1, 2, 3, 4],
+          "x-ms-enum": {
+            "name": "PanelId",
+            "modelAsString": false,
+            "values": [
+              { "value": 1, "displayName": "1" },
+              { "value": 2, "displayName": "2" },
+              { "value": 3, "displayName": "3" },
+              { "value": 4, "displayName": "4" }
+            ]
+          },
+          "default": 1,
+          "description": "Which panel to update (1-4). Only needed if your board uses a multi-panel layout such as Side by Side or 2x2 Grid. Defaults to panel 1."
+        },
+        "fullPanel": {
+          "type": "boolean",
+          "x-ms-summary": "Full Panel Mode",
+          "title": "Full Panel Mode",
+          "x-ms-visibility": "important",
+          "default": false,
+          "description": "When true, the message fills the entire panel area. Intended for bold, full-screen style messages."
+        },
+        "density": {
+          "type": "string",
+          "x-ms-summary": "Content Spacing",
+          "title": "Content Spacing",
+          "x-ms-visibility": "important",
+          "enum": ["compact", "standard", "spacious"],
+          "x-ms-enum": {
+            "name": "Density",
+            "modelAsString": false,
+            "values": [
+              { "value": "compact", "displayName": "Compact" },
+              { "value": "standard", "displayName": "Standard" },
+              { "value": "spacious", "displayName": "Spacious" }
+            ]
+          },
+          "default": "standard",
+          "description": "Controls the spacing between lines of text: compact, standard, or spacious."
+        },
+        "alignX": {
+          "type": "string",
+          "x-ms-summary": "Horizontal Alignment",
+          "title": "Horizontal Alignment",
+          "x-ms-visibility": "important",
+          "enum": ["start", "center", "end"],
+          "x-ms-enum": {
+            "name": "AlignX",
+            "modelAsString": false,
+            "values": [
+              { "value": "start", "displayName": "Start" },
+              { "value": "center", "displayName": "Center" },
+              { "value": "end", "displayName": "End" }
+            ]
+          },
+          "default": "center",
+          "description": "Horizontal alignment of the message text."
+        },
+        "alignY": {
+          "type": "string",
+          "x-ms-summary": "Vertical Alignment",
+          "title": "Vertical Alignment",
+          "x-ms-visibility": "important",
+          "enum": ["start", "center", "end"],
+          "x-ms-enum": {
+            "name": "AlignY",
+            "modelAsString": false,
+            "values": [
+              { "value": "start", "displayName": "Start" },
+              { "value": "center", "displayName": "Center" },
+              { "value": "end", "displayName": "End" }
+            ]
+          },
+          "default": "center",
+          "description": "Vertical alignment of the message text."
+        },
+        "background": {
+          "type": "string",
+          "x-ms-summary": "Background Color",
+          "title": "Background Color",
+          "x-ms-visibility": "important",
+          "description": "Background color for the update area in hex format (e.g. #0F172A). Covers the message row, or the entire panel when Full Panel Mode is enabled."
+        }
+      }
+    },
+    "DisplayMessageBlock": {
+      "type": "object",
+      "required": ["text"],
+      "properties": {
+        "text": {
+          "type": "string",
+          "x-ms-summary": "Message",
+          "title": "Message",
+          "x-ms-visibility": "important",
+          "description": "The text content to display."
+        },
+        "size": {
+          "type": "string",
+          "x-ms-summary": "Text Size",
+          "title": "Text Size",
+          "x-ms-visibility": "important",
+          "enum": ["small", "medium", "large"],
+          "x-ms-enum": {
+            "name": "TextSize",
+            "modelAsString": false,
+            "values": [
+              { "value": "small", "displayName": "Small" },
+              { "value": "medium", "displayName": "Medium" },
+              { "value": "large", "displayName": "Large" }
+            ]
+          },
+          "description": "Size of the message text."
+        },
+        "weight": {
+          "type": "string",
+          "x-ms-summary": "Font Weight",
+          "title": "Font Weight",
+          "x-ms-visibility": "important",
+          "enum": ["regular", "semibold", "bold"],
+          "x-ms-enum": {
+            "name": "FontWeight",
+            "modelAsString": false,
+            "values": [
+              { "value": "regular", "displayName": "Regular" },
+              { "value": "semibold", "displayName": "Semibold" },
+              { "value": "bold", "displayName": "Bold" }
+            ]
+          },
+          "description": "Weight (boldness) of the message text."
+        },
+        "color": {
+          "type": "string",
+          "x-ms-summary": "Text Color",
+          "title": "Text Color",
+          "x-ms-visibility": "important",
+          "description": "Text color in hex format (e.g. #FFFFFF for white)."
+        },
+        "background": {
+          "type": "string",
+          "x-ms-summary": "Text Background Color",
+          "title": "Text Background Color",
+          "x-ms-visibility": "important",
+          "description": "Background color applied directly behind the text, like a highlight (e.g. #0A4A36). Independent of the top-level background."
+        }
+      }
+    },
+    "UpdateResponse": {
+      "type": "object",
+      "properties": {
+        "messageId": {
+          "type": "string",
+          "x-ms-summary": "Message Id",
+          "title": "Message Id",
+          "x-ms-visibility": "important",
+          "description": "Unique identifier for this update."
+        },
+        "enqueuedAtUtc": {
+          "type": "string",
+          "x-ms-summary": "Sent At",
+          "title": "Sent At",
+          "x-ms-visibility": "important",
+          "format": "date-time",
+          "description": "UTC timestamp when the message was queued."
+        },
+        "userId": {
+          "type": "string",
+          "x-ms-summary": "User Id",
+          "title": "User Id",
+          "x-ms-visibility": "important",
+          "description": "The authenticated user who sent the update."
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "X-Api-Key",
+      "x-ms-apimTemplateParameterName": "api_key",
+      "x-ms-apimTemplateParameterDisplayName": "API Key"
+    },
+    "oauth2_auth": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://idp.pushtodisplay.com/oauth/v1.0/authorize",
+      "tokenUrl": "https://idp.pushtodisplay.com/oauth/v1.0/token",
+      "scopes": {
+        "openid": "OpenID Connect identity",
+        "push": "Send display updates",
+        "management": "Board, token, and device management"
+      }
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    },
+    {
+      "oauth2_auth": ["openid", "push", "management"]
+    }
+  ]
+}

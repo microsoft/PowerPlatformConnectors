@@ -11,6 +11,7 @@ namespace SnowflakeV2CoreLogic.Providers
     using Microsoft.Azure.Connectors.SnowflakeV2Contracts.Models;
     using Microsoft.Extensions.Logging;
     using SnowflakeV2CoreLogic;
+    using SnowflakeV2CoreLogic.Models;
     using SnowflakeV2CoreLogic.Utilities;
 
     /// <summary>
@@ -19,13 +20,16 @@ namespace SnowflakeV2CoreLogic.Providers
     public class SnowflakeTableMetadataProvider : ITableMetadataProvider
     {
         private readonly SnowflakeDBOperations snowflakeDBOperations;
+        private readonly SnowflakeConnectionParametersProvider snowflakeConnectionParametersProvider;
         private readonly ILogger logger;
 
         public SnowflakeTableMetadataProvider(
             SnowflakeDBOperations sfDBOperationsClient,
+            SnowflakeConnectionParametersProvider snowflakeConnectionParametersProvider,
             ILogger logger)
         {
             snowflakeDBOperations = sfDBOperationsClient ?? throw new ArgumentNullException(nameof(sfDBOperationsClient));
+            this.snowflakeConnectionParametersProvider = snowflakeConnectionParametersProvider ?? throw new ArgumentNullException(nameof(snowflakeConnectionParametersProvider));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -62,8 +66,12 @@ namespace SnowflakeV2CoreLogic.Providers
                 throw new ArgumentNullException("table");
             }
 
-            var metadataTask = snowflakeDBOperations.GetTableMetadataAsync(table, "GET $metadata.json/datasets/{dataset}/tables/{table}");
-            var primaryKeyTask = snowflakeDBOperations.GetPrimaryKeyAsync(table, "GET $metadata.json/datasets/{dataset}/tables/{table}", null);
+            SnowflakeConnectionParameters connectionParameters = snowflakeConnectionParametersProvider.GetConnectionParameters();
+            connectionParameters = SnowflakeConnectionParametersProvider.UpdateConnParametersToUseDataset(request, dataSet, connectionParameters);
+            SnowflakeConnectionParametersProvider.EnsureTableWithinConnection(table, connectionParameters);
+
+            var metadataTask = snowflakeDBOperations.GetTableMetadataAsync(table, "GET $metadata.json/datasets/{dataset}/tables/{table}", connectionParameters);
+            var primaryKeyTask = snowflakeDBOperations.GetPrimaryKeyAsync(table, "GET $metadata.json/datasets/{dataset}/tables/{table}", connectionParameters);
 
             // Wait for the both calls to compelte
             await Task.WhenAll(metadataTask, primaryKeyTask).ConfigureAwait(true);

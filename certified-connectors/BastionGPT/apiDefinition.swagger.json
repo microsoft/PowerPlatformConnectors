@@ -1,0 +1,560 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "BastionGPT",
+    "description": "BastionGPT is a HIPAA-compliant AI assistant built for healthcare by Bastion Intelligence. Generate text with AI chat completions, ask questions about uploaded documents, and transcribe audio recordings with speaker separation. Customer content is never used to train AI models. A BastionGPT API subscription key is required.",
+    "version": "1.0",
+    "contact": {
+      "name": "Bastion Intelligence Support",
+      "url": "https://support.bastiongpt.com",
+      "email": "support@bastiongpt.com"
+    },
+    "termsOfService": "https://bastionintelligence.com/terms"
+  },
+  "host": "api.bastiongpt.com",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/Ask": {
+      "post": {
+        "operationId": "AskQuestion",
+        "summary": "Ask a question",
+        "description": "Sends a single question to BastionGPT and returns the AI-generated answer as plain text. Optionally add instructions that shape the response, or supply a document ID to ask about a previously uploaded document. Use this operation for most scenarios; use the chat completion operation when you need to send a multi-turn conversation.",
+        "x-ms-visibility": "important",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "The question and generation settings.",
+            "schema": {
+              "$ref": "#/definitions/AskQuestionRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The answer.",
+            "schema": {
+              "$ref": "#/definitions/AskQuestionResponse"
+            }
+          },
+          "400": {
+            "description": "The request is invalid. The error code is one of question_required, text_too_long, or request_too_large."
+          },
+          "401": {
+            "description": "The API subscription key is missing or invalid."
+          },
+          "404": {
+            "description": "The referenced document ID does not exist for this API subscription key."
+          },
+          "429": {
+            "description": "The rate limit was exceeded. Wait and retry with exponential backoff."
+          },
+          "502": {
+            "description": "The document could not be prepared for the model. Retry shortly."
+          }
+        }
+      }
+    },
+    "/v1/ChatCompletion": {
+      "post": {
+        "operationId": "ChatCompletion",
+        "summary": "Create a chat completion",
+        "description": "Sends a multi-turn conversation to BastionGPT and returns an AI-generated text response. Include earlier user and assistant turns in the messages to keep context, add a system message as the first item to set instructions, or supply a document ID to ask questions about a previously uploaded document. For a single question, the ask a question operation is simpler.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "The conversation and generation settings.",
+            "schema": {
+              "$ref": "#/definitions/ChatCompletionRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The chat completion result.",
+            "schema": {
+              "$ref": "#/definitions/ChatCompletionResponse"
+            }
+          },
+          "400": {
+            "description": "The request is invalid. The error code is one of messages_required, text_too_long, or request_too_large."
+          },
+          "401": {
+            "description": "The API subscription key is missing or invalid."
+          },
+          "404": {
+            "description": "The referenced document ID does not exist for this API subscription key."
+          },
+          "429": {
+            "description": "The rate limit was exceeded. Wait and retry with exponential backoff."
+          },
+          "502": {
+            "description": "The document could not be prepared for the model. Retry shortly."
+          }
+        }
+      }
+    },
+    "/v1/Documents": {
+      "post": {
+        "operationId": "UploadDocument",
+        "summary": "Upload a document",
+        "description": "Uploads a single document and returns a document ID that can be supplied to the chat completion operation. Documents are retained for 30 days after upload and can be referenced by any number of chat completion requests during that time. Supported types are PDF, plain text, HTML, CSV, Markdown, PNG, and JPEG, up to 10 MB.",
+        "x-ms-visibility": "important",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "file",
+            "in": "formData",
+            "type": "file",
+            "required": true,
+            "x-ms-summary": "File",
+            "description": "The document to upload. Supported types are PDF, plain text, HTML, CSV, Markdown, PNG, and JPEG, up to 10 MB."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The document was stored.",
+            "schema": {
+              "$ref": "#/definitions/DocumentUploadResponse"
+            }
+          },
+          "400": {
+            "description": "The upload was rejected. The error code is one of invalid_content_type, missing_file, too_many_files, document_too_large, empty_document, or unsupported_content_type."
+          },
+          "401": {
+            "description": "The API subscription key is missing or invalid."
+          },
+          "429": {
+            "description": "The rate limit was exceeded. Wait and retry with exponential backoff."
+          }
+        }
+      }
+    },
+    "/request/Transcribe": {
+      "post": {
+        "operationId": "Transcribe",
+        "summary": "Submit audio for transcription",
+        "description": "Uploads an audio recording for asynchronous transcription with speaker separation and returns a transcript ID immediately. Use the transcript ID with the get transcript operation to retrieve the completed transcript. Common audio formats such as WAV, MP3, M4A, OGG, and WEBM are accepted.",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "file",
+            "in": "formData",
+            "type": "file",
+            "required": true,
+            "x-ms-summary": "Audio File",
+            "description": "The audio recording to transcribe. Common formats such as WAV, MP3, M4A, OGG, and WEBM are accepted."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The transcription was queued.",
+            "schema": {
+              "$ref": "#/definitions/TranscribeResponse"
+            }
+          },
+          "400": {
+            "description": "No audio file was included in the request."
+          },
+          "401": {
+            "description": "The API subscription key is missing or invalid."
+          },
+          "429": {
+            "description": "The rate limit was exceeded. Wait and retry with exponential backoff."
+          },
+          "500": {
+            "description": "An unexpected error occurred while processing the audio file."
+          }
+        }
+      }
+    },
+    "/get/TranscribeFile": {
+      "get": {
+        "operationId": "GetTranscript",
+        "summary": "Get a transcript",
+        "description": "Retrieves a transcript by its transcript ID. While transcription is still in progress, the status is processing and the segments are empty; wait 10 to 20 seconds and call the operation again. When the status is completed, the segments contain the speaker-separated transcript and the text contains the full transcript.",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "transcriptId",
+            "in": "query",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Transcript ID",
+            "description": "The transcript ID returned by the submit audio for transcription operation."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The transcript status and, when completed, the transcript segments and text.",
+            "schema": {
+              "$ref": "#/definitions/TranscriptResponse"
+            }
+          },
+          "400": {
+            "description": "The transcript ID is missing, or the transcription failed."
+          },
+          "401": {
+            "description": "The API subscription key is missing or invalid."
+          },
+          "429": {
+            "description": "The rate limit was exceeded. Wait and retry with exponential backoff."
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "AskQuestionRequest": {
+      "type": "object",
+      "required": [
+        "question",
+        "max_tokens"
+      ],
+      "properties": {
+        "question": {
+          "type": "string",
+          "x-ms-summary": "Question",
+          "description": "The question or request to send to BastionGPT."
+        },
+        "instructions": {
+          "type": "string",
+          "x-ms-summary": "Instructions",
+          "description": "Optional instructions that shape the response, such as the role to adopt, the audience, or the output format. When omitted, the default BastionGPT healthcare assistant persona is used."
+        },
+        "document_id": {
+          "type": "string",
+          "x-ms-summary": "Document ID",
+          "description": "The optional ID of a document previously uploaded with the upload a document operation. The document is attached to the request so the answer can use its content."
+        },
+        "max_tokens": {
+          "type": "integer",
+          "format": "int32",
+          "minimum": 1,
+          "default": 1000,
+          "x-ms-summary": "Max Tokens",
+          "description": "The maximum number of tokens to generate in the answer. Must be 1 or greater."
+        },
+        "temperature": {
+          "type": "number",
+          "format": "float",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0,
+          "x-ms-summary": "Temperature",
+          "x-ms-visibility": "advanced",
+          "description": "The sampling temperature from 0.0 to 1.0. Lower values produce more consistent output and higher values produce more varied output."
+        }
+      }
+    },
+    "AskQuestionResponse": {
+      "type": "object",
+      "properties": {
+        "answer": {
+          "type": "string",
+          "x-ms-summary": "Answer",
+          "description": "The AI-generated answer text."
+        },
+        "finish_reason": {
+          "type": "string",
+          "x-ms-summary": "Finish Reason",
+          "description": "The reason generation stopped. The value stop means a natural end, max_tokens means the token limit was reached and the answer may be truncated, and content_filter means content was withheld by safety filtering."
+        },
+        "response_id": {
+          "type": "string",
+          "x-ms-summary": "Response ID",
+          "description": "The unique identifier of this response."
+        },
+        "prompt_tokens": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Prompt Tokens",
+          "description": "The number of tokens in the input, including any instructions."
+        },
+        "completion_tokens": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Completion Tokens",
+          "description": "The number of tokens generated in the answer."
+        },
+        "total_tokens": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Total Tokens",
+          "description": "The sum of prompt tokens and completion tokens."
+        }
+      }
+    },
+    "TranscriptResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "x-ms-summary": "Status",
+          "description": "The transcription status. The value processing means the transcript is not ready yet and completed means the segments and text are available."
+        },
+        "segments": {
+          "type": "array",
+          "x-ms-summary": "Segments",
+          "description": "The speaker-separated transcript segments in order. Empty while the status is processing.",
+          "items": {
+            "$ref": "#/definitions/TranscriptSegment"
+          }
+        },
+        "text": {
+          "type": "string",
+          "x-ms-summary": "Text",
+          "description": "The full transcript as text, one line per segment with its timestamp and speaker. Empty while the status is processing."
+        }
+      }
+    },
+    "TranscriptSegment": {
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "type": "string",
+          "x-ms-summary": "Timestamp",
+          "description": "The segment start time in HH:MM:SS format."
+        },
+        "speaker": {
+          "type": "string",
+          "x-ms-summary": "Speaker",
+          "description": "The speaker label assigned by speaker separation."
+        },
+        "text": {
+          "type": "string",
+          "x-ms-summary": "Text",
+          "description": "The transcribed text for this segment."
+        }
+      }
+    },
+    "Message": {
+      "type": "object",
+      "required": [
+        "role",
+        "content"
+      ],
+      "properties": {
+        "role": {
+          "type": "string",
+          "enum": [
+            "system",
+            "user",
+            "assistant"
+          ],
+          "x-ms-summary": "Role",
+          "description": "The author of the message. Use system for instructions, user for the person's input, and assistant for earlier AI responses."
+        },
+        "content": {
+          "type": "string",
+          "x-ms-summary": "Content",
+          "description": "The text content of the message."
+        }
+      }
+    },
+    "ChatCompletionRequest": {
+      "type": "object",
+      "required": [
+        "messages",
+        "max_tokens"
+      ],
+      "properties": {
+        "messages": {
+          "type": "array",
+          "x-ms-summary": "Messages",
+          "description": "The conversation history, oldest first. Include earlier user and assistant turns to keep context. An optional system message as the first item overrides the default BastionGPT healthcare assistant persona.",
+          "items": {
+            "$ref": "#/definitions/Message"
+          }
+        },
+        "max_tokens": {
+          "type": "integer",
+          "format": "int32",
+          "minimum": 1,
+          "default": 1000,
+          "x-ms-summary": "Max Tokens",
+          "description": "The maximum number of tokens to generate in the response. Must be 1 or greater."
+        },
+        "temperature": {
+          "type": "number",
+          "format": "float",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0,
+          "x-ms-summary": "Temperature",
+          "x-ms-visibility": "advanced",
+          "description": "The sampling temperature from 0.0 to 1.0. Lower values produce more consistent output and higher values produce more varied output."
+        },
+        "document_id": {
+          "type": "string",
+          "x-ms-summary": "Document ID",
+          "description": "The optional ID of a document previously uploaded with the upload a document operation. The document is attached to the request so the response can use its content. One document per request."
+        }
+      }
+    },
+    "ChatCompletionResponse": {
+      "type": "object",
+      "properties": {
+        "choices": {
+          "type": "array",
+          "x-ms-summary": "Choices",
+          "description": "The generated responses. This array contains one item.",
+          "items": {
+            "$ref": "#/definitions/Choice"
+          }
+        },
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Response ID",
+          "description": "The unique identifier of this response."
+        },
+        "created": {
+          "type": "integer",
+          "format": "int64",
+          "x-ms-summary": "Created",
+          "description": "The Unix timestamp in seconds when the response was created."
+        },
+        "usage": {
+          "$ref": "#/definitions/Usage"
+        }
+      }
+    },
+    "Choice": {
+      "type": "object",
+      "properties": {
+        "finishReason": {
+          "type": "string",
+          "x-ms-summary": "Finish Reason",
+          "description": "The reason generation stopped. The value stop means a natural end, max_tokens means the token limit was reached and the response may be truncated, and content_filter means content was withheld by safety filtering."
+        },
+        "message": {
+          "type": "object",
+          "x-ms-summary": "Message",
+          "description": "The generated message.",
+          "properties": {
+            "content": {
+              "type": "string",
+              "x-ms-summary": "Content",
+              "description": "The generated text."
+            }
+          }
+        }
+      }
+    },
+    "Usage": {
+      "type": "object",
+      "x-ms-summary": "Usage",
+      "description": "The token accounting for the request.",
+      "properties": {
+        "promptTokens": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Prompt Tokens",
+          "description": "The number of tokens in the input, including the system message."
+        },
+        "completionTokens": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Completion Tokens",
+          "description": "The number of tokens generated in the response."
+        },
+        "totalTokens": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Total Tokens",
+          "description": "The sum of prompt tokens and completion tokens."
+        }
+      }
+    },
+    "DocumentUploadResponse": {
+      "type": "object",
+      "properties": {
+        "document_id": {
+          "type": "string",
+          "x-ms-summary": "Document ID",
+          "description": "The identifier of the uploaded document, valid for 30 days after upload. Supply it to the chat completion operation."
+        }
+      }
+    },
+    "TranscribeResponse": {
+      "type": "object",
+      "properties": {
+        "transcriptId": {
+          "type": "string",
+          "x-ms-summary": "Transcript ID",
+          "description": "The identifier used to retrieve the completed transcript."
+        },
+        "fileDuration": {
+          "type": "string",
+          "x-ms-summary": "File Duration",
+          "description": "The duration of the submitted audio in seconds, as a decimal string."
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "API Key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "key"
+    }
+  },
+  "security": [
+    {
+      "API Key": []
+    }
+  ],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://bastiongpt.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://bastionintelligence.com/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "AI;Productivity"
+    }
+  ]
+}

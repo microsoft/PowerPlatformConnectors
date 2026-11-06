@@ -29,6 +29,7 @@ namespace SnowflakeTestApp.Tests.Infrastructure
         private const string TRUNCATE_TABLE_SQL_TEMPLATE = "TRUNCATE TABLE IF EXISTS {0}";
         private const string SELECT_ALL_SQL_TEMPLATE = "SELECT ID, NAME, EMAIL, PHONE, IS_ACTIVE, BALANCE FROM {0} ORDER BY ID";
         private const string SELECT_BY_ID_SQL_TEMPLATE = "SELECT ID, NAME, EMAIL, PHONE, IS_ACTIVE, BALANCE FROM {0} WHERE ID = {1}";
+        private const string DELETE_BY_ID_SQL_TEMPLATE = "DELETE FROM {0} WHERE ID = {1}";
 
         private readonly HttpClient _httpClient;
         private readonly string _baseUrl;
@@ -229,6 +230,30 @@ namespace SnowflakeTestApp.Tests.Infrastructure
             {
                 throw new InvalidOperationException($"Could not cleanup test table '{tableName}': {ex.Message}", ex);
             }
+        }
+
+        /// <summary>
+        /// Deletes a single record by ID, bypassing the connector endpoints
+        /// </summary>
+        /// <param name="id">ID of the record to delete</param>
+        /// <param name="tableName">Name of the table (defaults to TestData.DefaultTable)</param>
+        public async Task DeleteRecordById(int id, string tableName = null)
+        {
+            tableName = tableName ?? TestData.DefaultTable;
+            await ExecuteSqlStatement(string.Format(DELETE_BY_ID_SQL_TEMPLATE, tableName, id));
+        }
+
+        /// <summary>
+        /// Puts a record back to the given values, re-inserting it if it was deleted. Tests that modify
+        /// shared seeded rows use this so later tests still see the seeded data.
+        /// </summary>
+        /// <param name="record">The record values to restore</param>
+        /// <param name="tableName">Name of the table (defaults to TestData.DefaultTable)</param>
+        public async Task RestoreRecord(TestDataRecord record, string tableName = null)
+        {
+            tableName = tableName ?? TestData.DefaultTable;
+            await DeleteRecordById(record.Id, tableName);
+            await SeedTableWithSampleData(tableName, new List<TestDataRecord> { record });
         }
 
         /// <summary>

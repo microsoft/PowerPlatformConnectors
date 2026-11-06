@@ -95,7 +95,7 @@ On some screens the **Security** tab of the connector designer may still show th
 | **Delete Item** (write) | Required: `name`. Optional: `delete_immediately`, `delete_in_days`, `version` |
 | **Move Objects** (write) | Required: `source_path`, `target_path`. Optional: `objects_type` (`item`, `auth_method`, `role`) |
 
-You can still pass `access-id` and `access-key` in the body on any action to override the connection (advanced).
+Credentials come only from the connection (HTTP Basic). Do not put Access ID or Access Key in action bodies.
 
 ## Supported operations
 
@@ -109,11 +109,11 @@ Calls Akeyless [`POST /describe-item`](https://docs.akeyless.io/reference/descri
 
 ### Get Secret
 
-Retrieves a plain or text-oriented secret value (`json: false` on `get-secret-value`).
+Retrieves a plain or text-oriented secret value (`json: false` on `get-secret-value`). The connector maps the Akeyless path-keyed payload to a single **Secret value** field for makers.
 
 ### Get Password
 
-Retrieves structured credential-style fields (`json: true` on `get-secret-value`).
+Retrieves structured credential-style fields (`json: true` on `get-secret-value`). The connector maps `username` / `password` (or common aliases such as `user` / `login`) for makers.
 
 ### List Auth Methods, List Roles, List Gateways, List Targets
 
@@ -142,15 +142,16 @@ These call [`/create-secret`](https://docs.akeyless.io/reference/createsecret), 
 ## Known issues and limitations
 
 - **`iconBrandColor`:** `#0E4D45` — not `#ffffff` or `#007ee5` (certified rules). Update if marketing requires a different approved color.
-- **Read vs write:** Most actions are read/metadata; **Get Secret** / **Get Password** read secret material. **Create Secret**, **Update Item**, **Delete Item**, and **Move Objects** change data in Akeyless.
+- **Read vs write:** Most actions are read/metadata; **Get Secret** / **Get Password** read secret material. **Create Secret**, **Update Item**, **Delete Item**, and **Move Objects** change data in Akeyless and are marked advanced in the maker UI.
+- **Run history:** Secret values returned by Get Secret / Get Password appear in flow run outputs. Restrict who can edit and view those flows.
 - **RBAC:** The API Key must be granted only the capabilities each flow needs (see [RBAC](https://docs.akeyless.io/docs/rbac)).
 
 ## Deployment instructions
 
 1. Validate: `paconn validate --api-def apiDefinition.swagger.json`.
-2. Import `apiDefinition.swagger.json`, `apiProperties.json`, and `script.csx` as a custom connector.
+2. Import `apiDefinition.swagger.json`, `apiProperties.json`, `script.csx`, and `icon.png` as a custom connector.
 3. Create a **connection** with **Akeyless Access ID** and **Akeyless Access Key**, then test the actions your role is allowed to call (start with **List Items** / **Describe Item** / **Get Secret** before write operations).
 
 ## Certification
 
-Open source under `certified-connectors/`, PR to `dev`, label `certified-connector`; after merge, submit via [ISV Studio](https://isvstudio.powerapps.com) per [Submit your connector for certification](https://learn.microsoft.com/connectors/custom-connectors/submit-certification).
+GitHub open-source under `certified-connectors/` is a pull request to the `dev` branch of [microsoft/PowerPlatformConnectors](https://github.com/microsoft/PowerPlatformConnectors). After that PR is approved, package the connector as Dataverse solutions and submit the zip through [Partner Center](https://learn.microsoft.com/en-us/connectors/custom-connectors/submit-for-certification) (Microsoft 365 and Copilot program, then New offer, then Connectors and Agents). Do not use ISV Studio; that path is retired. Packaging steps: [Prepare connector files](https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-submission).

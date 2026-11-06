@@ -1,0 +1,889 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0",
+    "title": "CourtListener",
+    "description": "CourtListener is a free legal research platform operated by Free Law Project. This connector provides access to federal and state court opinions, dockets, PACER filings, and citation verification.",
+    "contact": {
+      "name": "Dan Romano",
+      "url": "https://github.com/krautrocker"
+    }
+  },
+  "host": "www.courtlistener.com",
+  "basePath": "/api/rest/v4",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/dockets/": {
+      "get": {
+        "summary": "Search dockets",
+        "description": "Search federal court dockets by case name, docket number, court, or filing date. Use field selection to limit the response payload.",
+        "operationId": "SearchDockets",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "case_name",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Case Name",
+            "description": "Filter dockets by case name (partial match).",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "docket_number",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Docket Number",
+            "description": "Filter dockets by docket number.",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "court",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Court",
+            "description": "Filter dockets by court identifier (for example, scotus or ca9). Use court=xyz rather than court__id=xyz to avoid an expensive database join.",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "date_filed__gte",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date",
+            "x-ms-summary": "Filed On or After",
+            "description": "Filter dockets filed on or after this date (YYYY-MM-DD).",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "date_filed__lte",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date",
+            "x-ms-summary": "Filed On or Before",
+            "description": "Filter dockets filed on or before this date (YYYY-MM-DD).",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Order By",
+            "description": "Sort results by a field name, prefixed with a hyphen for descending order.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "x-ms-summary": "Page Size",
+            "description": "Number of results to return per page.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Cursor",
+            "description": "Pagination cursor from the next or previous URL in a prior response.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Fields",
+            "description": "Comma-separated list of fields to include in the response, reducing payload size and database load (for example, id,case_name,docket_number).",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of dockets matching the search criteria.",
+            "schema": {
+              "$ref": "#/definitions/DocketList"
+            }
+          }
+        }
+      }
+    },
+    "/dockets/{id}/": {
+      "get": {
+        "summary": "Get docket",
+        "description": "Retrieve a single court docket by its CourtListener numeric ID.",
+        "operationId": "GetDocket",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "x-ms-url-encoding": "single",
+            "x-ms-summary": "Docket ID",
+            "description": "The CourtListener numeric ID of the docket to retrieve.",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Fields",
+            "description": "Comma-separated list of fields to include in the response, reducing payload size and database load (for example, id,case_name,docket_number).",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The docket matching the specified ID.",
+            "schema": {
+              "$ref": "#/definitions/Docket"
+            }
+          }
+        }
+      }
+    },
+    "/docket-entries/": {
+      "get": {
+        "summary": "Get docket entries",
+        "description": "List docket entries for a specific court docket, with optional filtering and sorting.",
+        "operationId": "GetDocketEntries",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "docket",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "x-ms-summary": "Docket ID",
+            "description": "The numeric ID of the docket (for example, 73382952). Use the ID field from a Get docket response, not the full resource URI.",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "entry_number",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "x-ms-summary": "Entry Number",
+            "description": "Filter by a specific docket entry number.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "date_filed__gte",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date",
+            "x-ms-summary": "Filed On or After",
+            "description": "Filter entries filed on or after this date (YYYY-MM-DD).",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "date_filed__lte",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date",
+            "x-ms-summary": "Filed On or Before",
+            "description": "Filter entries filed on or before this date (YYYY-MM-DD).",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Order By",
+            "description": "Sort results by a field name, prefixed with a hyphen for descending order.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "x-ms-summary": "Page Size",
+            "description": "Number of results to return per page.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Cursor",
+            "description": "Pagination cursor from the next or previous URL in a prior response.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Fields",
+            "description": "Comma-separated list of fields to include in the response, reducing payload size and database load (for example, id,entry_number,description).",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of docket entries for the specified docket.",
+            "schema": {
+              "$ref": "#/definitions/DocketEntryList"
+            }
+          }
+        }
+      }
+    },
+    "/search/": {
+      "get": {
+        "summary": "Search opinions",
+        "description": "Search case law opinions by keyword, court, judge, or date using full-text search. Narrowing the query to a specific court or date range improves performance.",
+        "operationId": "SearchOpinions",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "default": "o",
+            "x-ms-visibility": "internal",
+            "x-ms-summary": "Type",
+            "description": "The type of content to search."
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Search Query",
+            "description": "Full-text search query using CourtListener search operators.",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "court",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Court",
+            "description": "Filter opinions by court identifier (for example, scotus or ca9). Use court=xyz rather than court__id=xyz to avoid an expensive database join.",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Order By",
+            "description": "Sort results by a field, for example score desc or dateFiled desc.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "filed_after",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date",
+            "x-ms-summary": "Filed After",
+            "description": "Filter opinions filed after this date (YYYY-MM-DD).",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "filed_before",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date",
+            "x-ms-summary": "Filed Before",
+            "description": "Filter opinions filed before this date (YYYY-MM-DD).",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Cursor",
+            "description": "Pagination cursor from the next or previous URL in a prior response.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Fields",
+            "description": "Comma-separated list of fields to include in the response, reducing payload size and database load (for example, id,caseName,citation).",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of case law opinion search results.",
+            "schema": {
+              "$ref": "#/definitions/OpinionSearchList"
+            }
+          }
+        }
+      }
+    },
+    "/citation-lookup/": {
+      "post": {
+        "summary": "Look up citation",
+        "description": "Verify one or more legal citations, or extract all citations from a block of text.",
+        "operationId": "GetCitation",
+        "x-ms-visibility": "important",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "x-ms-summary": "Citation Lookup Request",
+            "description": "The citation or block of text to look up.",
+            "x-ms-visibility": "important",
+            "schema": {
+              "$ref": "#/definitions/CitationLookupRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The citation lookup results.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CitationResult"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "DocketList": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Count",
+          "description": "The total number of dockets matching the query.",
+          "x-ms-visibility": "important"
+        },
+        "next": {
+          "type": "string",
+          "x-ms-summary": "Next Page URL",
+          "description": "The URL to retrieve the next page of results.",
+          "x-ms-visibility": "advanced"
+        },
+        "previous": {
+          "type": "string",
+          "x-ms-summary": "Previous Page URL",
+          "description": "The URL to retrieve the previous page of results.",
+          "x-ms-visibility": "advanced"
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Docket"
+          },
+          "x-ms-summary": "Results",
+          "description": "The list of dockets matching the query.",
+          "x-ms-visibility": "important"
+        }
+      }
+    },
+    "Docket": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "ID",
+          "description": "The CourtListener numeric ID of the docket.",
+          "x-ms-visibility": "important"
+        },
+        "resource_uri": {
+          "type": "string",
+          "x-ms-summary": "Resource URI",
+          "description": "The URI of this docket resource.",
+          "x-ms-visibility": "advanced"
+        },
+        "court_id": {
+          "type": "string",
+          "x-ms-summary": "Court ID",
+          "description": "The identifier of the court (for example, scotus or ca9).",
+          "x-ms-visibility": "important"
+        },
+        "case_name": {
+          "type": "string",
+          "x-ms-summary": "Case Name",
+          "description": "The short name of the case.",
+          "x-ms-visibility": "important"
+        },
+        "case_name_full": {
+          "type": "string",
+          "x-ms-summary": "Full Case Name",
+          "description": "The full name of the case.",
+          "x-ms-visibility": "advanced"
+        },
+        "docket_number": {
+          "type": "string",
+          "x-ms-summary": "Docket Number",
+          "description": "The docket number assigned by the court.",
+          "x-ms-visibility": "important"
+        },
+        "date_filed": {
+          "type": "string",
+          "x-ms-summary": "Date Filed",
+          "description": "The date the case was filed.",
+          "x-ms-visibility": "important"
+        },
+        "date_terminated": {
+          "type": "string",
+          "x-ms-summary": "Date Terminated",
+          "description": "The date the case was terminated, if applicable.",
+          "x-ms-visibility": "advanced"
+        },
+        "date_argued": {
+          "type": "string",
+          "x-ms-summary": "Date Argued",
+          "description": "The date the case was argued, if applicable.",
+          "x-ms-visibility": "advanced"
+        },
+        "assigned_to_str": {
+          "type": "string",
+          "x-ms-summary": "Assigned Judge",
+          "description": "The name of the judge assigned to this case.",
+          "x-ms-visibility": "important"
+        },
+        "referred_to_str": {
+          "type": "string",
+          "x-ms-summary": "Referred To",
+          "description": "The name of the magistrate judge this case was referred to, if applicable.",
+          "x-ms-visibility": "advanced"
+        },
+        "nature_of_suit": {
+          "type": "string",
+          "x-ms-summary": "Nature of Suit",
+          "description": "The nature of suit code for this case.",
+          "x-ms-visibility": "advanced"
+        },
+        "jurisdiction_type": {
+          "type": "string",
+          "x-ms-summary": "Jurisdiction Type",
+          "description": "The type of jurisdiction for this case.",
+          "x-ms-visibility": "advanced"
+        },
+        "cause": {
+          "type": "string",
+          "x-ms-summary": "Cause",
+          "description": "The cause of action for this case.",
+          "x-ms-visibility": "advanced"
+        },
+        "jury_demand": {
+          "type": "string",
+          "x-ms-summary": "Jury Demand",
+          "description": "Whether a jury was demanded in this case.",
+          "x-ms-visibility": "advanced"
+        },
+        "absolute_url": {
+          "type": "string",
+          "x-ms-summary": "URL Path",
+          "description": "The relative URL path for this docket. Prepend https://www.courtlistener.com to construct the full link (for example, https://www.courtlistener.com/docket/73382952/case-name/).",
+          "x-ms-visibility": "important"
+        },
+        "pacer_case_id": {
+          "type": "string",
+          "x-ms-summary": "PACER Case ID",
+          "description": "The PACER case ID for this docket, if available.",
+          "x-ms-visibility": "advanced"
+        },
+        "source": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Source",
+          "description": "The source code indicating how this docket was acquired.",
+          "x-ms-visibility": "advanced"
+        },
+        "blocked": {
+          "type": "boolean",
+          "x-ms-summary": "Blocked",
+          "description": "Whether this docket is blocked from search engine indexing.",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "DocketEntryList": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Count",
+          "description": "The total number of entries matching the query.",
+          "x-ms-visibility": "important"
+        },
+        "next": {
+          "type": "string",
+          "x-ms-summary": "Next Page URL",
+          "description": "The URL to retrieve the next page of results.",
+          "x-ms-visibility": "advanced"
+        },
+        "previous": {
+          "type": "string",
+          "x-ms-summary": "Previous Page URL",
+          "description": "The URL to retrieve the previous page of results.",
+          "x-ms-visibility": "advanced"
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DocketEntry"
+          },
+          "x-ms-summary": "Results",
+          "description": "The list of docket entries.",
+          "x-ms-visibility": "important"
+        }
+      }
+    },
+    "DocketEntry": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "ID",
+          "description": "The CourtListener numeric ID of this docket entry.",
+          "x-ms-visibility": "important"
+        },
+        "docket": {
+          "type": "string",
+          "x-ms-summary": "Docket URI",
+          "description": "The URI of the parent docket for this entry.",
+          "x-ms-visibility": "internal"
+        },
+        "date_filed": {
+          "type": "string",
+          "x-ms-summary": "Date Filed",
+          "description": "The date this entry was filed.",
+          "x-ms-visibility": "important"
+        },
+        "date_entered": {
+          "type": "string",
+          "x-ms-summary": "Date Entered",
+          "description": "The date this entry was entered into the docket.",
+          "x-ms-visibility": "advanced"
+        },
+        "entry_number": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Entry Number",
+          "description": "The sequential entry number on the docket.",
+          "x-ms-visibility": "important"
+        },
+        "description": {
+          "type": "string",
+          "x-ms-summary": "Description",
+          "description": "The text description of this docket entry.",
+          "x-ms-visibility": "important"
+        },
+        "pacer_sequence_number": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "PACER Sequence Number",
+          "description": "The PACER sequence number for this entry, if available.",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "OpinionSearchList": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Count",
+          "description": "The total number of opinions matching the query.",
+          "x-ms-visibility": "important"
+        },
+        "next": {
+          "type": "string",
+          "x-ms-summary": "Next Page URL",
+          "description": "The URL to retrieve the next page of results.",
+          "x-ms-visibility": "advanced"
+        },
+        "previous": {
+          "type": "string",
+          "x-ms-summary": "Previous Page URL",
+          "description": "The URL to retrieve the previous page of results.",
+          "x-ms-visibility": "advanced"
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/OpinionSearchResult"
+          },
+          "x-ms-summary": "Results",
+          "description": "The list of opinion search results.",
+          "x-ms-visibility": "important"
+        }
+      }
+    },
+    "OpinionSearchResult": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "ID",
+          "description": "The CourtListener numeric ID of this opinion.",
+          "x-ms-visibility": "important"
+        },
+        "cluster_id": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Cluster ID",
+          "description": "The ID of the opinion cluster this opinion belongs to.",
+          "x-ms-visibility": "internal"
+        },
+        "docket_id": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Docket ID",
+          "description": "The ID of the docket associated with this opinion.",
+          "x-ms-visibility": "advanced"
+        },
+        "court_id": {
+          "type": "string",
+          "x-ms-summary": "Court ID",
+          "description": "The identifier of the court that issued this opinion.",
+          "x-ms-visibility": "important"
+        },
+        "caseName": {
+          "type": "string",
+          "x-ms-summary": "Case Name",
+          "description": "The name of the case.",
+          "x-ms-visibility": "important"
+        },
+        "docketNumber": {
+          "type": "string",
+          "x-ms-summary": "Docket Number",
+          "description": "The docket number for this case.",
+          "x-ms-visibility": "important"
+        },
+        "dateFiled": {
+          "type": "string",
+          "x-ms-summary": "Date Filed",
+          "description": "The date this opinion was filed.",
+          "x-ms-visibility": "important"
+        },
+        "citation": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-summary": "Citations",
+          "description": "The list of citations for this opinion.",
+          "x-ms-visibility": "important"
+        },
+        "status": {
+          "type": "string",
+          "x-ms-summary": "Status",
+          "description": "The precedential status of this opinion.",
+          "x-ms-visibility": "important"
+        },
+        "citeCount": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Cite Count",
+          "description": "The number of times this opinion has been cited.",
+          "x-ms-visibility": "advanced"
+        },
+        "judge": {
+          "type": "string",
+          "x-ms-summary": "Judge",
+          "description": "The name of the judge who authored this opinion.",
+          "x-ms-visibility": "advanced"
+        },
+        "per_curiam": {
+          "type": "boolean",
+          "x-ms-summary": "Per Curiam",
+          "description": "Whether this opinion was issued per curiam by the full court.",
+          "x-ms-visibility": "advanced"
+        },
+        "absolute_url": {
+          "type": "string",
+          "x-ms-summary": "URL Path",
+          "description": "The relative URL path for this opinion. Prepend https://www.courtlistener.com to construct the full link (for example, https://www.courtlistener.com/opinion/10863230/case-name/).",
+          "x-ms-visibility": "important"
+        },
+        "snippet": {
+          "type": "string",
+          "x-ms-summary": "Snippet",
+          "description": "A text excerpt from the opinion relevant to the search query.",
+          "x-ms-visibility": "important"
+        }
+      }
+    },
+    "CitationLookupRequest": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "x-ms-summary": "Text",
+          "description": "A block of legal text from which to extract and verify all citations.",
+          "x-ms-visibility": "important"
+        },
+        "volume": {
+          "type": "string",
+          "x-ms-summary": "Volume",
+          "description": "The volume number of the reporter for a single citation lookup.",
+          "x-ms-visibility": "advanced"
+        },
+        "reporter": {
+          "type": "string",
+          "x-ms-summary": "Reporter",
+          "description": "The reporter abbreviation for a single citation lookup (for example, U.S. or F.3d).",
+          "x-ms-visibility": "advanced"
+        },
+        "page": {
+          "type": "string",
+          "x-ms-summary": "Page",
+          "description": "The page number within the reporter volume for a single citation lookup.",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "CitationResult": {
+      "type": "object",
+      "properties": {
+        "citation": {
+          "type": "string",
+          "x-ms-summary": "Citation",
+          "description": "The citation that was looked up.",
+          "x-ms-visibility": "important"
+        },
+        "normalized_citations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-summary": "Normalized Citations",
+          "description": "Corrected citations if the input contained typos or non-canonical abbreviations.",
+          "x-ms-visibility": "advanced"
+        },
+        "start_index": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Start Index",
+          "description": "The character position in the input text where this citation begins.",
+          "x-ms-visibility": "advanced"
+        },
+        "end_index": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "End Index",
+          "description": "The character position in the input text where this citation ends.",
+          "x-ms-visibility": "advanced"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Status",
+          "description": "The HTTP status code for this citation lookup result.",
+          "x-ms-visibility": "important"
+        },
+        "error_message": {
+          "type": "string",
+          "x-ms-summary": "Error Message",
+          "description": "Details about any error encountered during the citation lookup.",
+          "x-ms-visibility": "advanced"
+        },
+        "clusters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CitationCluster"
+          },
+          "x-ms-summary": "Clusters",
+          "description": "The CourtListener cases matching this citation.",
+          "x-ms-visibility": "important"
+        }
+      }
+    },
+    "CitationCluster": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Cluster ID",
+          "description": "The CourtListener cluster ID for this case.",
+          "x-ms-visibility": "important"
+        },
+        "case_name": {
+          "type": "string",
+          "x-ms-summary": "Case Name",
+          "description": "The name of the case matching this citation.",
+          "x-ms-visibility": "important"
+        },
+        "absolute_url": {
+          "type": "string",
+          "x-ms-summary": "URL Path",
+          "description": "The relative URL path for this case. Prepend https://www.courtlistener.com to construct the full link (for example, https://www.courtlistener.com/opinion/10863230/case-name/).",
+          "x-ms-visibility": "important"
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization"
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.courtlistener.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://free.law/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Business Intelligence;Data"
+    }
+  ]
+}

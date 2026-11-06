@@ -141,49 +141,15 @@ namespace SnowflakeV2CoreLogic.Utilities
 
             if (functionCallNode.Name.Equals("contains", StringComparison.OrdinalIgnoreCase))
             {
-                var arguments = functionCallNode.Parameters.ToList();
-
-                if (arguments.Count < 2)
-                    throw new InvalidOperationException("Contains function requires two arguments");
-
-                var property = ParseExpression(arguments[0] as SingleValueNode);
-                var value = ParseExpression(arguments[1] as SingleValueNode);
-
-                // Remove the surrounding quotes (the escaped content is preserved).
-                if (value.StartsWith("'") && value.EndsWith("'"))
-                {
-                    value = value.Substring(1, value.Length - 2);
-                }
-
-                return $"{property} {likeOperator} '%{value}%'";
+                return ParseLikeFunction(functionCallNode, likeOperator, "Contains", prefix: "%", suffix: "%");
             }
             else if (functionCallNode.Name.Equals("startswith", StringComparison.OrdinalIgnoreCase))
             {
-                var arguments = functionCallNode.Parameters.ToList();
-                if (arguments.Count < 2)
-                    throw new InvalidOperationException("StartsWith function requires two arguments");
-
-                var property = ParseExpression(arguments[0] as SingleValueNode);
-                var value = ParseExpression(arguments[1] as SingleValueNode);
-
-                if (value.StartsWith("'") && value.EndsWith("'"))
-                    value = value.Substring(1, value.Length - 2);
-
-                return $"{property} {likeOperator} '{value}%'";
+                return ParseLikeFunction(functionCallNode, likeOperator, "StartsWith", prefix: string.Empty, suffix: "%");
             }
             else if (functionCallNode.Name.Equals("endswith", StringComparison.OrdinalIgnoreCase))
             {
-                var arguments = functionCallNode.Parameters.ToList();
-                if (arguments.Count < 2)
-                    throw new InvalidOperationException("EndsWith function requires two arguments");
-
-                var property = ParseExpression(arguments[0] as SingleValueNode);
-                var value = ParseExpression(arguments[1] as SingleValueNode);
-
-                if (value.StartsWith("'") && value.EndsWith("'"))
-                    value = value.Substring(1, value.Length - 2);
-
-                return $"{property} {likeOperator} '%{value}'";
+                return ParseLikeFunction(functionCallNode, likeOperator, "EndsWith", prefix: "%", suffix: string.Empty);
             }
             else if (functionCallNode.Name.Equals("tolower", StringComparison.OrdinalIgnoreCase))
             {
@@ -205,6 +171,45 @@ namespace SnowflakeV2CoreLogic.Utilities
             }
 
             throw new NotSupportedException($"Unsupported function: {functionCallNode.Name}");
+        }
+
+        private string ParseLikeFunction(
+            SingleValueFunctionCallNode functionCallNode,
+            string likeOperator,
+            string displayName,
+            string prefix,
+            string suffix)
+        {
+            var arguments = functionCallNode.Parameters.ToList();
+            if (arguments.Count < 2)
+            {
+                throw new InvalidOperationException($"{displayName} function requires two arguments");
+            }
+
+            var property = ParseExpression(arguments[0] as SingleValueNode);
+            var searchTerm = GetSearchTermLiteral(arguments[1] as SingleValueNode, displayName);
+
+            return $"{property} {likeOperator} '{prefix}{EscapeStringLiteral(searchTerm)}{suffix}'";
+        }
+
+        /// <summary>
+        /// The search term is embedded inside a single SQL string literal together with the LIKE wildcards,
+        /// so it must be a string constant. Rendering any other expression (e.g. a nested tolower/toupper call)
+        /// would splice raw SQL into that literal and let caller-supplied text escape it.
+        /// </summary>
+        private static string GetSearchTermLiteral(SingleValueNode node, string displayName)
+        {
+            while (node is ConvertNode convertNode)
+            {
+                node = convertNode.Source;
+            }
+
+            if (node is ConstantNode constantNode && constantNode.Value is string stringValue)
+            {
+                return stringValue;
+            }
+
+            throw new ArgumentException($"{displayName} function only supports a string literal as its search argument.");
         }
 
         private string ParseUnaryOperator(UnaryOperatorNode unaryOperatorNode)
