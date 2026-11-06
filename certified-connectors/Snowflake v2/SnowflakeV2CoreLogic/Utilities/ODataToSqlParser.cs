@@ -4,9 +4,11 @@
 namespace SnowflakeV2CoreLogic.Utilities
 {
     using System;
+    using System.Globalization;
     using System.Linq;
     using Microsoft.OData.Core.UriParser.Semantic;
     using Microsoft.OData.Core.UriParser.TreeNodeKinds;
+    using Microsoft.OData.Edm.Library;
 
     /// <summary>
     /// OData to SQL Parser
@@ -85,15 +87,46 @@ namespace SnowflakeV2CoreLogic.Utilities
             }
             else if (expression is ConstantNode constantNode)
             {
-                if (constantNode.Value == null)
-                    return "NULL";
-                else if (constantNode.Value is string)
-                    return $"'{constantNode.Value}'";
-                else
-                    return constantNode.Value.ToString();
+                return FormatConstant(constantNode);
             }
 
             throw new NotSupportedException($"Unsupported expression type: {expression.GetType().Name}");
+        }
+
+        /// <summary>
+        /// Formats an OData constant as a Snowflake SQL literal.
+        /// Strings, GUIDs and temporal values are emitted as single-quoted literals; Snowflake casts them
+        /// implicitly when compared to the column. Unquoted, a GUID or date would be parsed as arithmetic.
+        /// On open types a date-only literal is parsed as a DateTimeOffset at midnight in the server's time
+        /// zone, so it is emitted as a date to leave its interpretation to the Snowflake session.
+        /// </summary>
+        private static string FormatConstant(ConstantNode constantNode)
+        {
+            var value = constantNode.Value;
+            switch (value)
+            {
+                case null:
+                    return "NULL";
+                case string stringValue:
+                    return $"'{EscapeStringLiteral(stringValue)}'";
+                case Guid guidValue:
+                    return $"'{guidValue:D}'";
+                case DateTimeOffset dateValue when IsDateOnlyLiteral(constantNode.LiteralText):
+                    return $"'{dateValue.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}'";
+                case DateTimeOffset dateTimeOffsetValue:
+                    return $"'{dateTimeOffsetValue.ToString("yyyy-MM-ddTHH:mm:ss.FFFFFFFzzz", CultureInfo.InvariantCulture)}'";
+                case Date dateValue:
+                    return string.Format(CultureInfo.InvariantCulture, "'{0:D4}-{1:D2}-{2:D2}'", dateValue.Year, dateValue.Month, dateValue.Day);
+                case TimeOfDay timeOfDayValue:
+                    return $"'{((TimeSpan)timeOfDayValue).ToString(@"hh\:mm\:ss\.FFFFFFF", CultureInfo.InvariantCulture).TrimEnd('.')}'";
+                default:
+                    return value.ToString();
+            }
+        }
+
+        private static bool IsDateOnlyLiteral(string literalText)
+        {
+            return !string.IsNullOrEmpty(literalText) && literalText.IndexOf("T", StringComparison.OrdinalIgnoreCase) < 0;
         }
 
         /// <summary>
