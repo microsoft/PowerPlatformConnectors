@@ -14,9 +14,14 @@ from paconn.authentication.profile import Profile
 from paconn.authentication.tokenmanager import TokenManager
 
 
-def get_authentication(settings, force_authenticate):
+def get_authentication(settings, force_authenticate, interactive=False):
     """
     Logs the user in and saves the token in a file.
+    
+    Args:
+        settings: Configuration settings containing authentication parameters
+        force_authenticate: Force re-authentication even if token exists
+        interactive: Use interactive browser authentication instead of device code
     """
     tokenmanager = TokenManager()
     credentials = tokenmanager.read()
@@ -31,7 +36,10 @@ def get_authentication(settings, force_authenticate):
             resource=settings.resource,
             authority_url=settings.authority_url)
 
-        credentials = profile.authenticate_device_code()
+        if interactive:
+            credentials = profile.authenticate_interactive()
+        else:
+            credentials = profile.authenticate_device_code()
 
         tokenmanager.write(credentials)
 
@@ -40,6 +48,13 @@ def get_authentication(settings, force_authenticate):
     # Couldn't acquire valid token
     if token_expired:
         raise CLIError('Couldn\'t get authentication')
+
+
+def get_authentication_interactive(settings, force_authenticate=False):
+    """
+    Logs the user in using interactive authentication and saves the token in a file.
+    """
+    return get_authentication(settings, force_authenticate, interactive=True)
 
 
 def remove_authentication():
