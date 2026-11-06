@@ -462,5 +462,150 @@ namespace SnowflakeV2CoreLogic.Tests.Utilities
         }
 
         #endregion
+
+        #region Non-string literals that must be quoted
+
+        [TestMethod]
+        public void ParseFilterToSql_GuidConstant_IsQuoted()
+        {
+            var filter = ParseFilter("ACCOUNTID eq db4735e6-77f2-ef11-be20-000d3ae154d9");
+            var result = parser.ParseFilterToSql(filter);
+            Assert.AreEqual("ACCOUNTID = 'db4735e6-77f2-ef11-be20-000d3ae154d9'", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_GuidConstant_Ne_IsQuoted()
+        {
+            var filter = ParseFilter("ACCOUNTID ne 3a0806c4-b0b0-f111-aaac-6045bd40e597");
+            var result = parser.ParseFilterToSql(filter);
+            Assert.AreEqual("ACCOUNTID <> '3a0806c4-b0b0-f111-aaac-6045bd40e597'", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_GuidConstant_InCompoundExpression_IsQuoted()
+        {
+            var filter = ParseFilter("ACCOUNTID eq db4735e6-77f2-ef11-be20-000d3ae154d9 and Name eq 'Alice'");
+            var result = parser.ParseFilterToSql(filter);
+            Assert.AreEqual("(ACCOUNTID = 'db4735e6-77f2-ef11-be20-000d3ae154d9') AND (Name = 'Alice')", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_GuidConstant_KeepsCallerCasing()
+        {
+            var filter = ParseFilter("ACCOUNTID eq DB4735E6-77F2-EF11-BE20-000D3AE154D9");
+            var result = parser.ParseFilterToSql(filter);
+            Assert.AreEqual("ACCOUNTID = 'DB4735E6-77F2-EF11-BE20-000D3AE154D9'", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_GuidNodeWithoutLiteralText_IsEmittedInCanonicalForm()
+        {
+            var eqNode = new BinaryOperatorNode(
+                BinaryOperatorKind.Equal,
+                new SingleValueOpenPropertyAccessNode(new ConstantNode("dummy"), "ACCOUNTID"),
+                new ConstantNode(Guid.Parse("DB4735E6-77F2-EF11-BE20-000D3AE154D9")));
+
+            var result = parser.ParseFilterToSql(MakeFilterClause(eqNode));
+            Assert.AreEqual("ACCOUNTID = 'db4735e6-77f2-ef11-be20-000d3ae154d9'", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_GuidNodeWithNonCanonicalLiteralText_IsEmittedInCanonicalForm()
+        {
+            var eqNode = new BinaryOperatorNode(
+                BinaryOperatorKind.Equal,
+                new SingleValueOpenPropertyAccessNode(new ConstantNode("dummy"), "ACCOUNTID"),
+                new ConstantNode(Guid.Parse("db4735e6-77f2-ef11-be20-000d3ae154d9"), "x' OR '1'='1"));
+
+            var result = parser.ParseFilterToSql(MakeFilterClause(eqNode));
+            Assert.AreEqual("ACCOUNTID = 'db4735e6-77f2-ef11-be20-000d3ae154d9'", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_DateTimeOffsetConstant_IsQuoted()
+        {
+            var filter = ParseFilter("CreatedOn ge 2026-09-15T00:00:00Z");
+            var result = parser.ParseFilterToSql(filter);
+            Assert.AreEqual("CreatedOn >= '2026-09-15T00:00:00+00:00'", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_DateTimeOffsetConstant_PreservesFractionAndOffset()
+        {
+            var filter = ParseFilter("CreatedOn lt 2026-09-15T10:20:30.5+02:00");
+            var result = parser.ParseFilterToSql(filter);
+            Assert.AreEqual("CreatedOn < '2026-09-15T10:20:30.5+02:00'", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_DateConstant_IsQuoted()
+        {
+            var filter = ParseFilter("BirthDate eq 2026-09-15");
+            var result = parser.ParseFilterToSql(filter);
+            Assert.AreEqual("BirthDate = '2026-09-15'", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_DateConstantOnTimestampColumn_IsEmittedAsDateOnly()
+        {
+            var filter = ParseFilter("CreatedOn ge 2026-10-01");
+            var result = parser.ParseFilterToSql(filter);
+            Assert.AreEqual("CreatedOn >= '2026-10-01'", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_DateTimeOffsetNode_KeepsTimeAndOffset()
+        {
+            var eqNode = new BinaryOperatorNode(
+                BinaryOperatorKind.Equal,
+                new SingleValueOpenPropertyAccessNode(new ConstantNode("dummy"), "CreatedOn"),
+                new ConstantNode(new DateTimeOffset(2026, 10, 1, 0, 0, 0, TimeSpan.FromHours(2))));
+
+            var result = parser.ParseFilterToSql(MakeFilterClause(eqNode));
+            Assert.AreEqual("CreatedOn = '2026-10-01T00:00:00+02:00'", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_TimeOfDayConstant_IsQuoted()
+        {
+            var filter = ParseFilter("StartTime eq 12:30:00");
+            var result = parser.ParseFilterToSql(filter);
+            Assert.AreEqual("StartTime = '12:30:00'", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_TimeOfDayConstant_PreservesFraction()
+        {
+            var filter = ParseFilter("StartTime eq 12:30:00.25");
+            var result = parser.ParseFilterToSql(filter);
+            Assert.AreEqual("StartTime = '12:30:00.25'", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_DateAndTimeOfDayNodes_AreQuoted()
+        {
+            var dateNode = new BinaryOperatorNode(
+                BinaryOperatorKind.Equal,
+                new SingleValueOpenPropertyAccessNode(new ConstantNode("dummy"), "D"),
+                new ConstantNode(new Date(2026, 1, 5)));
+            var timeNode = new BinaryOperatorNode(
+                BinaryOperatorKind.Equal,
+                new SingleValueOpenPropertyAccessNode(new ConstantNode("dummy"), "T"),
+                new ConstantNode(new TimeOfDay(7, 5, 3, 0)));
+            var filterClause = MakeFilterClause(new BinaryOperatorNode(BinaryOperatorKind.And, dateNode, timeNode));
+
+            var result = parser.ParseFilterToSql(filterClause);
+            Assert.AreEqual("(D = '2026-01-05') AND (T = '07:05:03')", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_BooleanConstant_KeepsExistingFormat()
+        {
+            var filter = ParseFilter("IS_ACTIVE eq true");
+            var result = parser.ParseFilterToSql(filter);
+            Assert.AreEqual("IS_ACTIVE = True", result);
+        }
+
+        #endregion
     }
 }
