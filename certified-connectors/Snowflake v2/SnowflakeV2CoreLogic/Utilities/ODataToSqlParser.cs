@@ -110,7 +110,7 @@ namespace SnowflakeV2CoreLogic.Utilities
                 case string stringValue:
                     return $"'{EscapeStringLiteral(stringValue)}'";
                 case Guid guidValue:
-                    return $"'{guidValue:D}'";
+                    return $"'{FormatGuid(guidValue, constantNode.LiteralText)}'";
                 case DateTimeOffset dateValue when IsDateOnlyLiteral(constantNode.LiteralText):
                     return $"'{dateValue.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}'";
                 case DateTimeOffset dateTimeOffsetValue:
@@ -122,6 +122,17 @@ namespace SnowflakeV2CoreLogic.Utilities
                 default:
                     return value.ToString();
             }
+        }
+
+        /// <summary>
+        /// GUIDs are stored in Snowflake as text and compared case-sensitively, so the caller's casing is kept.
+        /// The literal is only emitted once it has been validated as a canonical GUID.
+        /// </summary>
+        private static string FormatGuid(Guid value, string literalText)
+        {
+            return Guid.TryParseExact(literalText, "D", out var parsed) && parsed == value
+                ? literalText
+                : value.ToString("D");
         }
 
         private static bool IsDateOnlyLiteral(string literalText)

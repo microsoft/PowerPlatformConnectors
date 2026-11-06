@@ -490,10 +490,34 @@ namespace SnowflakeV2CoreLogic.Tests.Utilities
         }
 
         [TestMethod]
-        public void ParseFilterToSql_GuidConstant_IsEmittedInCanonicalLowercaseForm()
+        public void ParseFilterToSql_GuidConstant_KeepsCallerCasing()
         {
             var filter = ParseFilter("ACCOUNTID eq DB4735E6-77F2-EF11-BE20-000D3AE154D9");
             var result = parser.ParseFilterToSql(filter);
+            Assert.AreEqual("ACCOUNTID = 'DB4735E6-77F2-EF11-BE20-000D3AE154D9'", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_GuidNodeWithoutLiteralText_IsEmittedInCanonicalForm()
+        {
+            var eqNode = new BinaryOperatorNode(
+                BinaryOperatorKind.Equal,
+                new SingleValueOpenPropertyAccessNode(new ConstantNode("dummy"), "ACCOUNTID"),
+                new ConstantNode(Guid.Parse("DB4735E6-77F2-EF11-BE20-000D3AE154D9")));
+
+            var result = parser.ParseFilterToSql(MakeFilterClause(eqNode));
+            Assert.AreEqual("ACCOUNTID = 'db4735e6-77f2-ef11-be20-000d3ae154d9'", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_GuidNodeWithNonCanonicalLiteralText_IsEmittedInCanonicalForm()
+        {
+            var eqNode = new BinaryOperatorNode(
+                BinaryOperatorKind.Equal,
+                new SingleValueOpenPropertyAccessNode(new ConstantNode("dummy"), "ACCOUNTID"),
+                new ConstantNode(Guid.Parse("db4735e6-77f2-ef11-be20-000d3ae154d9"), "x' OR '1'='1"));
+
+            var result = parser.ParseFilterToSql(MakeFilterClause(eqNode));
             Assert.AreEqual("ACCOUNTID = 'db4735e6-77f2-ef11-be20-000d3ae154d9'", result);
         }
 

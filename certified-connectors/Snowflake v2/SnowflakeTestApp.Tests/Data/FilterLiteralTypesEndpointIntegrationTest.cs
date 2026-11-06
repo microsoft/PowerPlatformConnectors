@@ -23,7 +23,7 @@ namespace SnowflakeTestApp.Tests.Data
 
         private const string Guid1 = "db4735e6-77f2-ef11-be20-000d3ae154d9";
         private const string Guid2 = "3a0806c4-b0b0-f111-aaac-6045bd40e597";
-        private const string Guid3 = "7ffc8564-1d2e-4c3b-9a8f-0123456789ab";
+        private const string Guid3 = "7FFC8564-1D2E-4C3B-9A8F-0123456789AB";
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
@@ -97,7 +97,8 @@ namespace SnowflakeTestApp.Tests.Data
         [DataTestMethod]
         [DataRow("ACCOUNTID eq " + Guid1, new[] { 1 })]
         [DataRow("ACCOUNTID ne " + Guid1, new[] { 2, 3 })]
-        [DataRow("ACCOUNTID eq DB4735E6-77F2-EF11-BE20-000D3AE154D9", new[] { 1 })]
+        [DataRow("ACCOUNTID eq " + Guid3, new[] { 3 })]
+        [DataRow("ACCOUNTID eq DB4735E6-77F2-EF11-BE20-000D3AE154D9", new int[0])]
         [DataRow("ACCOUNTID eq " + Guid1 + " or ACCOUNTID eq " + Guid2, new[] { 1, 2 })]
         [DataRow("ACCOUNTID eq " + Guid2 + " and BIRTH_DATE eq 2026-10-01", new[] { 2 })]
         [DataRow("ACCOUNTID eq '" + Guid1 + "'", new[] { 1 })]
