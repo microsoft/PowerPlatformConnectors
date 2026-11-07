@@ -1,0 +1,2401 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Israel Open Data",
+    "description": "Israel Open Data is the national open government data portal of the State of Israel, published at data.gov.il. This connector searches the dataset catalogue, reads dataset, publishing organisation and resource metadata, lists the licences in use, and queries the tabular rows held in the portal DataStore.",
+    "version": "1.0",
+    "contact": {
+      "name": "Israel Government Open Data Portal",
+      "url": "https://data.gov.il/about"
+    }
+  },
+  "host": "data.gov.il",
+  "basePath": "/api/3/action",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/package_search": {
+      "get": {
+        "tags": [
+          "Datasets"
+        ],
+        "summary": "Search datasets",
+        "description": "Searches the Israel Open Data catalogue and returns the matching datasets with their full metadata, resources and tags. Use the Search Query option for free text and the Filter Query option to restrict results to a publishing organisation, a file format or another indexed field. Dataset titles and descriptions are published mainly in Hebrew.",
+        "operationId": "SearchDatasets",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Search Query",
+            "x-ms-visibility": "important",
+            "description": "The free text to search for across dataset titles, descriptions and tags. Leave this empty to return the whole catalogue. Hebrew text is accepted."
+          },
+          {
+            "name": "fq",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Filter Query",
+            "x-ms-visibility": "advanced",
+            "description": "A filter that restricts the results to an indexed field, written as field:value, for example organization:lamas or res_format:CSV. Combine several filters by separating them with a space."
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Sort Order",
+            "x-ms-visibility": "advanced",
+            "description": "The order the results are returned in, written as a field name followed by asc or desc, for example metadata_modified desc. The portal sorts by relevance and then by most recently modified when this is left empty."
+          },
+          {
+            "name": "rows",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "default": 20,
+            "x-ms-summary": "Number of Results",
+            "x-ms-visibility": "important",
+            "description": "The maximum number of datasets to return in one call. The portal returns 20 datasets when this is left empty and accepts up to 1000."
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "x-ms-summary": "Skip Count",
+            "x-ms-visibility": "advanced",
+            "description": "The number of datasets to skip before the first returned result, used to page through a large result set."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The matching datasets were returned.",
+            "schema": {
+              "$ref": "#/definitions/SearchDatasetsResponse"
+            }
+          },
+          "400": {
+            "description": "The request was malformed."
+          },
+          "409": {
+            "description": "The Search Query or Filter Query option could not be parsed by the portal search engine."
+          },
+          "500": {
+            "description": "The portal encountered an internal error."
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Datasets"
+        ],
+        "summary": "Search datasets (advanced)",
+        "description": "Searches the Israel Open Data catalogue by sending the search options in a request body rather than in the query string. Use this operation when you want to filter by resource file format, because the Format Filter option is only available here, or when a query or filter value is long enough or contains enough punctuation to be awkward in a query string.",
+        "operationId": "SearchDatasetsAdvanced",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "x-ms-summary": "Search Options",
+            "description": "The search options sent to the portal.",
+            "schema": {
+              "$ref": "#/definitions/SearchDatasetsRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The matching datasets were returned.",
+            "schema": {
+              "$ref": "#/definitions/SearchDatasetsResponse"
+            }
+          },
+          "400": {
+            "description": "The request was malformed."
+          },
+          "409": {
+            "description": "The Search Query or Filter Query option could not be parsed by the portal search engine."
+          },
+          "500": {
+            "description": "The portal encountered an internal error."
+          }
+        }
+      }
+    },
+    "/package_show": {
+      "get": {
+        "tags": [
+          "Datasets"
+        ],
+        "summary": "Get dataset",
+        "description": "Returns the full metadata of a single dataset, including every resource attached to it, its tags, its publishing organisation and its licence. Supply either the dataset name used in the portal address or the dataset identifier.",
+        "operationId": "GetDataset",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Dataset ID or Name",
+            "x-ms-visibility": "important",
+            "description": "The identifier of the dataset, or the short name that appears in the portal address, for example water_factory.",
+            "x-ms-dynamic-values": {
+              "operationId": "ListDatasetNames",
+              "value-collection": "result"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The dataset metadata was returned.",
+            "schema": {
+              "$ref": "#/definitions/DatasetResponse"
+            }
+          },
+          "404": {
+            "description": "No dataset exists with the supplied identifier or name."
+          },
+          "409": {
+            "description": "The Dataset ID or Name option was missing or not valid."
+          },
+          "500": {
+            "description": "The portal encountered an internal error."
+          }
+        }
+      }
+    },
+    "/package_list": {
+      "get": {
+        "tags": [
+          "Datasets"
+        ],
+        "summary": "List dataset names",
+        "description": "Returns the short name of every dataset published on the portal as a plain list of text values. Use one of the returned names with the Get dataset operation to read the full metadata of that dataset.",
+        "operationId": "ListDatasetNames",
+        "x-ms-visibility": "advanced",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The dataset names were returned.",
+            "schema": {
+              "$ref": "#/definitions/NameListResponse"
+            }
+          },
+          "500": {
+            "description": "The portal encountered an internal error."
+          }
+        }
+      }
+    },
+    "/package_autocomplete": {
+      "get": {
+        "tags": [
+          "Datasets"
+        ],
+        "summary": "Search dataset suggestions",
+        "description": "Returns datasets whose name or title begins with the text you supply, as a short suggestion list of names and titles. Use this to look up a dataset name before calling the Get dataset operation. An empty search text returns no suggestions, so always supply at least one character.",
+        "operationId": "SearchDatasetSuggestions",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Search Text",
+            "x-ms-visibility": "important",
+            "description": "The text a dataset name or title must begin with. At least one character is required, because an empty value returns no suggestions."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "x-ms-summary": "Number of Suggestions",
+            "x-ms-visibility": "advanced",
+            "description": "The maximum number of suggestions to return."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The dataset suggestions were returned.",
+            "schema": {
+              "$ref": "#/definitions/DatasetSuggestionListResponse"
+            }
+          },
+          "409": {
+            "description": "A required option was missing or not valid."
+          },
+          "500": {
+            "description": "The portal encountered an internal error."
+          }
+        }
+      }
+    },
+    "/organization_list": {
+      "get": {
+        "tags": [
+          "Organisations"
+        ],
+        "summary": "List organisations",
+        "description": "Returns the short name of every government ministry, authority and municipality that publishes data on the portal, as a plain list of text values. Use one of the returned names with the Get organisation operation to read the full details of that organisation.",
+        "operationId": "ListOrganizations",
+        "x-ms-visibility": "advanced",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The organisation names were returned.",
+            "schema": {
+              "$ref": "#/definitions/NameListResponse"
+            }
+          },
+          "500": {
+            "description": "The portal encountered an internal error."
+          }
+        }
+      }
+    },
+    "/organization_show": {
+      "get": {
+        "tags": [
+          "Organisations"
+        ],
+        "summary": "Get organisation",
+        "description": "Returns the details of a single publishing organisation, including its display title, its description and the number of datasets it has published. Organisation titles are published in Hebrew.",
+        "operationId": "GetOrganization",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Organisation ID or Name",
+            "x-ms-visibility": "important",
+            "description": "The identifier of the organisation, or its short name as returned by the List organisations operation, for example lamas.",
+            "x-ms-dynamic-values": {
+              "operationId": "SearchOrganizationSuggestions",
+              "parameters": {
+                "q": "",
+                "limit": 100
+              },
+              "value-collection": "result",
+              "value-path": "name",
+              "value-title": "title"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The organisation details were returned.",
+            "schema": {
+              "$ref": "#/definitions/OrganizationResponse"
+            }
+          },
+          "404": {
+            "description": "No organisation exists with the supplied identifier or name."
+          },
+          "409": {
+            "description": "The Organisation ID or Name option was missing or not valid."
+          },
+          "500": {
+            "description": "The portal encountered an internal error."
+          }
+        }
+      }
+    },
+    "/organization_autocomplete": {
+      "get": {
+        "tags": [
+          "Organisations"
+        ],
+        "summary": "Search organisation suggestions",
+        "description": "Returns publishing organisations whose name or title matches the text you supply, with the short name and the full title of each one. An empty search text returns the first organisations on the portal, so this operation can also be used to list them with their titles.",
+        "operationId": "SearchOrganizationSuggestions",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Search Text",
+            "x-ms-visibility": "important",
+            "description": "The text the organisation name or title must match. Leave this empty to return organisations without filtering."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "x-ms-summary": "Number of Suggestions",
+            "x-ms-visibility": "advanced",
+            "description": "The maximum number of suggestions to return. The portal returns 20 when this is left empty."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The organisation suggestions were returned.",
+            "schema": {
+              "$ref": "#/definitions/OrganizationSuggestionListResponse"
+            }
+          },
+          "409": {
+            "description": "A required option was missing or not valid."
+          },
+          "500": {
+            "description": "The portal encountered an internal error."
+          }
+        }
+      }
+    },
+    "/resource_show": {
+      "get": {
+        "tags": [
+          "Resources"
+        ],
+        "summary": "Get resource",
+        "description": "Returns the metadata of a single resource, which is one downloadable file or linked service belonging to a dataset. The metadata includes the download address, the file format, the update frequency and the data quality score the portal has assigned to the resource.",
+        "operationId": "GetResource",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Resource ID",
+            "x-ms-visibility": "important",
+            "description": "The identifier of the resource, taken from the Resources list of a dataset returned by the Get dataset or Search datasets operation."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The resource metadata was returned.",
+            "schema": {
+              "$ref": "#/definitions/ResourceResponse"
+            }
+          },
+          "404": {
+            "description": "No resource exists with the supplied identifier."
+          },
+          "409": {
+            "description": "The Resource ID option was missing or not valid."
+          },
+          "500": {
+            "description": "The portal encountered an internal error."
+          }
+        }
+      }
+    },
+    "/resource_search": {
+      "get": {
+        "tags": [
+          "Resources"
+        ],
+        "summary": "Search resources",
+        "description": "Searches the resources of the portal by the value of a single resource field, written as field:value. The resource index behind this operation is not currently populated on this portal, so the operation succeeds but returns a count of zero. Use Search datasets and read the Resources list of each dataset instead.",
+        "operationId": "SearchResources",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Field Query",
+            "x-ms-visibility": "important",
+            "description": "The field and value to match, written as field:value, for example format:CSV. Only stored resource fields such as format, name, description and url can be searched."
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Order By",
+            "x-ms-visibility": "advanced",
+            "description": "The name of the resource field the results are ordered by, for example name."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "x-ms-summary": "Number of Results",
+            "x-ms-visibility": "advanced",
+            "description": "The maximum number of resources to return in one call."
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "x-ms-summary": "Skip Count",
+            "x-ms-visibility": "advanced",
+            "description": "The number of resources to skip before the first returned result, used to page through a large result set."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The search completed. The Count property reports how many resources matched.",
+            "schema": {
+              "$ref": "#/definitions/SearchResourcesResponse"
+            }
+          },
+          "409": {
+            "description": "The Field Query option named a resource field that cannot be searched."
+          },
+          "500": {
+            "description": "The portal encountered an internal error."
+          }
+        }
+      }
+    },
+    "/resource_view_list": {
+      "get": {
+        "tags": [
+          "Resources"
+        ],
+        "summary": "List resource views",
+        "description": "Returns the views configured for one resource. A view is a preview the portal renders for a resource, such as a data table, a chart or a map.",
+        "operationId": "ListResourceViews",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Resource ID",
+            "x-ms-visibility": "important",
+            "description": "The identifier of the resource whose views are returned."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The resource views were returned.",
+            "schema": {
+              "$ref": "#/definitions/ResourceViewListResponse"
+            }
+          },
+          "409": {
+            "description": "A required option was missing or not valid."
+          },
+          "500": {
+            "description": "The portal encountered an internal error."
+          }
+        }
+      }
+    },
+    "/datastore_search": {
+      "get": {
+        "tags": [
+          "DataStore"
+        ],
+        "summary": "Search DataStore records",
+        "description": "Returns the individual rows held in the DataStore for one resource, together with the name and data type of every column. Only resources whose DataStore Active property is true can be queried this way. Use the Get dataset operation first to find a resource identifier.",
+        "operationId": "SearchDatastoreRecords",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "resource_id",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Resource ID",
+            "x-ms-visibility": "important",
+            "description": "The identifier of the resource to read rows from. The resource must have its DataStore Active property set to true."
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Search Query",
+            "x-ms-visibility": "important",
+            "description": "The free text to search for across every column of the resource. Leave this empty to return rows without filtering."
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Column Filters",
+            "x-ms-visibility": "advanced",
+            "description": "An exact match filter supplied as a JSON object of column names and values, for example {\"CHOPER\":\"IZ\"}. Use the Search DataStore records (advanced) operation to supply this as a structured object instead of text."
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Columns",
+            "x-ms-visibility": "advanced",
+            "description": "The names of the columns to return, separated by commas. Every column is returned when this is left empty."
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Sort Order",
+            "x-ms-visibility": "advanced",
+            "description": "The order the rows are returned in, written as a column name followed by asc or desc, for example _id desc."
+          },
+          {
+            "name": "distinct",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "x-ms-summary": "Distinct Rows Only",
+            "x-ms-visibility": "advanced",
+            "description": "Set this to true to remove duplicate rows from the result."
+          },
+          {
+            "name": "plain",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "x-ms-summary": "Plain Text Query",
+            "x-ms-visibility": "advanced",
+            "description": "Set this to false to treat the Search Query option as a full text search expression rather than as plain text."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "default": 100,
+            "x-ms-summary": "Number of Rows",
+            "x-ms-visibility": "important",
+            "description": "The maximum number of rows to return in one call. The portal returns 100 rows when this is left empty."
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "x-ms-summary": "Skip Count",
+            "x-ms-visibility": "advanced",
+            "description": "The number of rows to skip before the first returned row, used to page through a large resource."
+          },
+          {
+            "name": "include_total",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "x-ms-summary": "Include Total Count",
+            "x-ms-visibility": "advanced",
+            "description": "Set this to false to skip counting the total number of matching rows, which makes the call faster on very large resources."
+          },
+          {
+            "name": "records_format",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "default": "objects",
+            "enum": [
+              "objects"
+            ],
+            "x-ms-visibility": "internal",
+            "x-ms-summary": "Records Format",
+            "description": "The shape the rows are returned in. This is fixed to objects so that each row is returned as a named set of column values."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The DataStore rows were returned.",
+            "schema": {
+              "$ref": "#/definitions/DatastoreSearchResponse"
+            }
+          },
+          "404": {
+            "description": "The resource has no DataStore table, or no resource exists with the supplied identifier."
+          },
+          "409": {
+            "description": "The Resource ID option was missing, or a column named in the request does not exist."
+          },
+          "500": {
+            "description": "The portal encountered an internal error."
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "DataStore"
+        ],
+        "summary": "Search DataStore records (advanced)",
+        "description": "Returns the individual rows held in the DataStore for one resource, sending the query options in a request body rather than in the query string. Use this operation when you need to filter on exact column values, because the Column Filters option can be supplied here as a structured object.",
+        "operationId": "SearchDatastoreRecordsAdvanced",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "x-ms-summary": "Query Options",
+            "description": "The DataStore query options sent to the portal.",
+            "schema": {
+              "$ref": "#/definitions/SearchDatastoreRecordsRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The DataStore rows were returned.",
+            "schema": {
+              "$ref": "#/definitions/DatastoreSearchResponse"
+            }
+          },
+          "404": {
+            "description": "The resource has no DataStore table, or no resource exists with the supplied identifier."
+          },
+          "409": {
+            "description": "The Resource ID option was missing, or a column named in the request does not exist."
+          },
+          "500": {
+            "description": "The portal encountered an internal error."
+          }
+        }
+      }
+    },
+    "/datastore_search_sql": {
+      "get": {
+        "tags": [
+          "DataStore"
+        ],
+        "summary": "Search DataStore with SQL",
+        "description": "Runs a read only SQL query against the DataStore and returns the rows it produces. Name the resource identifier in double quotation marks as the table, for example SELECT * FROM \"e83f763b-b7d7-479e-b172-ae981ddc6de5\" LIMIT 10. Only resources whose DataStore Active property is true can be queried.",
+        "operationId": "SearchDatastoreWithSql",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "sql",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "SQL Query",
+            "x-ms-visibility": "important",
+            "description": "The SQL SELECT statement to run. The resource identifier is used as the table name and must be wrapped in double quotation marks."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The rows produced by the query were returned.",
+            "schema": {
+              "$ref": "#/definitions/DatastoreSqlResponse"
+            }
+          },
+          "409": {
+            "description": "A required option was missing or not valid."
+          },
+          "500": {
+            "description": "The portal encountered an internal error."
+          }
+        }
+      }
+    },
+    "/group_list": {
+      "get": {
+        "tags": [
+          "Reference"
+        ],
+        "summary": "List groups",
+        "description": "Returns the short name of every group defined on the portal. The portal categorises its datasets by publishing organisation rather than by group, so only a small number of placeholder groups exist.",
+        "operationId": "ListGroups",
+        "x-ms-visibility": "advanced",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The group names were returned.",
+            "schema": {
+              "$ref": "#/definitions/NameListResponse"
+            }
+          },
+          "409": {
+            "description": "A required option was missing or not valid."
+          },
+          "500": {
+            "description": "The portal encountered an internal error."
+          }
+        }
+      }
+    },
+    "/tag_list": {
+      "get": {
+        "tags": [
+          "Reference"
+        ],
+        "summary": "List tags",
+        "description": "Returns every keyword used across the datasets of the portal as a plain list of text values. Most tags are published in Hebrew. Use a returned tag with the Filter Query option of the Search datasets operation.",
+        "operationId": "ListTags",
+        "x-ms-visibility": "advanced",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The tags were returned.",
+            "schema": {
+              "$ref": "#/definitions/NameListResponse"
+            }
+          },
+          "409": {
+            "description": "A required option was missing or not valid."
+          },
+          "500": {
+            "description": "The portal encountered an internal error."
+          }
+        }
+      }
+    },
+    "/license_list": {
+      "get": {
+        "tags": [
+          "Reference"
+        ],
+        "summary": "List licences",
+        "description": "Returns every licence the portal offers for its datasets, with the identifier that appears in the Licence ID property of a dataset and the address of the full licence text. Some licence titles are published in Hebrew.",
+        "operationId": "ListLicenses",
+        "x-ms-visibility": "advanced",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The licences were returned.",
+            "schema": {
+              "$ref": "#/definitions/LicenseListResponse"
+            }
+          },
+          "500": {
+            "description": "The portal encountered an internal error."
+          }
+        }
+      }
+    },
+    "/format_autocomplete": {
+      "get": {
+        "tags": [
+          "Reference"
+        ],
+        "summary": "Search file format suggestions",
+        "description": "Returns the file formats used by resources on the portal that match the text you supply, such as csv, xlsx or geojson. An empty search text returns formats without filtering. Use a returned format with the Filter Query option of the Search datasets operation.",
+        "operationId": "SearchFormatSuggestions",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Search Text",
+            "x-ms-visibility": "important",
+            "description": "The text the file format must contain. Leave this empty to return formats without filtering."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "x-ms-summary": "Number of Suggestions",
+            "x-ms-visibility": "advanced",
+            "description": "The maximum number of formats to return. The portal returns five when this is left empty."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The file formats were returned.",
+            "schema": {
+              "$ref": "#/definitions/NameListResponse"
+            }
+          },
+          "409": {
+            "description": "A required option was missing or not valid."
+          },
+          "500": {
+            "description": "The portal encountered an internal error."
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "SearchDatasetsRequest": {
+      "type": "object",
+      "properties": {
+        "q": {
+          "type": "string",
+          "x-ms-summary": "Search Query",
+          "description": "The free text to search for across dataset titles, descriptions and tags. Leave this empty to return the whole catalogue. Hebrew text is accepted."
+        },
+        "fq": {
+          "type": "string",
+          "x-ms-summary": "Filter Query",
+          "description": "A filter that restricts the results to an indexed field, written as field:value, for example organization:lamas or res_format:CSV. Combine several filters by separating them with a space."
+        },
+        "fq_list": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "res_format:CSV",
+              "res_format:XLSX",
+              "res_format:XLS",
+              "res_format:PDF",
+              "res_format:JSON",
+              "res_format:GeoJSON",
+              "res_format:XML",
+              "res_format:KML",
+              "res_format:KMZ",
+              "res_format:SHP",
+              "res_format:GDB",
+              "res_format:DOC",
+              "res_format:DOCX",
+              "res_format:TXT",
+              "res_format:ZIP",
+              "res_format:RAR",
+              "res_format:JPEG",
+              "res_format:RSS",
+              "res_format:Web-Service",
+              "res_format:link"
+            ],
+            "x-ms-enum-values": [
+              {
+                "value": "res_format:CSV",
+                "displayName": "CSV"
+              },
+              {
+                "value": "res_format:XLSX",
+                "displayName": "XLSX"
+              },
+              {
+                "value": "res_format:XLS",
+                "displayName": "XLS"
+              },
+              {
+                "value": "res_format:PDF",
+                "displayName": "PDF"
+              },
+              {
+                "value": "res_format:JSON",
+                "displayName": "JSON"
+              },
+              {
+                "value": "res_format:GeoJSON",
+                "displayName": "GeoJSON"
+              },
+              {
+                "value": "res_format:XML",
+                "displayName": "XML"
+              },
+              {
+                "value": "res_format:KML",
+                "displayName": "KML"
+              },
+              {
+                "value": "res_format:KMZ",
+                "displayName": "KMZ"
+              },
+              {
+                "value": "res_format:SHP",
+                "displayName": "SHP"
+              },
+              {
+                "value": "res_format:GDB",
+                "displayName": "GDB"
+              },
+              {
+                "value": "res_format:DOC",
+                "displayName": "DOC"
+              },
+              {
+                "value": "res_format:DOCX",
+                "displayName": "DOCX"
+              },
+              {
+                "value": "res_format:TXT",
+                "displayName": "TXT"
+              },
+              {
+                "value": "res_format:ZIP",
+                "displayName": "ZIP"
+              },
+              {
+                "value": "res_format:RAR",
+                "displayName": "RAR"
+              },
+              {
+                "value": "res_format:JPEG",
+                "displayName": "JPEG"
+              },
+              {
+                "value": "res_format:RSS",
+                "displayName": "RSS"
+              },
+              {
+                "value": "res_format:Web-Service",
+                "displayName": "Web Service"
+              },
+              {
+                "value": "res_format:link",
+                "displayName": "Link"
+              }
+            ]
+          },
+          "x-ms-summary": "Format Filter",
+          "description": "Restricts the results to datasets that have at least one resource in the chosen file format. Pick one or more formats from the list. Each entry is sent to the portal as a res_format filter, and several entries are combined so that a dataset must match every one of them."
+        },
+        "sort": {
+          "type": "string",
+          "x-ms-summary": "Sort Order",
+          "description": "The order the results are returned in, written as a field name followed by asc or desc, for example metadata_modified desc."
+        },
+        "rows": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Number of Results",
+          "description": "The maximum number of datasets to return in one call. The portal returns 20 datasets when this is left empty and accepts up to 1000."
+        },
+        "start": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Skip Count",
+          "description": "The number of datasets to skip before the first returned result, used to page through a large result set."
+        }
+      }
+    },
+    "SearchDatastoreRecordsRequest": {
+      "type": "object",
+      "required": [
+        "resource_id",
+        "records_format"
+      ],
+      "properties": {
+        "resource_id": {
+          "type": "string",
+          "x-ms-summary": "Resource ID",
+          "description": "The identifier of the resource to read rows from. The resource must have its DataStore Active property set to true."
+        },
+        "q": {
+          "type": "string",
+          "x-ms-summary": "Search Query",
+          "description": "The free text to search for across every column of the resource."
+        },
+        "filters": {
+          "type": "object",
+          "additionalProperties": true,
+          "x-ms-summary": "Column Filters",
+          "description": "An exact match filter given as a set of column names and the values each column must equal."
+        },
+        "fields": {
+          "type": "string",
+          "x-ms-summary": "Columns",
+          "description": "The names of the columns to return, separated by commas. Every column is returned when this is left empty."
+        },
+        "sort": {
+          "type": "string",
+          "x-ms-summary": "Sort Order",
+          "description": "The order the rows are returned in, written as a column name followed by asc or desc, for example _id desc."
+        },
+        "distinct": {
+          "type": "boolean",
+          "x-ms-summary": "Distinct Rows Only",
+          "description": "Set this to true to remove duplicate rows from the result."
+        },
+        "plain": {
+          "type": "boolean",
+          "x-ms-summary": "Plain Text Query",
+          "description": "Set this to false to treat the Search Query option as a full text search expression rather than as plain text."
+        },
+        "limit": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Number of Rows",
+          "description": "The maximum number of rows to return in one call. The portal returns 100 rows when this is left empty."
+        },
+        "offset": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Skip Count",
+          "description": "The number of rows to skip before the first returned row, used to page through a large resource."
+        },
+        "include_total": {
+          "type": "boolean",
+          "x-ms-summary": "Include Total Count",
+          "description": "Set this to false to skip counting the total number of matching rows, which makes the call faster on very large resources."
+        },
+        "records_format": {
+          "type": "string",
+          "default": "objects",
+          "enum": [
+            "objects"
+          ],
+          "x-ms-visibility": "internal",
+          "x-ms-summary": "Records Format",
+          "description": "The shape the rows are returned in. This is fixed to objects so that each row is returned as a named set of column values, which keeps the response shape the same as the Search DataStore records operation."
+        }
+      }
+    },
+    "DataQualityScore": {
+      "type": "object",
+      "description": "The data quality score the portal has assigned to a resource.",
+      "properties": {
+        "final_score": {
+          "type": "number",
+          "format": "double",
+          "x-ms-summary": "Final Score",
+          "description": "The overall data quality score the portal has calculated for the resource."
+        },
+        "metadata": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Metadata Score",
+          "description": "The score awarded for the completeness of the metadata of the resource."
+        },
+        "updated": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Freshness Score",
+          "description": "The score awarded for how recently the resource was updated."
+        },
+        "unique_rows": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Unique Rows Score",
+          "description": "The score awarded for the proportion of rows in the resource that are unique."
+        },
+        "cells_completeness": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Cell Completeness Score",
+          "description": "The score awarded for the proportion of cells in the resource that hold a value."
+        },
+        "asci_titles": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Latin Column Titles Score",
+          "description": "The score awarded for the use of Latin characters in the column titles of the resource."
+        },
+        "api_retrievable": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "API Retrievable Score",
+          "description": "The score awarded for whether the resource can be read through the DataStore."
+        },
+        "score_updated": {
+          "type": "string",
+          "x-ms-summary": "Score Calculated On",
+          "description": "The date and time the data quality score was last calculated."
+        }
+      }
+    },
+    "Resource": {
+      "type": "object",
+      "description": "One downloadable file or linked service belonging to a dataset.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Resource ID",
+          "description": "The identifier of the resource, used by the Get resource and Search DataStore records operations."
+        },
+        "package_id": {
+          "type": "string",
+          "x-ms-summary": "Dataset ID",
+          "description": "The identifier of the dataset the resource belongs to."
+        },
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Name",
+          "description": "The name of the resource, usually published in Hebrew."
+        },
+        "description": {
+          "type": "string",
+          "x-ms-summary": "Description",
+          "description": "The description of the resource."
+        },
+        "notes": {
+          "type": "string",
+          "x-ms-summary": "Notes",
+          "description": "Additional notes the publisher has recorded about the resource."
+        },
+        "url": {
+          "type": "string",
+          "x-ms-summary": "Download URL",
+          "description": "The web address the resource can be downloaded from."
+        },
+        "original_url": {
+          "type": "string",
+          "x-ms-summary": "Original URL",
+          "description": "The web address the resource was originally harvested from."
+        },
+        "url_type": {
+          "type": "string",
+          "x-ms-summary": "URL Type",
+          "description": "How the resource is held by the portal, for example upload for a file stored on the portal."
+        },
+        "format": {
+          "type": "string",
+          "x-ms-summary": "Format",
+          "description": "The file format of the resource, for example CSV or PDF."
+        },
+        "mimetype": {
+          "type": "string",
+          "x-ms-summary": "Media Type",
+          "description": "The internet media type of the resource, for example text/csv."
+        },
+        "mimetype_inner": {
+          "type": "string",
+          "x-ms-summary": "Inner Media Type",
+          "description": "The internet media type of the file held inside the resource when the resource is an archive."
+        },
+        "size": {
+          "type": "integer",
+          "format": "int64",
+          "x-ms-summary": "Size In Bytes",
+          "description": "The size of the resource in bytes."
+        },
+        "hash": {
+          "type": "string",
+          "x-ms-summary": "Hash",
+          "description": "The checksum of the resource contents, used by the portal to detect changes."
+        },
+        "state": {
+          "type": "string",
+          "x-ms-summary": "State",
+          "description": "Whether the resource is active or has been deleted."
+        },
+        "position": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Position",
+          "description": "The position of the resource in the resource list of its dataset, counting from zero."
+        },
+        "created": {
+          "type": "string",
+          "x-ms-summary": "Created On",
+          "description": "The date and time the resource was added to the portal."
+        },
+        "last_modified": {
+          "type": "string",
+          "x-ms-summary": "Last Modified On",
+          "description": "The date and time the contents of the resource were last changed."
+        },
+        "metadata_modified": {
+          "type": "string",
+          "x-ms-summary": "Metadata Modified On",
+          "description": "The date and time the metadata of the resource was last changed."
+        },
+        "cache_url": {
+          "type": "string",
+          "x-ms-summary": "Cache URL",
+          "description": "The web address of the cached copy of the resource held by the portal."
+        },
+        "cache_last_updated": {
+          "type": "string",
+          "x-ms-summary": "Cache Last Updated On",
+          "description": "The date and time the cached copy of the resource was last refreshed."
+        },
+        "datastore_active": {
+          "type": "boolean",
+          "x-ms-summary": "DataStore Active",
+          "description": "Whether the rows of the resource can be queried with the Search DataStore records operation."
+        },
+        "datastore_contains_all_records_of_source_file": {
+          "type": "boolean",
+          "x-ms-summary": "DataStore Holds Every Row",
+          "description": "Whether the DataStore holds every row of the source file rather than only part of it."
+        },
+        "resource_type": {
+          "type": "string",
+          "x-ms-summary": "Resource Type",
+          "description": "The type the publisher has assigned to the resource."
+        },
+        "Frequency": {
+          "type": "string",
+          "x-ms-summary": "Update Frequency",
+          "description": "How often the publisher refreshes the resource, for example Day, Month or Times in day."
+        },
+        "how_update": {
+          "type": "string",
+          "x-ms-summary": "Update Method",
+          "description": "Whether the resource is refreshed manually or automatically."
+        },
+        "category": {
+          "type": "string",
+          "x-ms-summary": "Category",
+          "description": "The category the publisher has assigned to the resource, for example information, description or archive."
+        },
+        "ckan_url": {
+          "type": "string",
+          "x-ms-summary": "Portal URL",
+          "description": "The address of the portal instance that holds the resource."
+        },
+        "resource_ref_number": {
+          "type": "string",
+          "x-ms-summary": "Reference Number",
+          "description": "The reference number the publisher has assigned to the resource."
+        },
+        "resource_coordinates": {
+          "type": "string",
+          "x-ms-summary": "Coordinates",
+          "description": "The geographic coordinates the resource covers, when the resource holds spatial data."
+        },
+        "resource_desc_spatial_cover": {
+          "type": "string",
+          "x-ms-summary": "Spatial Coverage",
+          "description": "A description of the geographic area the resource covers."
+        },
+        "resource_geodetic_ref_sys": {
+          "type": "string",
+          "x-ms-summary": "Geodetic Reference System",
+          "description": "The geodetic reference system the coordinates of the resource are expressed in."
+        },
+        "response_mail": {
+          "type": "string",
+          "x-ms-summary": "Response Email",
+          "description": "The email address enquiries about the resource are sent to."
+        },
+        "task_created": {
+          "type": "string",
+          "x-ms-summary": "Task Created On",
+          "description": "The date and time the portal last queued a task to load the resource into the DataStore."
+        },
+        "ignore_hash": {
+          "type": "boolean",
+          "x-ms-summary": "Ignore Hash",
+          "description": "Whether the portal reloads the resource even when its checksum has not changed."
+        },
+        "set_url_type": {
+          "type": "boolean",
+          "x-ms-summary": "Set URL Type",
+          "description": "An internal flag the portal uses while it is loading the resource."
+        },
+        "resource_id": {
+          "type": "string",
+          "x-ms-summary": "DataStore Resource ID",
+          "description": "The identifier the DataStore holds for the resource."
+        },
+        "score": {
+          "$ref": "#/definitions/DataQualityScore"
+        }
+      }
+    },
+    "DatasetTag": {
+      "type": "object",
+      "description": "A keyword attached to a dataset.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Tag ID",
+          "description": "The identifier of the tag."
+        },
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Name",
+          "description": "The text of the tag, usually published in Hebrew."
+        },
+        "display_name": {
+          "type": "string",
+          "x-ms-summary": "Display Name",
+          "description": "The text of the tag as it is shown on the portal."
+        },
+        "state": {
+          "type": "string",
+          "x-ms-summary": "State",
+          "description": "Whether the tag is active or has been deleted."
+        },
+        "vocabulary_id": {
+          "type": "string",
+          "x-ms-summary": "Vocabulary ID",
+          "description": "The identifier of the controlled vocabulary the tag belongs to, when the tag is not a free text tag."
+        }
+      }
+    },
+    "DatasetExtra": {
+      "type": "object",
+      "description": "An additional metadata item recorded against a dataset.",
+      "properties": {
+        "key": {
+          "type": "string",
+          "x-ms-summary": "Key",
+          "description": "The name of the additional metadata item."
+        },
+        "value": {
+          "type": "string",
+          "x-ms-summary": "Value",
+          "description": "The value of the additional metadata item."
+        }
+      }
+    },
+    "DatasetOrganization": {
+      "type": "object",
+      "description": "The organisation that published a dataset, as it is returned inside the dataset.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Organisation ID",
+          "description": "The identifier of the publishing organisation."
+        },
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Name",
+          "description": "The short name of the publishing organisation, for example lamas."
+        },
+        "title": {
+          "type": "string",
+          "x-ms-summary": "Title",
+          "description": "The full name of the publishing organisation, usually published in Hebrew."
+        },
+        "description": {
+          "type": "string",
+          "x-ms-summary": "Description",
+          "description": "The description of the publishing organisation."
+        },
+        "image_url": {
+          "type": "string",
+          "x-ms-summary": "Logo URL",
+          "description": "The web address of the logo of the publishing organisation."
+        },
+        "type": {
+          "type": "string",
+          "x-ms-summary": "Type",
+          "description": "The type the portal has assigned to the organisation record."
+        },
+        "state": {
+          "type": "string",
+          "x-ms-summary": "State",
+          "description": "Whether the publishing organisation is active or has been deleted."
+        },
+        "approval_status": {
+          "type": "string",
+          "x-ms-summary": "Approval Status",
+          "description": "Whether the publishing organisation has been approved on the portal."
+        },
+        "is_organization": {
+          "type": "boolean",
+          "x-ms-summary": "Is Organisation",
+          "description": "Whether the record is an organisation rather than a group."
+        },
+        "created": {
+          "type": "string",
+          "x-ms-summary": "Created On",
+          "description": "The date and time the publishing organisation was added to the portal."
+        }
+      }
+    },
+    "Dataset": {
+      "type": "object",
+      "description": "A dataset published on the portal, together with its resources and tags.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Dataset ID",
+          "description": "The identifier of the dataset."
+        },
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Name",
+          "description": "The short name of the dataset, as it appears in the portal address."
+        },
+        "title": {
+          "type": "string",
+          "x-ms-summary": "Title",
+          "description": "The title of the dataset, usually published in Hebrew."
+        },
+        "notes": {
+          "type": "string",
+          "x-ms-summary": "Description",
+          "description": "The description of the dataset, usually published in Hebrew."
+        },
+        "remark": {
+          "type": "string",
+          "x-ms-summary": "Remark",
+          "description": "An additional remark the publisher has recorded about the dataset."
+        },
+        "url": {
+          "type": "string",
+          "x-ms-summary": "Source URL",
+          "description": "The web address of the original source of the dataset."
+        },
+        "url_link": {
+          "type": "string",
+          "x-ms-summary": "Source Link Text",
+          "description": "The text the portal displays for the source web address of the dataset."
+        },
+        "title_link": {
+          "type": "string",
+          "x-ms-summary": "Title Link",
+          "description": "A further web address the publisher has attached to the title of the dataset."
+        },
+        "state": {
+          "type": "string",
+          "x-ms-summary": "State",
+          "description": "Whether the dataset is active or has been deleted."
+        },
+        "type": {
+          "type": "string",
+          "x-ms-summary": "Type",
+          "description": "The type the portal has assigned to the record, normally dataset."
+        },
+        "private": {
+          "type": "boolean",
+          "x-ms-summary": "Is Private",
+          "description": "Whether the dataset is private. Only public datasets are returned by this connector."
+        },
+        "isopen": {
+          "type": "boolean",
+          "x-ms-summary": "Is Open",
+          "description": "Whether the licence of the dataset is recognised as an open licence."
+        },
+        "version": {
+          "type": "string",
+          "x-ms-summary": "Version",
+          "description": "The version the publisher has recorded for the dataset."
+        },
+        "license_id": {
+          "type": "string",
+          "x-ms-summary": "Licence ID",
+          "description": "The identifier of the licence of the dataset, matching a licence returned by the List licences operation."
+        },
+        "license_title": {
+          "type": "string",
+          "x-ms-summary": "Licence Title",
+          "description": "The title of the licence of the dataset."
+        },
+        "license_url": {
+          "type": "string",
+          "x-ms-summary": "Licence URL",
+          "description": "The web address of the full text of the licence of the dataset."
+        },
+        "author": {
+          "type": "string",
+          "x-ms-summary": "Author",
+          "description": "The name of the author of the dataset."
+        },
+        "author_email": {
+          "type": "string",
+          "x-ms-summary": "Author Email",
+          "description": "The email address of the author of the dataset."
+        },
+        "author_notification": {
+          "type": "string",
+          "x-ms-summary": "Author Notification",
+          "description": "Whether the author is notified when the dataset changes."
+        },
+        "maintainer": {
+          "type": "string",
+          "x-ms-summary": "Maintainer",
+          "description": "The name of the person who maintains the dataset."
+        },
+        "maintainer_email": {
+          "type": "string",
+          "x-ms-summary": "Maintainer Email",
+          "description": "The email address of the person who maintains the dataset."
+        },
+        "mail_box": {
+          "type": "string",
+          "x-ms-summary": "Contact Mailbox",
+          "description": "The mailbox the publisher has listed for enquiries about the dataset."
+        },
+        "owner_org": {
+          "type": "string",
+          "x-ms-summary": "Owning Organisation ID",
+          "description": "The identifier of the organisation that published the dataset."
+        },
+        "creator_user_id": {
+          "type": "string",
+          "x-ms-summary": "Creator User ID",
+          "description": "The identifier of the portal account that created the dataset."
+        },
+        "metadata_created": {
+          "type": "string",
+          "x-ms-summary": "Created On",
+          "description": "The date and time the dataset was added to the portal."
+        },
+        "metadata_modified": {
+          "type": "string",
+          "x-ms-summary": "Last Modified On",
+          "description": "The date and time the dataset metadata was last changed."
+        },
+        "num_resources": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Number of Resources",
+          "description": "The number of resources attached to the dataset."
+        },
+        "num_tags": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Number of Tags",
+          "description": "The number of tags attached to the dataset."
+        },
+        "organization": {
+          "$ref": "#/definitions/DatasetOrganization"
+        },
+        "resources": {
+          "type": "array",
+          "x-ms-summary": "Resources",
+          "description": "The downloadable files and linked services attached to the dataset.",
+          "items": {
+            "$ref": "#/definitions/Resource"
+          }
+        },
+        "tags": {
+          "type": "array",
+          "x-ms-summary": "Tags",
+          "description": "The keywords attached to the dataset.",
+          "items": {
+            "$ref": "#/definitions/DatasetTag"
+          }
+        },
+        "extras": {
+          "type": "array",
+          "x-ms-summary": "Additional Metadata",
+          "description": "Additional metadata items recorded against the dataset as name and value pairs.",
+          "items": {
+            "$ref": "#/definitions/DatasetExtra"
+          }
+        },
+        "groups": {
+          "type": "array",
+          "x-ms-summary": "Groups",
+          "description": "The groups the dataset belongs to. The portal categorises datasets by publishing organisation rather than by group, so this is normally empty.",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "relationships_as_object": {
+          "type": "array",
+          "x-ms-summary": "Relationships As Object",
+          "description": "The relationships in which this dataset is the object.",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "relationships_as_subject": {
+          "type": "array",
+          "x-ms-summary": "Relationships As Subject",
+          "description": "The relationships in which this dataset is the subject.",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    "Organization": {
+      "type": "object",
+      "description": "A government ministry, authority or municipality that publishes data on the portal.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Organisation ID",
+          "description": "The identifier of the organisation."
+        },
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Name",
+          "description": "The short name of the organisation, for example lamas."
+        },
+        "title": {
+          "type": "string",
+          "x-ms-summary": "Title",
+          "description": "The full name of the organisation, usually published in Hebrew."
+        },
+        "display_name": {
+          "type": "string",
+          "x-ms-summary": "Display Name",
+          "description": "The name of the organisation as it is shown on the portal."
+        },
+        "description": {
+          "type": "string",
+          "x-ms-summary": "Description",
+          "description": "The description of the organisation."
+        },
+        "notes": {
+          "type": "string",
+          "x-ms-summary": "Notes",
+          "description": "Additional notes recorded about the organisation."
+        },
+        "image_url": {
+          "type": "string",
+          "x-ms-summary": "Logo URL",
+          "description": "The web address of the logo of the organisation."
+        },
+        "image_display_url": {
+          "type": "string",
+          "x-ms-summary": "Logo Display URL",
+          "description": "The full web address the portal uses to display the logo of the organisation."
+        },
+        "type": {
+          "type": "string",
+          "x-ms-summary": "Type",
+          "description": "The type the portal has assigned to the organisation record."
+        },
+        "state": {
+          "type": "string",
+          "x-ms-summary": "State",
+          "description": "Whether the organisation is active or has been deleted."
+        },
+        "approval_status": {
+          "type": "string",
+          "x-ms-summary": "Approval Status",
+          "description": "Whether the organisation has been approved on the portal."
+        },
+        "is_organization": {
+          "type": "boolean",
+          "x-ms-summary": "Is Organisation",
+          "description": "Whether the record is an organisation rather than a group."
+        },
+        "organization_id": {
+          "type": "string",
+          "x-ms-summary": "Parent Organisation ID",
+          "description": "The identifier of the parent organisation, when the organisation sits below another one."
+        },
+        "package_count": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Number of Datasets",
+          "description": "The number of datasets the organisation has published."
+        },
+        "num_followers": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Number of Followers",
+          "description": "The number of portal accounts that follow the organisation."
+        },
+        "created": {
+          "type": "string",
+          "x-ms-summary": "Created On",
+          "description": "The date and time the organisation was added to the portal."
+        },
+        "extras": {
+          "type": "array",
+          "x-ms-summary": "Additional Metadata",
+          "description": "Additional metadata items recorded against the organisation.",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "tags": {
+          "type": "array",
+          "x-ms-summary": "Tags",
+          "description": "The keywords attached to the organisation.",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "groups": {
+          "type": "array",
+          "x-ms-summary": "Groups",
+          "description": "The groups the organisation belongs to.",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "users": {
+          "type": "array",
+          "x-ms-summary": "Users",
+          "description": "The portal accounts that administer the organisation.",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    "License": {
+      "type": "object",
+      "description": "A licence a dataset can be published under.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Licence ID",
+          "description": "The identifier of the licence, as used by the Licence ID property of a dataset."
+        },
+        "title": {
+          "type": "string",
+          "x-ms-summary": "Title",
+          "description": "The title of the licence. Some titles are published in Hebrew."
+        },
+        "url": {
+          "type": "string",
+          "x-ms-summary": "URL",
+          "description": "The web address of the full licence text."
+        },
+        "family": {
+          "type": "string",
+          "x-ms-summary": "Family",
+          "description": "The licence family the licence belongs to."
+        },
+        "maintainer": {
+          "type": "string",
+          "x-ms-summary": "Maintainer",
+          "description": "The organisation that maintains the licence."
+        },
+        "status": {
+          "type": "string",
+          "x-ms-summary": "Status",
+          "description": "Whether the licence is active on the portal."
+        },
+        "od_conformance": {
+          "type": "string",
+          "x-ms-summary": "Open Definition Conformance",
+          "description": "Whether the licence conforms to the Open Definition."
+        },
+        "osd_conformance": {
+          "type": "string",
+          "x-ms-summary": "Open Source Definition Conformance",
+          "description": "Whether the licence conforms to the Open Source Definition."
+        },
+        "is_generic": {
+          "type": "string",
+          "x-ms-summary": "Is Generic",
+          "description": "Whether the licence is a generic one rather than a named public licence. The portal returns this as the text True or False rather than as a true or false value."
+        },
+        "domain_content": {
+          "type": "string",
+          "x-ms-summary": "Covers Content",
+          "description": "Whether the licence is intended for content. The portal returns this as the text True or False rather than as a true or false value."
+        },
+        "domain_data": {
+          "type": "string",
+          "x-ms-summary": "Covers Data",
+          "description": "Whether the licence is intended for data. The portal returns this as the text True or False rather than as a true or false value."
+        },
+        "domain_software": {
+          "type": "string",
+          "x-ms-summary": "Covers Software",
+          "description": "Whether the licence is intended for software. The portal returns this as the text True or False rather than as a true or false value."
+        }
+      }
+    },
+    "DatastoreFieldInfo": {
+      "type": "object",
+      "description": "The display settings the publisher has recorded for a DataStore column.",
+      "properties": {
+        "label": {
+          "type": "string",
+          "x-ms-summary": "Label",
+          "description": "The label the publisher has given the column."
+        },
+        "notes": {
+          "type": "string",
+          "x-ms-summary": "Notes",
+          "description": "The notes the publisher has recorded about the column."
+        },
+        "type_override": {
+          "type": "string",
+          "x-ms-summary": "Type Override",
+          "description": "The data type the publisher has forced for the column, when it differs from the detected type."
+        }
+      }
+    },
+    "DatastoreField": {
+      "type": "object",
+      "description": "One column of a DataStore table.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Column Name",
+          "description": "The name of the column. The column named _id is the row number the portal assigns."
+        },
+        "type": {
+          "type": "string",
+          "x-ms-summary": "Data Type",
+          "description": "The data type of the column, for example text, int, numeric or timestamp."
+        },
+        "info": {
+          "$ref": "#/definitions/DatastoreFieldInfo"
+        }
+      }
+    },
+    "DatastoreLinks": {
+      "type": "object",
+      "description": "The addresses of the current and next pages of DataStore rows.",
+      "properties": {
+        "start": {
+          "type": "string",
+          "x-ms-summary": "First Page URL",
+          "description": "The address of the first page of rows for this query."
+        },
+        "next": {
+          "type": "string",
+          "x-ms-summary": "Next Page URL",
+          "description": "The address of the next page of rows for this query."
+        },
+        "prev": {
+          "type": "string",
+          "x-ms-summary": "Previous Page URL",
+          "description": "The address of the previous page of rows for this query."
+        }
+      }
+    },
+    "SearchDatasetsResult": {
+      "type": "object",
+      "description": "The datasets that matched the search, with the total number of matches.",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Total Matches",
+          "description": "The total number of datasets that matched the search, which can be larger than the number returned."
+        },
+        "sort": {
+          "type": "string",
+          "x-ms-summary": "Sort Order Used",
+          "description": "The sort order the portal applied to the results."
+        },
+        "results": {
+          "type": "array",
+          "x-ms-summary": "Datasets",
+          "description": "The datasets that matched the search.",
+          "items": {
+            "$ref": "#/definitions/Dataset"
+          }
+        },
+        "facets": {
+          "type": "object",
+          "additionalProperties": true,
+          "x-ms-summary": "Facets",
+          "description": "The counts of matching datasets grouped by field value. The portal returns this empty unless facets were requested."
+        },
+        "search_facets": {
+          "type": "object",
+          "additionalProperties": true,
+          "x-ms-summary": "Search Facets",
+          "description": "The same facet counts in the extended form the portal search page uses."
+        }
+      }
+    },
+    "SearchDatasetsResponse": {
+      "type": "object",
+      "description": "The response returned by the dataset search operations.",
+      "properties": {
+        "help": {
+          "type": "string",
+          "x-ms-summary": "Help URL",
+          "description": "The web address of the portal documentation for this operation."
+        },
+        "success": {
+          "type": "boolean",
+          "x-ms-summary": "Succeeded",
+          "description": "Whether the portal completed the request successfully."
+        },
+        "result": {
+          "$ref": "#/definitions/SearchDatasetsResult"
+        }
+      }
+    },
+    "DatasetResponse": {
+      "type": "object",
+      "description": "The response returned by the Get dataset operation.",
+      "properties": {
+        "help": {
+          "type": "string",
+          "x-ms-summary": "Help URL",
+          "description": "The web address of the portal documentation for this operation."
+        },
+        "success": {
+          "type": "boolean",
+          "x-ms-summary": "Succeeded",
+          "description": "Whether the portal completed the request successfully."
+        },
+        "result": {
+          "$ref": "#/definitions/Dataset"
+        }
+      }
+    },
+    "NameListResponse": {
+      "type": "object",
+      "description": "The response returned by the operations that list names.",
+      "properties": {
+        "help": {
+          "type": "string",
+          "x-ms-summary": "Help URL",
+          "description": "The web address of the portal documentation for this operation."
+        },
+        "success": {
+          "type": "boolean",
+          "x-ms-summary": "Succeeded",
+          "description": "Whether the portal completed the request successfully."
+        },
+        "result": {
+          "type": "array",
+          "x-ms-summary": "Names",
+          "description": "The list of short names returned by the portal.",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "OrganizationResponse": {
+      "type": "object",
+      "description": "The response returned by the Get organisation operation.",
+      "properties": {
+        "help": {
+          "type": "string",
+          "x-ms-summary": "Help URL",
+          "description": "The web address of the portal documentation for this operation."
+        },
+        "success": {
+          "type": "boolean",
+          "x-ms-summary": "Succeeded",
+          "description": "Whether the portal completed the request successfully."
+        },
+        "result": {
+          "$ref": "#/definitions/Organization"
+        }
+      }
+    },
+    "ResourceResponse": {
+      "type": "object",
+      "description": "The response returned by the Get resource operation.",
+      "properties": {
+        "help": {
+          "type": "string",
+          "x-ms-summary": "Help URL",
+          "description": "The web address of the portal documentation for this operation."
+        },
+        "success": {
+          "type": "boolean",
+          "x-ms-summary": "Succeeded",
+          "description": "Whether the portal completed the request successfully."
+        },
+        "result": {
+          "$ref": "#/definitions/Resource"
+        }
+      }
+    },
+    "SearchResourcesResult": {
+      "type": "object",
+      "description": "The resources that matched the field query, with the total number of matches.",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Total Matches",
+          "description": "The total number of resources that matched the field query."
+        },
+        "results": {
+          "type": "array",
+          "x-ms-summary": "Resources",
+          "description": "The resources that matched the field query. The resource index is not currently populated on this portal, so this is normally empty.",
+          "items": {
+            "$ref": "#/definitions/Resource"
+          }
+        }
+      }
+    },
+    "SearchResourcesResponse": {
+      "type": "object",
+      "description": "The response returned by the Search resources operation.",
+      "properties": {
+        "help": {
+          "type": "string",
+          "x-ms-summary": "Help URL",
+          "description": "The web address of the portal documentation for this operation."
+        },
+        "success": {
+          "type": "boolean",
+          "x-ms-summary": "Succeeded",
+          "description": "Whether the portal completed the request successfully."
+        },
+        "result": {
+          "$ref": "#/definitions/SearchResourcesResult"
+        }
+      }
+    },
+    "LicenseListResponse": {
+      "type": "object",
+      "description": "The response returned by the List licences operation.",
+      "properties": {
+        "help": {
+          "type": "string",
+          "x-ms-summary": "Help URL",
+          "description": "The web address of the portal documentation for this operation."
+        },
+        "success": {
+          "type": "boolean",
+          "x-ms-summary": "Succeeded",
+          "description": "Whether the portal completed the request successfully."
+        },
+        "result": {
+          "type": "array",
+          "x-ms-summary": "Licences",
+          "description": "The licences the portal offers for its datasets.",
+          "items": {
+            "$ref": "#/definitions/License"
+          }
+        }
+      }
+    },
+    "DatastoreSearchResult": {
+      "type": "object",
+      "description": "The DataStore rows that matched the query, with the definition of every column.",
+      "properties": {
+        "resource_id": {
+          "type": "string",
+          "x-ms-summary": "Resource ID",
+          "description": "The identifier of the resource the rows were read from."
+        },
+        "total": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Total Rows",
+          "description": "The total number of rows that matched the query, which can be larger than the number returned."
+        },
+        "total_was_estimated": {
+          "type": "boolean",
+          "x-ms-summary": "Total Was Estimated",
+          "description": "Whether the total number of rows is an estimate rather than an exact count."
+        },
+        "total_estimation_threshold": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Total Estimation Threshold",
+          "description": "The number of rows above which the portal estimates the total instead of counting it exactly."
+        },
+        "include_total": {
+          "type": "boolean",
+          "x-ms-summary": "Total Included",
+          "description": "Whether the portal counted the total number of matching rows for this query."
+        },
+        "limit": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Number of Rows Requested",
+          "description": "The maximum number of rows the portal was asked to return."
+        },
+        "records_format": {
+          "type": "string",
+          "x-ms-summary": "Records Format",
+          "description": "The shape the rows were returned in, which is always objects for this connector."
+        },
+        "fields": {
+          "type": "array",
+          "x-ms-summary": "Columns",
+          "description": "The name and data type of every column in the resource.",
+          "items": {
+            "$ref": "#/definitions/DatastoreField"
+          }
+        },
+        "records": {
+          "type": "array",
+          "x-ms-summary": "Rows",
+          "description": "The rows of the resource. Every resource has its own set of columns, so the properties of each row differ from one resource to another.",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "_links": {
+          "$ref": "#/definitions/DatastoreLinks"
+        }
+      }
+    },
+    "DatastoreSearchResponse": {
+      "type": "object",
+      "description": "The response returned by the DataStore search operations.",
+      "properties": {
+        "help": {
+          "type": "string",
+          "x-ms-summary": "Help URL",
+          "description": "The web address of the portal documentation for this operation."
+        },
+        "success": {
+          "type": "boolean",
+          "x-ms-summary": "Succeeded",
+          "description": "Whether the portal completed the request successfully."
+        },
+        "result": {
+          "$ref": "#/definitions/DatastoreSearchResult"
+        }
+      }
+    },
+    "DatasetSuggestion": {
+      "type": "object",
+      "description": "A dataset suggested for the text supplied to the dataset suggestion search.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Name",
+          "description": "The short name of the dataset, which can be passed to the Get dataset operation."
+        },
+        "title": {
+          "type": "string",
+          "x-ms-summary": "Title",
+          "description": "The title of the dataset, usually published in Hebrew."
+        },
+        "match_field": {
+          "type": "string",
+          "x-ms-summary": "Matched Field",
+          "description": "The field the search text matched on, either name or title."
+        },
+        "match_displayed": {
+          "type": "string",
+          "x-ms-summary": "Matched Text",
+          "description": "The text of the matched field as the portal displays it in a suggestion list."
+        }
+      }
+    },
+    "OrganizationSuggestion": {
+      "type": "object",
+      "description": "A publishing organisation suggested for the text supplied to the organisation suggestion search.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Organisation ID",
+          "description": "The identifier of the organisation."
+        },
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Name",
+          "description": "The short name of the organisation, which can be passed to the Get organisation operation."
+        },
+        "title": {
+          "type": "string",
+          "x-ms-summary": "Title",
+          "description": "The full name of the organisation, usually published in Hebrew."
+        }
+      }
+    },
+    "ResourceView": {
+      "type": "object",
+      "description": "A preview the portal renders for a resource, such as a data table, a chart or a map.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "View ID",
+          "description": "The identifier of the view."
+        },
+        "resource_id": {
+          "type": "string",
+          "x-ms-summary": "Resource ID",
+          "description": "The identifier of the resource the view belongs to."
+        },
+        "package_id": {
+          "type": "string",
+          "x-ms-summary": "Dataset ID",
+          "description": "The identifier of the dataset the resource belongs to."
+        },
+        "title": {
+          "type": "string",
+          "x-ms-summary": "Title",
+          "description": "The title of the view, usually published in Hebrew."
+        },
+        "description": {
+          "type": "string",
+          "x-ms-summary": "Description",
+          "description": "The description of the view."
+        },
+        "view_type": {
+          "type": "string",
+          "x-ms-summary": "View Type",
+          "description": "The kind of preview the view renders, for example datatables_view for a data table."
+        }
+      }
+    },
+    "DatastoreSqlField": {
+      "type": "object",
+      "description": "One column produced by a DataStore SQL query.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Column Name",
+          "description": "The name of the column produced by the query."
+        },
+        "type": {
+          "type": "string",
+          "x-ms-summary": "Data Type",
+          "description": "The data type of the column, for example text, int, numeric or timestamp."
+        }
+      }
+    },
+    "DatastoreSqlResult": {
+      "type": "object",
+      "description": "The rows produced by a DataStore SQL query, with the definition of every column.",
+      "properties": {
+        "sql": {
+          "type": "string",
+          "x-ms-summary": "SQL Query",
+          "description": "The SQL statement the portal ran."
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DatastoreSqlField"
+          },
+          "x-ms-summary": "Columns",
+          "description": "The name and data type of every column produced by the query."
+        },
+        "records": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "x-ms-summary": "Rows",
+          "description": "The rows produced by the query. Every resource has its own set of columns, so the properties of each row differ from one query to another. Rows also carry a _full_text column that the portal uses for searching."
+        }
+      }
+    },
+    "DatasetSuggestionListResponse": {
+      "type": "object",
+      "description": "The response returned by the Search dataset suggestions operation.",
+      "properties": {
+        "help": {
+          "type": "string",
+          "x-ms-summary": "Help URL",
+          "description": "The web address of the portal documentation for this operation."
+        },
+        "success": {
+          "type": "boolean",
+          "x-ms-summary": "Succeeded",
+          "description": "Whether the portal completed the request successfully."
+        },
+        "result": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DatasetSuggestion"
+          },
+          "x-ms-summary": "Suggestions",
+          "description": "The datasets that matched the search text."
+        }
+      }
+    },
+    "OrganizationSuggestionListResponse": {
+      "type": "object",
+      "description": "The response returned by the Search organisation suggestions operation.",
+      "properties": {
+        "help": {
+          "type": "string",
+          "x-ms-summary": "Help URL",
+          "description": "The web address of the portal documentation for this operation."
+        },
+        "success": {
+          "type": "boolean",
+          "x-ms-summary": "Succeeded",
+          "description": "Whether the portal completed the request successfully."
+        },
+        "result": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/OrganizationSuggestion"
+          },
+          "x-ms-summary": "Suggestions",
+          "description": "The organisations that matched the search text."
+        }
+      }
+    },
+    "ResourceViewListResponse": {
+      "type": "object",
+      "description": "The response returned by the List resource views operation.",
+      "properties": {
+        "help": {
+          "type": "string",
+          "x-ms-summary": "Help URL",
+          "description": "The web address of the portal documentation for this operation."
+        },
+        "success": {
+          "type": "boolean",
+          "x-ms-summary": "Succeeded",
+          "description": "Whether the portal completed the request successfully."
+        },
+        "result": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ResourceView"
+          },
+          "x-ms-summary": "Views",
+          "description": "The views configured for the resource."
+        }
+      }
+    },
+    "DatastoreSqlResponse": {
+      "type": "object",
+      "description": "The response returned by the Search DataStore with SQL operation.",
+      "properties": {
+        "help": {
+          "type": "string",
+          "x-ms-summary": "Help URL",
+          "description": "The web address of the portal documentation for this operation."
+        },
+        "success": {
+          "type": "boolean",
+          "x-ms-summary": "Succeeded",
+          "description": "Whether the portal completed the request successfully."
+        },
+        "result": {
+          "$ref": "#/definitions/DatastoreSqlResult"
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {},
+  "security": [],
+  "tags": [
+    {
+      "name": "Datasets",
+      "description": "Search the dataset catalogue and read dataset metadata."
+    },
+    {
+      "name": "Organisations",
+      "description": "Browse the government bodies that publish data on the portal."
+    },
+    {
+      "name": "Resources",
+      "description": "Read the metadata of the individual files attached to a dataset."
+    },
+    {
+      "name": "DataStore",
+      "description": "Query the tabular rows the portal holds for a resource."
+    },
+    {
+      "name": "Reference",
+      "description": "Read the reference lists the portal publishes."
+    }
+  ],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://data.gov.il/about"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://data.gov.il/terms"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Data;Business Intelligence"
+    }
+  ]
+}
