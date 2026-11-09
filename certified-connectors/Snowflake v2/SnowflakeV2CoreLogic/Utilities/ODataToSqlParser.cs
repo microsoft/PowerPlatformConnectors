@@ -13,6 +13,9 @@ namespace SnowflakeV2CoreLogic.Utilities
     /// <summary>
     /// OData to SQL Parser
     /// 
+    /// Caller-supplied string values are escaped before being embedded as SQL string literals, and
+    /// identifiers (column/property names) are validated as Snowflake identifiers.
+    /// 
     /// Supported Operations:
     /// 
     /// Comparison Operators:
@@ -77,13 +80,12 @@ namespace SnowflakeV2CoreLogic.Utilities
             }
             else if (expression is SingleValuePropertyAccessNode propertyAccessNode)
             {
-                return propertyAccessNode.Property.Name;
+                return propertyAccessNode.Property.Name.ToSafeSnowflakeIdentifier("Filter property");
             }
             // Handle open property access (dynamic properties)
             else if (expression is SingleValueOpenPropertyAccessNode openPropertyNode)
             {
-                // For open properties, we use the property name directly
-                return openPropertyNode.Name;
+                return openPropertyNode.Name.ToSafeSnowflakeIdentifier("Filter property");
             }
             else if (expression is ConstantNode constantNode)
             {
