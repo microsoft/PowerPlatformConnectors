@@ -1,17 +1,17 @@
 # LoginLlama
-LoginLlama adds an extra layer of customer security without the extra work. LoginLlama uses a number of ranking factors to decide if a login is deemed suspicious. We determine a score for each login based on how 'suspicious' it is. We then use Bollinger Bands to determine if the login is suspicious or not.
+LoginLlama scores each sign-in to your app for risk. Send the user's identity, IP address and user agent, and it returns a score from 0 to 10 with the reasons: a new device or location, impossible travel, Tor, VPN and proxy addresses, and bursts of failed attempts.
 
 ## Publisher: Troy Taylor, Hitachi Solutions
 
 ## Prerequisites
-You will need to sign up for an account with [LoginLlama](https://loginllama.app/).
+You will need to sign up for an account with [LoginLlama](https://loginllama.app/). The free tier includes 1,000 login checks.
 
 ## Obtaining Credentials
-You will find your API Key on your [Account page](https://loginllama.app/account).
+Create an API key on the [API keys page](https://loginllama.app/account/api) of your LoginLlama dashboard, and paste it in when you create the connection.
 
 ## Supported Operations
-### Check a login for suspicious behavior
-Retrieve the status and codes for a submitted login.
+### Check a login for risk
+Score a sign-in for risk and get the reasons. Only the identity key is required. Send the IP address and user agent as well for a useful score. Set the authentication outcome to failed for wrong passwords, so LoginLlama can spot password guessing.
 
 ## Known Issues and Limitations
-There are no known issues at this time.
+New risk codes may be added over time, so treat the list in the response as open-ended.

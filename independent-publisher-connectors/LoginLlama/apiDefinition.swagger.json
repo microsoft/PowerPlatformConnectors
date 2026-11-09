@@ -2,8 +2,8 @@
   "swagger": "2.0",
   "info": {
     "title": "LoginLlama",
-    "description": "LoginLlama adds an extra layer of customer security without the extra work. LoginLlama uses a number of ranking factors to decide if a login is deemed suspicious. We determine a score for each login based on how 'suspicious' it is. We then use Bollinger Bands to determine if the login is suspicious or not.",
-    "version": "1.0",
+    "description": "LoginLlama scores each sign-in to your app for risk. Send the user's identity, IP address and user agent, and it returns a score from 0 to 10 with the reasons: a new device or location, impossible travel, Tor, VPN and proxy addresses, and bursts of failed attempts.",
+    "version": "1.1",
     "contact": {
       "name": "Troy Taylor",
       "url": "https://www.hitachisolutions.com",
@@ -26,79 +26,166 @@
       "post": {
         "responses": {
           "200": {
-            "description": "default",
+            "description": "The risk score and reasons for the login.",
             "schema": {
               "type": "object",
               "properties": {
-                "status": {
-                  "type": "string",
-                  "description": "The status.",
-                  "title": "Status"
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "title": "Type",
+                      "description": "Always login_check."
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "title": "Status",
+                          "description": "fail when the risk score is above 5, otherwise pass."
+                        },
+                        "risk_score": {
+                          "type": "integer",
+                          "title": "Risk Score",
+                          "description": "From 0 to 10. A common policy: 0 to 2 allow, 3 to 5 watch, 6 to 7 ask for MFA, 8 and above block.",
+                          "format": "int32"
+                        },
+                        "risk_codes": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "title": "Risk Codes",
+                          "description": "Why the login scored as it did. New codes may be added. Current codes: ip_address_suspicious, device_fingerprint_suspicious, location_fingerprint_suspicious, behavioral_fingerprint_suspicious, known_tor_exit_node, known_proxy, known_vpn, known_botnet, known_bot, ip_address_not_used_before, device_fingerprint_not_used_before, ai_detected_suspicious, new_login_location, impossible_travel_detected, geo_mismatch_detected, after_failure_burst, ip_password_spraying, privileged_account."
+                        },
+                        "unrecognized_device": {
+                          "type": "boolean",
+                          "title": "Unrecognized Device",
+                          "description": "True when this device and browser are new for the user."
+                        },
+                        "authentication_outcome": {
+                          "type": "string",
+                          "title": "Authentication Outcome",
+                          "description": "The outcome sent in the request."
+                        },
+                        "message": {
+                          "type": "string",
+                          "title": "Message",
+                          "description": "A short description of the result."
+                        }
+                      }
+                    }
+                  }
                 },
-                "message": {
-                  "type": "string",
-                  "description": "The status message.",
-                  "title": "Message"
-                },
-                "codes": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  },
-                  "description": "The codes.",
-                  "title": "Codes"
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "environment": {
+                      "type": "string",
+                      "title": "Environment",
+                      "description": "production or staging, from the API key used."
+                    },
+                    "test": {
+                      "type": "boolean",
+                      "title": "Test",
+                      "description": "True for a test key, where the result comes from tags in the identity rather than the login."
+                    },
+                    "email_sent": {
+                      "type": "boolean",
+                      "title": "Email Sent",
+                      "description": "Whether LoginLlama emailed the user about this sign-in."
+                    },
+                    "warnings": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Warnings",
+                      "description": "Problems with the request that weakened the check, such as an IP address that could not be located."
+                    }
+                  }
                 }
               }
             }
           }
         },
-        "summary": "Check a login for suspicious behavior",
-        "description": "Retrieve the status and codes for a submitted login.",
+        "summary": "Check a login for risk",
+        "description": "Score a sign-in for risk and get the reasons. Call it after checking the password, or before with authentication_outcome set to pending. Report failed attempts too, so LoginLlama can spot password guessing.",
         "operationId": "LoginPost",
         "parameters": [
           {
             "name": "body",
             "in": "body",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "object",
+              "required": [
+                "identity_key"
+              ],
               "properties": {
+                "identity_key": {
+                  "type": "string",
+                  "title": "Identity Key",
+                  "description": "A stable identifier for the user, such as an email address or user ID."
+                },
                 "ip_address": {
                   "type": "string",
-                  "description": "The IP address.",
-                  "title": "IP Address"
+                  "title": "IP Address",
+                  "description": "The IPv4 or IPv6 address the sign-in came from."
                 },
                 "user_agent": {
                   "type": "string",
-                  "description": "The user agent string.",
-                  "title": "User Agent"
+                  "title": "User Agent",
+                  "description": "The user agent string of the client signing in."
                 },
-                "identity_key": {
+                "email_address": {
                   "type": "string",
-                  "description": "A unique identity key for the user.",
-                  "title": "Identity Key"
+                  "title": "Email Address",
+                  "description": "The user's email address. Taken from the identity key when that looks like an email."
+                },
+                "authentication_outcome": {
+                  "type": "string",
+                  "title": "Authentication Outcome",
+                  "description": "The result of your own credential check: success (the default), failed for a wrong password, or pending to check before authenticating.",
+                  "enum": [
+                    "success",
+                    "failed",
+                    "pending"
+                  ]
+                },
+                "privileged": {
+                  "type": "boolean",
+                  "title": "Privileged",
+                  "description": "True for an admin or other high-value account. Any risk signal adds privileged_account, and fewer failed attempts count as a burst."
                 },
                 "geo_country": {
                   "type": "string",
-                  "description": "The user's country.",
-                  "title": "Geo Country"
+                  "title": "Country",
+                  "description": "The country the sign-in claims to come from, such as US. Worked out from the IP address when left empty."
+                },
+                "geo_region": {
+                  "type": "string",
+                  "title": "Region",
+                  "description": "The state or province, as an ISO 3166-2 code or its name. Worked out from the IP address when left empty."
                 },
                 "geo_city": {
                   "type": "string",
-                  "description": "The user's city.",
-                  "title": "Geo City"
+                  "title": "City",
+                  "description": "The city the sign-in claims to come from. Worked out from the IP address when left empty."
                 },
                 "user_time_of_day": {
                   "type": "string",
-                  "description": "The user's time of day.",
-                  "title": "User Time Of Day"
+                  "title": "User Time Of Day",
+                  "description": "The user's local time, 24-hour HH:mm, such as 14:30."
+                },
+                "timestamp": {
+                  "type": "string",
+                  "title": "Timestamp",
+                  "description": "When the sign-in happened, in ISO 8601."
                 }
-              },
-              "required": [
-                "ip_address",
-                "user_agent",
-                "identity_key"
-              ]
+              }
             }
           }
         ]
@@ -128,7 +215,7 @@
     },
     {
       "propertyName": "Categories",
-      "propertyValue": "Website"
+      "propertyValue": "Security;IT Operations"
     }
   ]
 }
