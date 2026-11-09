@@ -9,16 +9,20 @@ There are no prerequisites needed for this connector.
 ## Obtaining Credentials
 This connector does not use authentication, so no credentials are needed.
 
+## Deprecation
+**This connector is deprecated.** The underlying service, WorldTimeAPI (worldtimeapi.org), has been permanently sunset by its maintainer, so the connector's operations no longer return data.
+If you are using it in your flows or apps, please migrate away from it. As an alternative for time and timezone data, consider the **TimeAPI** independent publisher connector (based on timeapi.io). Reach out if you need help migrating.
+
 ## Supported Operations
-### Get all TimeZones
+### Get all TimeZones (deprecated)
 Request a list of valid timezones.
-### Get current time based on IP
+### Get current time based on IP (deprecated)
 Request the current time based on an IP. This is a "best guess" obtained from open-source data.
-### Get timezone(s) of an area
+### Get timezone(s) of an area (deprecated)
 Request a list of valid timezones for an area.
-### Get timezone(s) of a location
+### Get timezone(s) of a location (deprecated)
 Request list of timezones for a location.
-### Get timezone(s) of a region
+### Get timezone(s) of a region (deprecated)
 Request timezone for a region.
 
 ## Known Issues and Limitations
