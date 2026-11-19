@@ -1,0 +1,376 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Content Rabbit",
+    "description": "Content Rabbit is a headless social-scheduling core. Schedule and publish to multiple social networks.",
+    "version": "1.0",
+    "contact": {
+      "name": "Pooria Arab",
+      "url": "https://contentrabbitai.com",
+      "email": "support@contentrabbit.ai"
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://contentrabbitai.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://contentrabbitai.com/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Social Media;Marketing"
+    }
+  ],
+  "host": "contentrabbitai.com",
+  "basePath": "/api/public/v1",
+  "schemes": ["https"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization",
+      "description": "Enter your Content Rabbit API key (without the 'Bearer ' prefix)"
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "paths": {
+    "/accounts": {
+      "get": {
+        "summary": "List Accounts",
+        "description": "Retrieves a list of connected social accounts.",
+        "operationId": "ListAccounts",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "$ref": "#/definitions/ListAccountsResponse"
+            }
+          }
+        }
+      }
+    },
+    "/posts": {
+      "get": {
+        "summary": "List Posts",
+        "description": "Retrieves a list of scheduled or published posts.",
+        "operationId": "ListPosts",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of posts to return (1-100, default 25)",
+            "required": false,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "x-ms-summary": "Limit"
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "description": "Opaque cursor from the previous response's `paging.nextCursor`, used to fetch the next page",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Cursor"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by post status",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Status"
+          },
+          {
+            "name": "platform",
+            "in": "query",
+            "description": "Filter by platform type (e.g. 'twitter', 'linkedin')",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Platform"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "$ref": "#/definitions/ListPostsResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create Post",
+        "description": "Creates or schedules a new post.",
+        "operationId": "CreatePost",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Post details",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreatePostRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Post created successfully",
+            "schema": {
+              "$ref": "#/definitions/CreatePostResponse"
+            }
+          }
+        }
+      }
+    },
+    "/analytics/posts": {
+      "get": {
+        "summary": "Get Analytics",
+        "description": "Retrieves post-level analytics for the team over a date range (defaults to the last 30 days).",
+        "operationId": "GetAnalytics",
+        "parameters": [
+          {
+            "name": "start",
+            "in": "query",
+            "description": "Start of the date range (ISO 8601)",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Start Date"
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "description": "End of the date range (ISO 8601)",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "End Date"
+          },
+          {
+            "name": "timezone",
+            "in": "query",
+            "description": "IANA timezone used to bucket the range",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Timezone"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "requestId": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/media/upload-url": {
+      "post": {
+        "summary": "Create Media Upload URL",
+        "description": "Creates a signed, time-limited Cloudflare Images upload URL. POST the file as multipart form data directly to the returned `uploadURL`, then reference the returned `id` as a media ID (e.g. in `CreatePostRequest.mediaIds`).",
+        "operationId": "CreateMediaUploadUrl",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Upload URL options",
+            "required": false,
+            "schema": {
+              "$ref": "#/definitions/CreateMediaUploadUrlRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Upload URL created successfully",
+            "schema": {
+              "$ref": "#/definitions/MediaResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Account": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "platform": {
+          "type": "string"
+        }
+      }
+    },
+    "ListAccountsResponse": {
+      "type": "object",
+      "properties": {
+        "requestId": {
+          "type": "string"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Account"
+          }
+        }
+      }
+    },
+    "Post": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        },
+        "platformType": {
+          "type": "string",
+          "x-ms-summary": "Platform Type"
+        },
+        "scheduledAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string"
+        }
+      }
+    },
+    "ListPostsResponse": {
+      "type": "object",
+      "properties": {
+        "requestId": {
+          "type": "string"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Post"
+          }
+        },
+        "paging": {
+          "type": "object",
+          "properties": {
+            "nextCursor": {
+              "type": "string",
+              "x-nullable": true,
+              "description": "Pass as the `cursor` query parameter to fetch the next page; null when there are no more results"
+            }
+          }
+        }
+      }
+    },
+    "CreatePostRequest": {
+      "type": "object",
+      "required": ["platformType"],
+      "properties": {
+        "content": {
+          "type": "string",
+          "description": "Content of the post",
+          "x-ms-summary": "Post Content"
+        },
+        "platformType": {
+          "type": "string",
+          "description": "Primary platform (e.g. 'twitter', 'linkedin')",
+          "x-ms-summary": "Platform Type"
+        },
+        "scheduledAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Optional ISO 8601 date-time to schedule the post",
+          "x-ms-summary": "Scheduled At"
+        },
+        "mediaIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Array of media IDs",
+          "x-ms-summary": "Media IDs"
+        }
+      }
+    },
+    "CreatePostResponse": {
+      "type": "object",
+      "properties": {
+        "requestId": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/Post"
+        }
+      }
+    },
+    "CreateMediaUploadUrlRequest": {
+      "type": "object",
+      "properties": {
+        "requireSigned": {
+          "type": "boolean",
+          "description": "Require a signed URL (default true)",
+          "x-ms-summary": "Require Signed"
+        },
+        "expirySeconds": {
+          "type": "integer",
+          "description": "Seconds until the upload URL expires (60-3600, default 600)",
+          "minimum": 60,
+          "maximum": 3600,
+          "x-ms-summary": "Expiry Seconds"
+        }
+      }
+    },
+    "MediaResponse": {
+      "type": "object",
+      "properties": {
+        "requestId": {
+          "type": "string"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "uploadURL": {
+              "type": "string",
+              "x-ms-summary": "Upload URL"
+            },
+            "id": {
+              "type": "string",
+              "x-ms-summary": "Media ID"
+            },
+            "expiresAt": {
+              "type": "string",
+              "format": "date-time",
+              "x-ms-summary": "Expires At"
+            },
+            "teamId": {
+              "type": "string",
+              "x-ms-summary": "Team ID"
+            }
+          }
+        }
+      }
+    }
+  }
+}
