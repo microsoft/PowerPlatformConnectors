@@ -287,7 +287,7 @@ try {
     }
 
     # Step 5: The contents in extracted temp path folder should have no folder, 3 zip files if plugin enabled, 2 zip files if no plugin
-    $pkgAssetFoldereName = Get-ChildItem -Path $tempFolder2 -Directory
+    $pkgAssetFoldereName = Get-ChildItem -Path $tempFolder2 -Directory | Select-Object -ExpandProperty Name
 
     $folderPath = "$tempFolder2/$pkgAssetFoldereName"
 
