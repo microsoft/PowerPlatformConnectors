@@ -5,12 +5,6 @@ screenshots, and generates EU-compliant hybrid e-invoices (ZUGFeRD / Factur-X).
 Conversions render in a real browser engine, so what you see in the page is what
 you get in the document.
 
-This proposal reserves the connector name and starts the verified credentials
-process. The complete, validated connector files
-(`apiDefinition.swagger.json`, `apiProperties.json`, `readme.md`) are included in
-this pull request. The remaining operation screenshots will be added once the
-verified credentials setup is complete.
-
 ## Publisher
 
 PolyDoc
@@ -43,6 +37,22 @@ connection; the connector adds the `Bearer` prefix.
   or thumbnails.
 - Produce EU-compliant hybrid e-invoices (ZUGFeRD / Factur-X) directly from
   structured invoice data, ready for sending or archiving.
+
+## Changes in this update (September 2026)
+
+Only the request body of **Convert to PDF** changes. Operations, authentication
+and responses stay the same, and every added field is optional.
+
+- Invoice: `orderReference` (purchase order number, BT-13), `deliveryDate`
+  (actual delivery date, BT-72) and `deliverTo`, the deliver-to party name and
+  address (BT-70, BT-75 to BT-78, BT-80). A deliver-to address requires only its
+  country code (EN 16931 rule BR-57).
+- Seller and buyer: `contactName` (BT-41, BT-56) and `electronicAddress`
+  (BT-34, BT-49).
+- Invoice line: `buyerItemId` (BT-156).
+- The e-invoice profile list drops `minimum` and `basicwl`. Neither carries
+  invoice lines, so neither produces an EN 16931 e-invoice, and the PolyDoc API
+  has rejected both with a validation error since September 2026.
 
 ## Reference
 
