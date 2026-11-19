@@ -1,0 +1,1083 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Typeform",
+    "description": "Typeform is a conversational data collection platform for forms, surveys, and quizzes. Retrieve responses, create and manage forms, and browse workspaces.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Aaron Mah",
+      "url": "https://github.com/aaronmah",
+      "email": "aaronmah@microsoft.com"
+    }
+  },
+  "host": "api.typeform.com",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/me": {
+      "get": {
+        "summary": "Get My Account Info",
+        "description": "Retrieves the authenticated user's account information including alias and email.",
+        "operationId": "GetMe",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/MeResponse"
+            }
+          }
+        },
+        "x-ms-visibility": "important"
+      }
+    },
+    "/forms": {
+      "get": {
+        "summary": "List Forms",
+        "description": "Retrieves a paginated list of forms in the authenticated account.",
+        "operationId": "ListForms",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Filter forms by title keyword.",
+            "x-ms-summary": "Search"
+          },
+          {
+            "name": "workspace_id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Filter forms by workspace ID.",
+            "x-ms-summary": "Workspace ID",
+            "x-ms-dynamic-values": {
+              "operationId": "ListWorkspaces",
+              "value-path": "id",
+              "value-title": "name",
+              "value-collection": "items"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 1,
+            "description": "Page number for pagination.",
+            "x-ms-summary": "Page",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 10,
+            "description": "Number of results per page (max 200).",
+            "x-ms-summary": "Page Size",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ListFormsResponse"
+            }
+          }
+        },
+        "x-ms-visibility": "important"
+      },
+      "post": {
+        "summary": "Create Form",
+        "description": "Creates a new form with specified title, fields, and settings.",
+        "operationId": "CreateForm",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateFormRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/FormResponse"
+            }
+          }
+        }
+      }
+    },
+    "/forms/{form_id}": {
+      "get": {
+        "summary": "Get Form",
+        "description": "Retrieves the full definition of a specific form including fields, settings, and logic.",
+        "operationId": "GetForm",
+        "parameters": [
+          {
+            "name": "form_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID of the form.",
+            "x-ms-summary": "Form ID",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "ListForms",
+              "value-path": "id",
+              "value-title": "title",
+              "value-collection": "items"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/FormResponse"
+            }
+          }
+        },
+        "x-ms-visibility": "important"
+      }
+    },
+    "/forms/{form_id}/responses": {
+      "get": {
+        "summary": "Get Responses",
+        "description": "Retrieves responses submitted to a specific form with filtering, sorting, and pagination.",
+        "operationId": "GetResponses",
+        "parameters": [
+          {
+            "name": "form_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID of the form to retrieve responses for.",
+            "x-ms-summary": "Form ID",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "ListForms",
+              "value-path": "id",
+              "value-title": "title",
+              "value-collection": "items"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 25,
+            "description": "Number of responses per page (max 1000).",
+            "x-ms-summary": "Page Size",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "ISO 8601 datetime — return responses submitted after this time.",
+            "x-ms-summary": "Since"
+          },
+          {
+            "name": "until",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "ISO 8601 datetime — return responses submitted before this time.",
+            "x-ms-summary": "Until",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Response token for forward cursor pagination.",
+            "x-ms-summary": "After Token",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Response token for backward cursor pagination.",
+            "x-ms-summary": "Before Token",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "response_type",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Filter by response completion status.",
+            "x-ms-summary": "Response Type",
+            "enum": [
+              "completed",
+              "partial"
+            ]
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Sort order, e.g. submitted_at,desc.",
+            "x-ms-summary": "Sort",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Search term within response answers.",
+            "x-ms-summary": "Query",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Comma-separated field IDs to include in the response.",
+            "x-ms-summary": "Fields",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/GetResponsesResponse"
+            }
+          }
+        },
+        "x-ms-visibility": "important"
+      },
+      "delete": {
+        "summary": "Delete Responses",
+        "description": "Deletes specific responses from a form by response IDs. Deletion is asynchronous.",
+        "operationId": "DeleteResponses",
+        "parameters": [
+          {
+            "name": "form_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID of the form to delete responses from.",
+            "x-ms-summary": "Form ID",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "ListForms",
+              "value-path": "id",
+              "value-title": "title",
+              "value-collection": "items"
+            }
+          },
+          {
+            "name": "included_response_ids",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "description": "Comma-separated response IDs to delete (max 1000).",
+            "x-ms-summary": "Response IDs"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/workspaces": {
+      "get": {
+        "summary": "List Workspaces",
+        "description": "Retrieves a paginated list of workspaces the authenticated user has access to.",
+        "operationId": "ListWorkspaces",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Filter workspaces by name.",
+            "x-ms-summary": "Search"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 1,
+            "description": "Page number for pagination.",
+            "x-ms-summary": "Page",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 10,
+            "description": "Number of results per page (max 200).",
+            "x-ms-summary": "Page Size",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ListWorkspacesResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "MeResponse": {
+      "type": "object",
+      "properties": {
+        "alias": {
+          "type": "string",
+          "description": "The display name of the authenticated user.",
+          "x-ms-summary": "Alias"
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address of the authenticated user.",
+          "x-ms-summary": "Email"
+        },
+        "language": {
+          "type": "string",
+          "description": "The locale code of the authenticated user.",
+          "x-ms-summary": "Language"
+        }
+      }
+    },
+    "ListFormsResponse": {
+      "type": "object",
+      "properties": {
+        "total_items": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Total number of forms.",
+          "x-ms-summary": "Total Items"
+        },
+        "page_count": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Total number of pages.",
+          "x-ms-summary": "Page Count"
+        },
+        "items": {
+          "type": "array",
+          "description": "Array of form summary objects.",
+          "items": {
+            "$ref": "#/definitions/FormSummary"
+          }
+        }
+      }
+    },
+    "FormSummary": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique form identifier.",
+          "x-ms-summary": "Form ID"
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the form.",
+          "x-ms-summary": "Title"
+        },
+        "last_updated_at": {
+          "type": "string",
+          "description": "The date and time the form was last updated.",
+          "x-ms-summary": "Last Updated At"
+        },
+        "created_at": {
+          "type": "string",
+          "description": "The date and time the form was created.",
+          "x-ms-summary": "Created At"
+        },
+        "settings": {
+          "type": "object",
+          "description": "Form settings.",
+          "properties": {
+            "is_public": {
+              "type": "boolean",
+              "description": "Whether the form is publicly accessible.",
+              "x-ms-summary": "Is Public"
+            }
+          }
+        },
+        "self": {
+          "type": "object",
+          "description": "Self-referencing link.",
+          "properties": {
+            "href": {
+              "type": "string",
+              "description": "API URL for this form.",
+              "x-ms-summary": "Self Link"
+            }
+          }
+        },
+        "_links": {
+          "type": "object",
+          "description": "Related links.",
+          "properties": {
+            "display": {
+              "type": "string",
+              "description": "Public display URL for the form.",
+              "x-ms-summary": "Display URL"
+            }
+          }
+        }
+      }
+    },
+    "FormResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique form identifier.",
+          "x-ms-summary": "Form ID"
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the form.",
+          "x-ms-summary": "Title"
+        },
+        "type": {
+          "type": "string",
+          "description": "The type of the form.",
+          "x-ms-summary": "Type"
+        },
+        "created_at": {
+          "type": "string",
+          "description": "The date and time the form was created.",
+          "x-ms-summary": "Created At"
+        },
+        "last_updated_at": {
+          "type": "string",
+          "description": "The date and time the form was last updated.",
+          "x-ms-summary": "Last Updated At"
+        },
+        "settings": {
+          "type": "object",
+          "description": "Form settings.",
+          "properties": {
+            "is_public": {
+              "type": "boolean",
+              "description": "Whether the form is publicly accessible.",
+              "x-ms-summary": "Is Public"
+            },
+            "language": {
+              "type": "string",
+              "description": "The language of the form.",
+              "x-ms-summary": "Language"
+            }
+          }
+        },
+        "fields": {
+          "type": "array",
+          "description": "Array of form field definitions.",
+          "items": {
+            "$ref": "#/definitions/FormField"
+          }
+        },
+        "welcome_screens": {
+          "type": "array",
+          "description": "Array of welcome screen definitions.",
+          "items": {
+            "$ref": "#/definitions/Screen"
+          }
+        },
+        "thankyou_screens": {
+          "type": "array",
+          "description": "Array of thank-you screen definitions.",
+          "items": {
+            "$ref": "#/definitions/Screen"
+          }
+        },
+        "theme": {
+          "type": "object",
+          "description": "Theme reference.",
+          "properties": {
+            "href": {
+              "type": "string",
+              "description": "API URL for the theme.",
+              "x-ms-summary": "Theme Link"
+            }
+          }
+        },
+        "workspace": {
+          "type": "object",
+          "description": "Workspace reference.",
+          "properties": {
+            "href": {
+              "type": "string",
+              "description": "API URL for the workspace.",
+              "x-ms-summary": "Workspace Link"
+            }
+          }
+        },
+        "_links": {
+          "type": "object",
+          "description": "Related links.",
+          "properties": {
+            "display": {
+              "type": "string",
+              "description": "Public display URL for the form.",
+              "x-ms-summary": "Display URL"
+            }
+          }
+        }
+      }
+    },
+    "FormField": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique field identifier.",
+          "x-ms-summary": "Field ID"
+        },
+        "ref": {
+          "type": "string",
+          "description": "The reference identifier for the field.",
+          "x-ms-summary": "Field Ref"
+        },
+        "title": {
+          "type": "string",
+          "description": "The question text displayed to respondents.",
+          "x-ms-summary": "Question Text"
+        },
+        "type": {
+          "type": "string",
+          "description": "The field type (e.g. short_text, multiple_choice, dropdown).",
+          "x-ms-summary": "Field Type"
+        },
+        "properties": {
+          "type": "object",
+          "description": "Field-specific properties.",
+          "x-ms-summary": "Properties"
+        }
+      }
+    },
+    "Screen": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "type": "string",
+          "description": "The reference identifier for the screen.",
+          "x-ms-summary": "Screen Ref"
+        },
+        "title": {
+          "type": "string",
+          "description": "The title text of the screen.",
+          "x-ms-summary": "Title"
+        },
+        "properties": {
+          "type": "object",
+          "description": "Screen-specific properties.",
+          "x-ms-summary": "Properties"
+        }
+      }
+    },
+    "CreateFormRequest": {
+      "type": "object",
+      "required": [
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "The title for the new form.",
+          "x-ms-summary": "Title"
+        },
+        "settings": {
+          "type": "object",
+          "description": "Form settings.",
+          "properties": {
+            "language": {
+              "type": "string",
+              "description": "The language code for the form (e.g. en).",
+              "x-ms-summary": "Language"
+            },
+            "is_public": {
+              "type": "boolean",
+              "description": "Whether the form should be publicly accessible.",
+              "x-ms-summary": "Is Public"
+            }
+          }
+        },
+        "workspace": {
+          "type": "object",
+          "description": "Workspace to create the form in.",
+          "properties": {
+            "href": {
+              "type": "string",
+              "description": "Workspace API URL (e.g. https://api.typeform.com/workspaces/abc123).",
+              "x-ms-summary": "Workspace URL"
+            }
+          }
+        },
+        "fields": {
+          "type": "array",
+          "description": "Array of field definitions for the new form.",
+          "items": {
+            "$ref": "#/definitions/CreateFormField"
+          }
+        }
+      }
+    },
+    "CreateFormField": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "The question text for the field.",
+          "x-ms-summary": "Question Text"
+        },
+        "type": {
+          "type": "string",
+          "description": "The field type (e.g. short_text, long_text, multiple_choice, yes_no, email, number, rating, date).",
+          "x-ms-summary": "Field Type",
+          "enum": [
+            "short_text",
+            "long_text",
+            "multiple_choice",
+            "yes_no",
+            "email",
+            "number",
+            "rating",
+            "date",
+            "dropdown",
+            "opinion_scale",
+            "legal",
+            "file_upload",
+            "website",
+            "phone_number",
+            "statement"
+          ]
+        },
+        "ref": {
+          "type": "string",
+          "description": "An optional reference identifier for the field.",
+          "x-ms-summary": "Field Ref",
+          "x-ms-visibility": "advanced"
+        },
+        "properties": {
+          "type": "object",
+          "description": "Field-specific properties (e.g. choices for multiple_choice).",
+          "x-ms-summary": "Properties",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "GetResponsesResponse": {
+      "type": "object",
+      "properties": {
+        "total_items": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Total number of responses.",
+          "x-ms-summary": "Total Items"
+        },
+        "page_count": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Total number of pages.",
+          "x-ms-summary": "Page Count"
+        },
+        "items": {
+          "type": "array",
+          "description": "Array of response objects.",
+          "items": {
+            "$ref": "#/definitions/ResponseItem"
+          }
+        }
+      }
+    },
+    "ResponseItem": {
+      "type": "object",
+      "properties": {
+        "landing_id": {
+          "type": "string",
+          "description": "The landing identifier for the response.",
+          "x-ms-summary": "Landing ID"
+        },
+        "token": {
+          "type": "string",
+          "description": "The unique response token.",
+          "x-ms-summary": "Response Token"
+        },
+        "response_id": {
+          "type": "string",
+          "description": "The unique response identifier.",
+          "x-ms-summary": "Response ID"
+        },
+        "landed_at": {
+          "type": "string",
+          "description": "The date and time the respondent landed on the form.",
+          "x-ms-summary": "Landed At"
+        },
+        "submitted_at": {
+          "type": "string",
+          "description": "The date and time the response was submitted.",
+          "x-ms-summary": "Submitted At"
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Metadata about the respondent's environment.",
+          "properties": {
+            "user_agent": {
+              "type": "string",
+              "description": "The user agent string of the respondent's browser.",
+              "x-ms-summary": "User Agent"
+            },
+            "platform": {
+              "type": "string",
+              "description": "The platform the respondent used.",
+              "x-ms-summary": "Platform"
+            },
+            "referer": {
+              "type": "string",
+              "description": "The referring URL.",
+              "x-ms-summary": "Referer"
+            },
+            "browser": {
+              "type": "string",
+              "description": "The browser used by the respondent.",
+              "x-ms-summary": "Browser"
+            }
+          }
+        },
+        "hidden": {
+          "type": "object",
+          "description": "Hidden field values passed in the form URL.",
+          "x-ms-summary": "Hidden Fields"
+        },
+        "calculated": {
+          "type": "object",
+          "description": "Calculated values for the response.",
+          "properties": {
+            "score": {
+              "type": "integer",
+              "format": "int32",
+              "description": "The calculated score for the response.",
+              "x-ms-summary": "Score"
+            }
+          }
+        },
+        "answers": {
+          "type": "array",
+          "description": "Array of answer objects for this response.",
+          "items": {
+            "$ref": "#/definitions/Answer"
+          }
+        },
+        "variables": {
+          "type": "array",
+          "description": "Array of variable values for this response.",
+          "items": {
+            "$ref": "#/definitions/Variable"
+          }
+        }
+      }
+    },
+    "Answer": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "type": "object",
+          "description": "The field this answer corresponds to.",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The field identifier.",
+              "x-ms-summary": "Field ID"
+            },
+            "ref": {
+              "type": "string",
+              "description": "The field reference.",
+              "x-ms-summary": "Field Ref"
+            },
+            "type": {
+              "type": "string",
+              "description": "The field type.",
+              "x-ms-summary": "Field Type"
+            }
+          }
+        },
+        "type": {
+          "type": "string",
+          "description": "The answer value type (text, number, boolean, choice, choices, date, email, url, file_url, payment).",
+          "x-ms-summary": "Answer Type"
+        },
+        "text": {
+          "type": "string",
+          "description": "The text answer value.",
+          "x-ms-summary": "Text"
+        },
+        "number": {
+          "type": "number",
+          "description": "The numeric answer value.",
+          "x-ms-summary": "Number"
+        },
+        "boolean": {
+          "type": "boolean",
+          "description": "The boolean answer value.",
+          "x-ms-summary": "Boolean"
+        },
+        "date": {
+          "type": "string",
+          "description": "The date answer value.",
+          "x-ms-summary": "Date"
+        },
+        "email": {
+          "type": "string",
+          "description": "The email answer value.",
+          "x-ms-summary": "Email"
+        },
+        "url": {
+          "type": "string",
+          "description": "The URL answer value.",
+          "x-ms-summary": "URL"
+        },
+        "file_url": {
+          "type": "string",
+          "description": "The file URL answer value.",
+          "x-ms-summary": "File URL"
+        },
+        "choice": {
+          "type": "object",
+          "description": "The single choice answer value.",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The choice identifier.",
+              "x-ms-summary": "Choice ID"
+            },
+            "label": {
+              "type": "string",
+              "description": "The choice label.",
+              "x-ms-summary": "Choice Label"
+            },
+            "ref": {
+              "type": "string",
+              "description": "The choice reference.",
+              "x-ms-summary": "Choice Ref"
+            }
+          }
+        },
+        "choices": {
+          "type": "object",
+          "description": "The multiple choice answer values.",
+          "properties": {
+            "ids": {
+              "type": "array",
+              "description": "Array of selected choice IDs.",
+              "items": {
+                "type": "string"
+              }
+            },
+            "labels": {
+              "type": "array",
+              "description": "Array of selected choice labels.",
+              "items": {
+                "type": "string"
+              }
+            },
+            "refs": {
+              "type": "array",
+              "description": "Array of selected choice refs.",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "payment": {
+          "type": "object",
+          "description": "The payment answer value.",
+          "properties": {
+            "amount": {
+              "type": "string",
+              "description": "The payment amount.",
+              "x-ms-summary": "Amount"
+            },
+            "last4": {
+              "type": "string",
+              "description": "Last 4 digits of the card.",
+              "x-ms-summary": "Last 4"
+            },
+            "name": {
+              "type": "string",
+              "description": "The cardholder name.",
+              "x-ms-summary": "Cardholder Name"
+            },
+            "success": {
+              "type": "boolean",
+              "description": "Whether the payment was successful.",
+              "x-ms-summary": "Success"
+            }
+          }
+        }
+      }
+    },
+    "Variable": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "The variable name.",
+          "x-ms-summary": "Key"
+        },
+        "type": {
+          "type": "string",
+          "description": "The variable type (number or text).",
+          "x-ms-summary": "Type"
+        },
+        "number": {
+          "type": "number",
+          "description": "The numeric variable value.",
+          "x-ms-summary": "Number Value"
+        },
+        "text": {
+          "type": "string",
+          "description": "The text variable value.",
+          "x-ms-summary": "Text Value"
+        }
+      }
+    },
+    "ListWorkspacesResponse": {
+      "type": "object",
+      "properties": {
+        "total_items": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Total number of workspaces.",
+          "x-ms-summary": "Total Items"
+        },
+        "page_count": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Total number of pages.",
+          "x-ms-summary": "Page Count"
+        },
+        "items": {
+          "type": "array",
+          "description": "Array of workspace objects.",
+          "items": {
+            "$ref": "#/definitions/WorkspaceItem"
+          }
+        }
+      }
+    },
+    "WorkspaceItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique workspace identifier.",
+          "x-ms-summary": "Workspace ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the workspace.",
+          "x-ms-summary": "Name"
+        },
+        "account_id": {
+          "type": "string",
+          "description": "The account ID that owns this workspace.",
+          "x-ms-summary": "Account ID"
+        },
+        "shared": {
+          "type": "boolean",
+          "description": "Whether the workspace is shared with other users.",
+          "x-ms-summary": "Shared"
+        },
+        "forms": {
+          "type": "object",
+          "description": "Forms in this workspace.",
+          "properties": {
+            "count": {
+              "type": "integer",
+              "format": "int32",
+              "description": "Number of forms in the workspace.",
+              "x-ms-summary": "Form Count"
+            },
+            "href": {
+              "type": "string",
+              "description": "API URL to list forms in this workspace.",
+              "x-ms-summary": "Forms Link"
+            }
+          }
+        },
+        "self": {
+          "type": "object",
+          "description": "Self-referencing link.",
+          "properties": {
+            "href": {
+              "type": "string",
+              "description": "API URL for this workspace.",
+              "x-ms-summary": "Self Link"
+            }
+          }
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization"
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.typeform.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.typeform.com/privacy-policy/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Productivity;Data"
+    }
+  ]
+}
