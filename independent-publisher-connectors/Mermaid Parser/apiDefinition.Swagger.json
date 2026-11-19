@@ -1,0 +1,683 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Mermaid Parser",
+    "description": "Universal Mermaid diagram parser supporting 20+ diagram types (ERD, Class, Flowchart, Sequence, State, Gantt, Timeline, Mindmap, etc.) with comprehensive validation and syntax checking. Extract structured data from any Mermaid diagram and convert to multiple output formats including JSON Schema, SQL DDL, TypeScript, C#, Python, GraphQL, and more. Perfect for documentation analysis, data modeling, and workflow automation.",
+    "version": "2.0.0",
+    "contact": {
+      "name": "Troy Taylor",
+      "email": "troy@troystaylor.com"
+    }
+  },
+  "host": "troystaylor.com",
+  "basePath": "/api",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/parse-mermaid": {
+      "post": {
+        "operationId": "ParseMermaidDiagram",
+        "summary": "Parse Mermaid Diagram",
+        "x-ms-summary": "Parse Mermaid Diagram",
+        "description": "Parse any Mermaid diagram (20+ types including ERD, Class, Flowchart, Sequence, State, Gantt, Timeline, Mindmap, Architecture, and more) into structured data with comprehensive validation, entity extraction, relationship analysis, and syntax checking.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "ParseRequest",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "mermaidContent"
+              ],
+              "properties": {
+                "mermaidContent": {
+                  "type": "string",
+                  "x-ms-summary": "Mermaid Diagram Content",
+                  "description": "The complete Mermaid diagram content supporting ERD, Class, Flowchart, Sequence, State, Gantt, C4Context, Mindmap, Timeline, Quadrant, and 13+ other diagram types with advanced parsing for inheritance, methods, visibility modifiers, and relationship labels."
+                },
+                "validateSyntax": {
+                  "type": "boolean",
+                  "default": true,
+                  "x-ms-summary": "Validate Syntax",
+                  "description": "Perform comprehensive syntax validation including brace matching, orphaned relationship detection, empty entity warnings, and context-aware error reporting.",
+                  "x-ms-visibility": "advanced"
+                },
+                "detectCDM": {
+                  "type": "boolean",
+                  "default": true,
+                  "x-ms-summary": "Detect CDM Entities",
+                  "description": "Automatically detect matching Common Data Model entities for ERD diagrams with confidence scoring and attribute mapping.",
+                  "x-ms-visibility": "advanced"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mermaid diagram successfully parsed and processed",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "x-ms-summary": "Processing Success",
+                  "description": "Indicates whether the diagram parsing operation completed successfully."
+                },
+                "entities": {
+                  "type": "array",
+                  "x-ms-summary": "Parsed Entities",
+                  "description": "Array of entities extracted from the Mermaid diagram with their attributes and properties.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "x-ms-summary": "Entity Name",
+                        "description": "The name of the parsed entity from the Mermaid diagram."
+                      },
+                      "logicalName": {
+                        "type": "string",
+                        "x-ms-summary": "Logical Name",
+                        "description": "The logical name of the entity, typically in snake_case format."
+                      },
+                      "entityType": {
+                        "type": "string",
+                        "x-ms-summary": "Entity Type",
+                        "description": "The type of entity: Table, Class, Interface, AbstractClass, or Entity."
+                      },
+                      "baseClass": {
+                        "type": "string",
+                        "x-ms-summary": "Base Class",
+                        "description": "The base class this entity inherits from (for class diagrams)."
+                      },
+                      "interfaces": {
+                        "type": "array",
+                        "x-ms-summary": "Interfaces",
+                        "description": "Array of interfaces this entity implements (for class diagrams).",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "attributes": {
+                        "type": "array",
+                        "x-ms-summary": "Entity Attributes",
+                        "description": "Array of attributes or fields that belong to this entity.",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string",
+                              "x-ms-summary": "Attribute Name",
+                              "description": "The name of the entity attribute or field."
+                            },
+                            "dataType": {
+                              "type": "string",
+                              "x-ms-summary": "Data Type",
+                              "description": "The data type of the attribute, such as string, int, boolean, or date."
+                            },
+                            "visibility": {
+                              "type": "string",
+                              "x-ms-summary": "Visibility",
+                              "description": "The visibility modifier: public, private, protected, or package."
+                            },
+                            "isStatic": {
+                              "type": "boolean",
+                              "x-ms-summary": "Is Static",
+                              "description": "Indicates whether the attribute is static."
+                            },
+                            "isReadOnly": {
+                              "type": "boolean",
+                              "x-ms-summary": "Is Read Only",
+                              "description": "Indicates whether the attribute is read-only."
+                            },
+                            "defaultValue": {
+                              "type": "string",
+                              "x-ms-summary": "Default Value",
+                              "description": "The default value of the attribute."
+                            },
+                            "constraints": {
+                              "type": "array",
+                              "x-ms-summary": "Constraints",
+                              "description": "Array of constraints like PK, FK, UK, NOT_NULL.",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "isPrimaryKey": {
+                              "type": "boolean",
+                              "x-ms-summary": "Is Primary Key",
+                              "description": "Indicates whether this attribute is a primary key."
+                            },
+                            "isForeignKey": {
+                              "type": "boolean",
+                              "x-ms-summary": "Is Foreign Key",
+                              "description": "Indicates whether this attribute is a foreign key."
+                            },
+                            "isUnique": {
+                              "type": "boolean",
+                              "x-ms-summary": "Is Unique",
+                              "description": "Indicates whether this attribute has a unique constraint."
+                            },
+                            "isNullable": {
+                              "type": "boolean",
+                              "x-ms-summary": "Is Nullable",
+                              "description": "Indicates whether this attribute can be null."
+                            }
+                          }
+                        }
+                      },
+                      "methods": {
+                        "type": "array",
+                        "x-ms-summary": "Entity Methods",
+                        "description": "Array of methods that belong to this entity (for class diagrams).",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string",
+                              "x-ms-summary": "Method Name",
+                              "description": "The name of the method."
+                            },
+                            "returnType": {
+                              "type": "string",
+                              "x-ms-summary": "Return Type",
+                              "description": "The return type of the method."
+                            },
+                            "visibility": {
+                              "type": "string",
+                              "x-ms-summary": "Visibility",
+                              "description": "The visibility modifier: public, private, protected, or package."
+                            },
+                            "isStatic": {
+                              "type": "boolean",
+                              "x-ms-summary": "Is Static",
+                              "description": "Indicates whether the method is static."
+                            },
+                            "isAbstract": {
+                              "type": "boolean",
+                              "x-ms-summary": "Is Abstract",
+                              "description": "Indicates whether the method is abstract."
+                            },
+                            "parameters": {
+                              "type": "array",
+                              "x-ms-summary": "Method Parameters",
+                              "description": "Array of parameters for this method.",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "name": {
+                                    "type": "string",
+                                    "x-ms-summary": "Parameter Name",
+                                    "description": "The name of the parameter."
+                                  },
+                                  "dataType": {
+                                    "type": "string",
+                                    "x-ms-summary": "Parameter Type",
+                                    "description": "The data type of the parameter."
+                                  },
+                                  "defaultValue": {
+                                    "type": "string",
+                                    "x-ms-summary": "Default Value",
+                                    "description": "The default value of the parameter."
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "metadata": {
+                        "type": "object",
+                        "x-ms-summary": "Entity Metadata",
+                        "description": "Additional metadata properties for the entity."
+                      }
+                    }
+                  }
+                },
+                "diagramType": {
+                  "type": "string",
+                  "x-ms-summary": "Detected Diagram Type",
+                  "description": "The type of Mermaid diagram that was detected using advanced pattern recognition: ERD, Class, Flowchart, Sequence, State, Gantt, Pie, User Journey, Git Graph, C4Context, Mindmap, Timeline, Quadrant, or other supported types."
+                },
+                "relationships": {
+                  "type": "array",
+                  "x-ms-summary": "Parsed Relationships",
+                  "description": "Array of relationships between entities as defined in the Mermaid diagram with enhanced context and metadata.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "from": {
+                        "type": "string",
+                        "x-ms-summary": "From Entity",
+                        "description": "The source entity in the relationship."
+                      },
+                      "to": {
+                        "type": "string", 
+                        "x-ms-summary": "To Entity",
+                        "description": "The target entity in the relationship."
+                      },
+                      "type": {
+                        "type": "string",
+                        "x-ms-summary": "Relationship Type",
+                        "description": "The type of relationship: one-to-many, many-to-one, one-to-one, many-to-many, inheritance, composition, aggregation, dependency, association, or other types."
+                      },
+                      "label": {
+                        "type": "string",
+                        "x-ms-summary": "Relationship Label",
+                        "description": "The label or description text associated with the relationship."
+                      },
+                      "context": {
+                        "type": "string",
+                        "x-ms-summary": "Diagram Context",
+                        "description": "The diagram context where this relationship was found: ERD, Class, Flow, or Generic."
+                      },
+                      "foreignKeyField": {
+                        "type": "string",
+                        "x-ms-summary": "Foreign Key Field",
+                        "description": "The foreign key field name if applicable."
+                      },
+                      "cardinality": {
+                        "type": "string",
+                        "x-ms-summary": "Cardinality",
+                        "description": "The cardinality notation of the relationship (e.g., 1:N, M:N)."
+                      },
+                      "isOptional": {
+                        "type": "boolean",
+                        "x-ms-summary": "Is Optional",
+                        "description": "Indicates whether the relationship is optional."
+                      },
+                      "metadata": {
+                        "type": "object",
+                        "x-ms-summary": "Relationship Metadata",
+                        "description": "Additional metadata properties for the relationship."
+                      }
+                    }
+                  }
+                },
+                "validation": {
+                  "type": "object",
+                  "x-ms-summary": "Validation Results",
+                  "description": "Results of syntax validation performed on the Mermaid diagram content.",
+                  "properties": {
+                    "isValid": {
+                      "type": "boolean",
+                      "x-ms-summary": "Is Valid",
+                      "description": "Indicates whether the diagram syntax is valid and error-free."
+                    },
+                    "errors": {
+                      "type": "array",
+                      "x-ms-summary": "Validation Errors",
+                      "description": "Array of error messages found during syntax validation.",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "warnings": {
+                      "type": "array",
+                      "x-ms-summary": "Validation Warnings",
+                      "description": "Array of warning messages found during syntax validation.",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "cdmDetection": {
+                  "type": "object",
+                  "x-ms-summary": "CDM Detection Results",
+                  "description": "Common Data Model entity detection results that are generated for ERD diagrams.",
+                  "properties": {
+                    "detectedEntities": {
+                      "type": "array",
+                      "x-ms-summary": "Detected CDM Entities",
+                      "description": "Array of entities that match Common Data Model entities with confidence scores.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "entityName": {
+                            "type": "string",
+                            "x-ms-summary": "Entity Name",
+                            "description": "The name of the entity from the diagram that was matched to a CDM entity."
+                          },
+                          "cdmMatch": {
+                            "type": "string", 
+                            "x-ms-summary": "CDM Match",
+                            "description": "The name of the matching Common Data Model entity."
+                          },
+                          "confidence": {
+                            "type": "number",
+                            "x-ms-summary": "Match Confidence",
+                            "description": "The confidence score of the CDM match, ranging from 0.0 to 1.0."
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid diagram content or request parameters",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "x-ms-summary": "Error Code",
+                      "description": "The specific error code identifying the type of error that occurred."
+                    },
+                    "message": {
+                      "type": "string",
+                      "x-ms-summary": "Error Message",
+                      "description": "A detailed error message describing what went wrong during processing."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/convert-mermaid": {
+      "post": {
+        "operationId": "ConvertMermaidToFormats",
+        "summary": "Convert to Development Formats",
+        "x-ms-summary": "Convert to Development Formats",
+        "description": "Convert parsed Mermaid diagram entities and relationships to 18+ development platform formats including JSON Schema, SQL DDL, TypeScript, C#, Python, Java, Go, Rust, GraphQL, React, Vue, Swift, Dataverse Schema, Microsoft Platform Formulas, PostgreSQL DDL, MySQL DDL, Mongoose Schema, and Markdown documentation. Supports enhanced entity properties, methods, inheritance, and relationship metadata.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "ConvertRequest",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "entities"
+              ],
+              "properties": {
+                "entities": {
+                  "type": "array",
+                  "x-ms-summary": "Parsed Entities",
+                  "description": "Array of entities that were returned from the ParseMermaidDiagram operation.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "x-ms-summary": "Entity Name",
+                        "description": "The name of the entity to be converted."
+                      },
+                      "logicalName": {
+                        "type": "string",
+                        "x-ms-summary": "Logical Name",
+                        "description": "The logical name of the entity, typically in lowercase format."
+                      },
+                      "attributes": {
+                        "type": "array",
+                        "x-ms-summary": "Entity Attributes",
+                        "description": "Array of attributes or fields that belong to this entity.",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string",
+                              "x-ms-summary": "Attribute Name",
+                              "description": "The name of the entity attribute or field."
+                            },
+                            "dataType": {
+                              "type": "string",
+                              "x-ms-summary": "Data Type",
+                              "description": "The data type of the attribute, such as string, int, boolean, or date."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "relationships": {
+                  "type": "array",
+                  "x-ms-summary": "Parsed Relationships",
+                  "description": "Array of relationships that were returned from the ParseMermaidDiagram operation (optional).",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "from": {
+                        "type": "string",
+                        "x-ms-summary": "From Entity",
+                        "description": "The source entity in the relationship."
+                      },
+                      "to": {
+                        "type": "string",
+                        "x-ms-summary": "To Entity",
+                        "description": "The target entity in the relationship."
+                      },
+                      "type": {
+                        "type": "string",
+                        "x-ms-summary": "Relationship Type",
+                        "description": "The type of relationship, such as one-to-many, many-to-one, or one-to-one."
+                      }
+                    }
+                  }
+                },
+                "outputFormat": {
+                  "type": "string",
+                  "default": "all",
+                  "x-ms-summary": "Output Format",
+                  "description": "Specific format to generate, or 'all' to generate all 18 available formats with enhanced entity and relationship support.",
+                  "enum": ["all", "jsonSchema", "sqlDDL", "typescript", "csharp", "python", "java", "go", "rust", "graphql", "react", "vue", "swift", "dataverseSchema", "microsoftPlatformFormulas", "postgresqlDDL", "mysqlDDL", "mongooseSchema", "markdown"],
+                  "x-ms-visibility": "advanced"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Format conversions successfully generated",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "x-ms-summary": "Conversion Success",
+                  "description": "Indicates whether the conversion operation completed successfully."
+                },
+                "conversions": {
+                  "type": "object",
+                  "x-ms-summary": "Format Conversions",
+                  "description": "Generated format conversions for the provided entities in multiple development platform formats with inheritance support.",
+                  "properties": {
+                    "jsonSchema": {
+                      "type": "string",
+                      "x-ms-summary": "JSON Schema",
+                      "description": "Proper JSON Schema Draft 07 specification with $schema, definitions, and typed properties.",
+                      "example": "{\n  \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n  \"title\": \"Generated Schema\",\n  \"type\": \"object\",\n  \"definitions\": {\n    \"Animal\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"name\": {\"type\": \"string\"},\n        \"age\": {\"type\": \"integer\"}\n      }\n    }\n  }\n}"
+                    },
+                    "sqlDDL": {
+                      "type": "string",
+                      "x-ms-summary": "SQL DDL",
+                      "description": "SQL CREATE TABLE statements with proper syntax for database schema creation.",
+                      "example": "-- Generated SQL DDL\n\nCREATE TABLE Animal (\n    name VARCHAR(255),\n    age INT\n);\n\nCREATE TABLE Dog (\n    name VARCHAR(255),\n    age INT,\n    breed VARCHAR(255)\n);"
+                    },
+                    "typescript": {
+                      "type": "string",
+                      "x-ms-summary": "TypeScript Interfaces",
+                      "description": "TypeScript interface definitions with inheritance support (extends keyword).",
+                      "example": "// Generated TypeScript\ninterface Animal {\n  name: string;\n  age: number;\n}\n\ninterface Dog extends Animal {\n  breed: string;\n}"
+                    },
+                    "csharp": {
+                      "type": "string",
+                      "x-ms-summary": "C# Classes",
+                      "description": "C# class definitions with inheritance support and properties for .NET development.",
+                      "example": "// Generated C#\npublic class Animal {\n  public string name { get; set; }\n  public int age { get; set; }\n}\n\npublic class Dog : Animal {\n  public string breed { get; set; }\n}"
+                    },
+                    "python": {
+                      "type": "string",
+                      "x-ms-summary": "Python Classes",
+                      "description": "Python dataclass definitions with inheritance support and type hints.",
+                      "example": "# Generated Python\nfrom dataclasses import dataclass\n\n@dataclass\nclass Animal:\n  name: str\n  age: int\n\n@dataclass\nclass Dog(Animal):\n  breed: str"
+                    },
+                    "java": {
+                      "type": "string",
+                      "x-ms-summary": "Java Classes",
+                      "description": "Java class definitions with inheritance (extends) for enterprise development."
+                    },
+                    "go": {
+                      "type": "string",
+                      "x-ms-summary": "Go Structs",
+                      "description": "Go struct definitions with JSON tags for cloud and microservices development."
+                    },
+                    "rust": {
+                      "type": "string",
+                      "x-ms-summary": "Rust Structs",
+                      "description": "Rust struct definitions with Serde annotations for performance-critical applications."
+                    },
+                    "graphql": {
+                      "type": "string",
+                      "x-ms-summary": "GraphQL Schema",
+                      "description": "GraphQL type definitions for modern API development."
+                    },
+                    "react": {
+                      "type": "string",
+                      "x-ms-summary": "React TypeScript",
+                      "description": "React TypeScript component interfaces and prop definitions for frontend development."
+                    },
+                    "vue": {
+                      "type": "string",
+                      "x-ms-summary": "Vue Composition API",
+                      "description": "Vue.js Composition API type definitions for reactive frontend development."
+                    },
+                    "swift": {
+                      "type": "string",
+                      "x-ms-summary": "Swift Models",
+                      "description": "Swift model definitions with Codable protocol for iOS development."
+                    },
+                    "dataverseSchema": {
+                      "type": "string",
+                      "x-ms-summary": "Dataverse Schema",
+                      "description": "Microsoft Dataverse table schema definition for Power Platform integration."
+                    },
+                    "microsoftPlatformFormulas": {
+                      "type": "string",
+                      "x-ms-summary": "Microsoft Platform Formulas",
+                      "description": "Microsoft Platform collection formulas for creating data structures in low-code applications."
+                    },
+                    "postgresqlDDL": {
+                      "type": "string",
+                      "x-ms-summary": "PostgreSQL DDL",
+                      "description": "PostgreSQL-specific Data Definition Language statements with advanced features."
+                    },
+                    "mysqlDDL": {
+                      "type": "string",
+                      "x-ms-summary": "MySQL DDL",
+                      "description": "MySQL-specific Data Definition Language statements with engine optimizations."
+                    },
+                    "mongooseSchema": {
+                      "type": "string",
+                      "x-ms-summary": "Mongoose Schema",
+                      "description": "Mongoose schema definitions for MongoDB and Node.js development."
+                    },
+                    "markdown": {
+                      "type": "string",
+                      "x-ms-summary": "Markdown Documentation",
+                      "description": "Markdown table format with inheritance indicators for documentation purposes.",
+                      "example": "# Entity Documentation\n\n## Animal\n\n| Field | Type |\n|-------|------|\n| name | String |\n| age | int |\n\n## Dog\n\n*Inherits from: Animal*\n\n| Field | Type |\n|-------|------|\n| breed | String |"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid entities or request parameters",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "x-ms-summary": "Error Code",
+                      "description": "The specific error code identifying the type of error that occurred."
+                    },
+                    "message": {
+                      "type": "string",
+                      "x-ms-summary": "Error Message",
+                      "description": "A detailed error message describing what went wrong during processing."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mcp": {
+      "post": {
+        "summary": "Invoke Mermaid Parser Tools",
+        "x-ms-summary": "Invoke Mermaid Parser Tools",
+        "description": "Access advanced Mermaid parsing tools through Model Context Protocol (MCP) JSON-RPC 2.0 interface. Supports 6 specialized tools: parse_mermaid_diagram, convert_to_formats, validate_mermaid_syntax, detect_diagram_type, extract_entities, and extract_relationships with comprehensive enterprise-grade parsing capabilities.",
+        "operationId": "InvokeServer",
+        "x-ms-visibility": "advanced",
+        "x-ms-agentic-protocol": "mcp-streamable-1.0",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "MCP tool invocation successful",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "jsonrpc": {
+                  "type": "string",
+                  "description": "JSON-RPC version identifier"
+                },
+                "id": {
+                  "type": "string",
+                  "description": "Request identifier"
+                },
+                "result": {
+                  "type": "object",
+                  "description": "Tool execution result"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {},
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://troystaylor.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://troystaylor.com/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Business Intelligence;Productivity"
+    }
+  ]
+}
