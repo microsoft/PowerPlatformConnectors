@@ -1,0 +1,1808 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Miro V2",
+    "description": "Miro is a digital whiteboarding and visual collaboration platform for cross-functional teams. Create and manage boards, add sticky notes, cards, frames, text, and connectors, and share boards with collaborators using the Miro V2 REST API.",
+    "version": "1.0",
+    "contact": {
+      "name": "Aaron Mah",
+      "url": "https://github.com/aaronmah"
+    }
+  },
+  "host": "api.miro.com",
+  "basePath": "/v2",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "securityDefinitions": {
+    "oauth2_auth": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://miro.com/oauth/authorize",
+      "tokenUrl": "https://api.miro.com/v1/oauth/token",
+      "scopes": {
+        "boards:read boards:write": "boards:read boards:write"
+      }
+    }
+  },
+  "security": [
+    {
+      "oauth2_auth": [
+        "boards:read boards:write"
+      ]
+    }
+  ],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://miro.com/"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://miro.com/legal/privacy-policy/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Collaboration;Productivity"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Boards",
+      "description": "Operations for managing Miro boards."
+    },
+    {
+      "name": "Items",
+      "description": "Operations for creating and retrieving board items."
+    },
+    {
+      "name": "Members",
+      "description": "Operations for sharing boards with collaborators."
+    },
+    {
+      "name": "Connectors",
+      "description": "Operations for creating lines between items."
+    }
+  ],
+  "paths": {
+    "/boards": {
+      "get": {
+        "operationId": "listBoards",
+        "summary": "List Boards",
+        "description": "Retrieves a list of boards accessible to the current user.",
+        "tags": [
+          "Boards"
+        ],
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Filter boards by team ID.",
+            "x-ms-summary": "Team ID"
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Search boards by name.",
+            "x-ms-summary": "Search Query"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Sort field for the results.",
+            "x-ms-summary": "Sort By",
+            "enum": [
+              "default",
+              "last_modified",
+              "last_opened",
+              "last_created",
+              "alphabetically"
+            ]
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "description": "Maximum number of boards to return (1-50, default 20).",
+            "x-ms-summary": "Limit"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Offset for pagination from previous response.",
+            "x-ms-summary": "Offset"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of boards retrieved successfully.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "description": "Array of board objects.",
+                  "items": {
+                    "$ref": "#/definitions/Board"
+                  }
+                },
+                "total": {
+                  "type": "integer",
+                  "description": "Total number of boards matching the query.",
+                  "x-ms-summary": "Total"
+                },
+                "size": {
+                  "type": "integer",
+                  "description": "Number of boards in this response.",
+                  "x-ms-summary": "Size"
+                },
+                "offset": {
+                  "type": "string",
+                  "description": "Offset for the next page.",
+                  "x-ms-summary": "Next Offset"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createBoard",
+        "summary": "Create Board",
+        "description": "Creates a new Miro board with the specified name and settings.",
+        "tags": [
+          "Boards"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Name of the new board.",
+                  "x-ms-summary": "Board Name"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Description of the board.",
+                  "x-ms-summary": "Description",
+                  "x-ms-visibility": "advanced"
+                },
+                "teamId": {
+                  "type": "string",
+                  "description": "ID of the team to create the board in.",
+                  "x-ms-summary": "Team ID",
+                  "x-ms-visibility": "advanced"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Board created successfully.",
+            "schema": {
+              "$ref": "#/definitions/Board"
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "copyBoard",
+        "summary": "Copy Board",
+        "description": "Creates a copy of an existing board, including all its content.",
+        "tags": [
+          "Boards"
+        ],
+        "parameters": [
+          {
+            "name": "copy_from",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "description": "The ID of the board to copy.",
+            "x-ms-summary": "Source Board ID",
+            "x-ms-dynamic-values": {
+              "operationId": "listBoards",
+              "value-path": "id",
+              "value-title": "name",
+              "value-collection": "data"
+            }
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Name for the copied board. Defaults to Copy of original.",
+                  "x-ms-summary": "Board Name"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Description for the copied board.",
+                  "x-ms-summary": "Description",
+                  "x-ms-visibility": "advanced"
+                },
+                "teamId": {
+                  "type": "string",
+                  "description": "Team ID to place the copied board in.",
+                  "x-ms-summary": "Team ID",
+                  "x-ms-visibility": "advanced"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Board copied successfully.",
+            "schema": {
+              "$ref": "#/definitions/Board"
+            }
+          }
+        }
+      }
+    },
+    "/boards/{board_id}": {
+      "get": {
+        "operationId": "getBoard",
+        "summary": "Get Board",
+        "description": "Retrieves details for a specific board by its ID.",
+        "tags": [
+          "Boards"
+        ],
+        "parameters": [
+          {
+            "name": "board_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the board.",
+            "x-ms-summary": "Board ID",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "listBoards",
+              "value-path": "id",
+              "value-title": "name",
+              "value-collection": "data"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Board details retrieved successfully.",
+            "schema": {
+              "$ref": "#/definitions/BoardDetail"
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateBoard",
+        "summary": "Update Board",
+        "description": "Updates the name, description, or settings of an existing board.",
+        "tags": [
+          "Boards"
+        ],
+        "parameters": [
+          {
+            "name": "board_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the board.",
+            "x-ms-summary": "Board ID",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "listBoards",
+              "value-path": "id",
+              "value-title": "name",
+              "value-collection": "data"
+            }
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "New board name.",
+                  "x-ms-summary": "Board Name"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "New board description.",
+                  "x-ms-summary": "Description"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Board updated successfully.",
+            "schema": {
+              "$ref": "#/definitions/Board"
+            }
+          }
+        }
+      }
+    },
+    "/boards/{board_id}/sticky_notes": {
+      "post": {
+        "operationId": "createStickyNote",
+        "summary": "Create Sticky Note",
+        "description": "Creates a sticky note on a board with the specified text and color.",
+        "tags": [
+          "Items"
+        ],
+        "parameters": [
+          {
+            "name": "board_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the board.",
+            "x-ms-summary": "Board ID",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "listBoards",
+              "value-path": "id",
+              "value-title": "name",
+              "value-collection": "data"
+            }
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "data"
+              ],
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "content"
+                  ],
+                  "description": "Content and shape of the sticky note.",
+                  "properties": {
+                    "content": {
+                      "type": "string",
+                      "description": "Text content of the sticky note. Supports basic HTML tags.",
+                      "x-ms-summary": "Content"
+                    },
+                    "shape": {
+                      "type": "string",
+                      "description": "Shape of the sticky note.",
+                      "x-ms-summary": "Shape",
+                      "enum": [
+                        "square",
+                        "rectangle"
+                      ],
+                      "x-ms-visibility": "advanced"
+                    }
+                  }
+                },
+                "style": {
+                  "type": "object",
+                  "description": "Visual style settings for the sticky note.",
+                  "x-ms-visibility": "advanced",
+                  "properties": {
+                    "fillColor": {
+                      "type": "string",
+                      "description": "Background color of the sticky note.",
+                      "x-ms-summary": "Fill Color",
+                      "enum": [
+                        "gray",
+                        "light_yellow",
+                        "yellow",
+                        "orange",
+                        "light_green",
+                        "green",
+                        "dark_green",
+                        "cyan",
+                        "light_pink",
+                        "pink",
+                        "violet",
+                        "red",
+                        "light_blue",
+                        "blue",
+                        "dark_blue",
+                        "black"
+                      ]
+                    },
+                    "textAlign": {
+                      "type": "string",
+                      "description": "Horizontal text alignment.",
+                      "x-ms-summary": "Text Align",
+                      "enum": [
+                        "left",
+                        "center",
+                        "right"
+                      ]
+                    },
+                    "textAlignVertical": {
+                      "type": "string",
+                      "description": "Vertical text alignment.",
+                      "x-ms-summary": "Vertical Align",
+                      "enum": [
+                        "top",
+                        "middle",
+                        "bottom"
+                      ]
+                    }
+                  }
+                },
+                "position": {
+                  "type": "object",
+                  "description": "Position on the board.",
+                  "x-ms-visibility": "advanced",
+                  "properties": {
+                    "x": {
+                      "type": "number",
+                      "description": "X coordinate on the board.",
+                      "x-ms-summary": "X Position"
+                    },
+                    "y": {
+                      "type": "number",
+                      "description": "Y coordinate on the board.",
+                      "x-ms-summary": "Y Position"
+                    }
+                  }
+                },
+                "parent": {
+                  "type": "object",
+                  "description": "Parent frame to place the item inside.",
+                  "x-ms-visibility": "advanced",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID of a parent frame.",
+                      "x-ms-summary": "Parent Frame ID"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Sticky note created successfully.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Unique identifier of the sticky note.",
+                  "x-ms-summary": "Item ID"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "Item type. Always sticky_note.",
+                  "x-ms-summary": "Type"
+                },
+                "data": {
+                  "type": "object",
+                  "description": "Content data of the sticky note.",
+                  "properties": {
+                    "content": {
+                      "type": "string",
+                      "description": "Text content.",
+                      "x-ms-summary": "Content"
+                    },
+                    "shape": {
+                      "type": "string",
+                      "description": "Shape of the sticky note.",
+                      "x-ms-summary": "Shape"
+                    }
+                  }
+                },
+                "style": {
+                  "type": "object",
+                  "description": "Visual style of the sticky note.",
+                  "properties": {
+                    "fillColor": {
+                      "type": "string",
+                      "description": "Background color.",
+                      "x-ms-summary": "Fill Color"
+                    }
+                  }
+                },
+                "position": {
+                  "$ref": "#/definitions/Position"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "description": "ISO 8601 creation timestamp.",
+                  "x-ms-summary": "Created At"
+                },
+                "createdBy": {
+                  "$ref": "#/definitions/CreatedBy"
+                },
+                "modifiedAt": {
+                  "type": "string",
+                  "description": "ISO 8601 last modified timestamp.",
+                  "x-ms-summary": "Modified At"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/boards/{board_id}/cards": {
+      "post": {
+        "operationId": "createCard",
+        "summary": "Create Card",
+        "description": "Creates a card item on a board with title, description, assignee, and due date.",
+        "tags": [
+          "Items"
+        ],
+        "parameters": [
+          {
+            "name": "board_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the board.",
+            "x-ms-summary": "Board ID",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "listBoards",
+              "value-path": "id",
+              "value-title": "name",
+              "value-collection": "data"
+            }
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "data"
+              ],
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "title"
+                  ],
+                  "description": "Card data including title and description.",
+                  "properties": {
+                    "title": {
+                      "type": "string",
+                      "description": "Title of the card.",
+                      "x-ms-summary": "Card Title"
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Description of the card. Supports HTML.",
+                      "x-ms-summary": "Description",
+                      "x-ms-visibility": "advanced"
+                    },
+                    "assigneeId": {
+                      "type": "string",
+                      "description": "Miro user ID to assign the card to.",
+                      "x-ms-summary": "Assignee ID",
+                      "x-ms-visibility": "advanced"
+                    },
+                    "dueDate": {
+                      "type": "string",
+                      "description": "Due date in ISO 8601 format.",
+                      "x-ms-summary": "Due Date",
+                      "x-ms-visibility": "advanced"
+                    }
+                  }
+                },
+                "style": {
+                  "type": "object",
+                  "description": "Visual style settings for the card.",
+                  "x-ms-visibility": "advanced",
+                  "properties": {
+                    "cardTheme": {
+                      "type": "string",
+                      "description": "Color theme for the card as hex color.",
+                      "x-ms-summary": "Card Theme Color"
+                    }
+                  }
+                },
+                "position": {
+                  "type": "object",
+                  "description": "Position on the board.",
+                  "x-ms-visibility": "advanced",
+                  "properties": {
+                    "x": {
+                      "type": "number",
+                      "description": "X coordinate on the board.",
+                      "x-ms-summary": "X Position"
+                    },
+                    "y": {
+                      "type": "number",
+                      "description": "Y coordinate on the board.",
+                      "x-ms-summary": "Y Position"
+                    }
+                  }
+                },
+                "parent": {
+                  "type": "object",
+                  "description": "Parent frame to place the item inside.",
+                  "x-ms-visibility": "advanced",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID of a parent frame.",
+                      "x-ms-summary": "Parent Frame ID"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Card created successfully.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Unique identifier of the card.",
+                  "x-ms-summary": "Item ID"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "Item type. Always card.",
+                  "x-ms-summary": "Type"
+                },
+                "data": {
+                  "type": "object",
+                  "description": "Card data.",
+                  "properties": {
+                    "title": {
+                      "type": "string",
+                      "description": "Card title.",
+                      "x-ms-summary": "Card Title"
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Card description.",
+                      "x-ms-summary": "Description"
+                    },
+                    "assigneeId": {
+                      "type": "string",
+                      "description": "Assigned user ID.",
+                      "x-ms-summary": "Assignee ID"
+                    },
+                    "dueDate": {
+                      "type": "string",
+                      "description": "Due date.",
+                      "x-ms-summary": "Due Date"
+                    }
+                  }
+                },
+                "style": {
+                  "type": "object",
+                  "description": "Card visual style.",
+                  "properties": {
+                    "cardTheme": {
+                      "type": "string",
+                      "description": "Card color theme.",
+                      "x-ms-summary": "Card Theme"
+                    }
+                  }
+                },
+                "position": {
+                  "$ref": "#/definitions/Position"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "description": "ISO 8601 creation timestamp.",
+                  "x-ms-summary": "Created At"
+                },
+                "createdBy": {
+                  "$ref": "#/definitions/CreatedBy"
+                },
+                "modifiedAt": {
+                  "type": "string",
+                  "description": "ISO 8601 last modified timestamp.",
+                  "x-ms-summary": "Modified At"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/boards/{board_id}/items": {
+      "get": {
+        "operationId": "listBoardItems",
+        "summary": "List Board Items",
+        "description": "Retrieves all items on a board, optionally filtered by item type.",
+        "tags": [
+          "Items"
+        ],
+        "parameters": [
+          {
+            "name": "board_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the board.",
+            "x-ms-summary": "Board ID",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "listBoards",
+              "value-path": "id",
+              "value-title": "name",
+              "value-collection": "data"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Filter by item type.",
+            "x-ms-summary": "Item Type",
+            "enum": [
+              "sticky_note",
+              "card",
+              "shape",
+              "text",
+              "image",
+              "frame",
+              "document",
+              "embed",
+              "app_card"
+            ]
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "description": "Maximum items to return (1-50, default 10).",
+            "x-ms-summary": "Limit"
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Cursor for pagination from previous response.",
+            "x-ms-summary": "Cursor"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Board items retrieved successfully.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "description": "Array of item objects.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "Unique item identifier.",
+                        "x-ms-summary": "Item ID"
+                      },
+                      "type": {
+                        "type": "string",
+                        "description": "Item type.",
+                        "x-ms-summary": "Type"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "description": "ISO 8601 creation timestamp.",
+                        "x-ms-summary": "Created At"
+                      },
+                      "modifiedAt": {
+                        "type": "string",
+                        "description": "ISO 8601 last modified timestamp.",
+                        "x-ms-summary": "Modified At"
+                      },
+                      "createdBy": {
+                        "$ref": "#/definitions/CreatedBy"
+                      },
+                      "position": {
+                        "$ref": "#/definitions/Position"
+                      },
+                      "data": {
+                        "type": "object",
+                        "description": "Item-type-specific data.",
+                        "properties": {
+                          "content": {
+                            "type": "string",
+                            "description": "Text content for sticky notes and text items.",
+                            "x-ms-summary": "Content"
+                          },
+                          "title": {
+                            "type": "string",
+                            "description": "Title for cards and frames.",
+                            "x-ms-summary": "Title"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "size": {
+                  "type": "integer",
+                  "description": "Number of items in this response.",
+                  "x-ms-summary": "Size"
+                },
+                "cursor": {
+                  "type": "string",
+                  "description": "Cursor for the next page.",
+                  "x-ms-summary": "Next Cursor"
+                },
+                "total": {
+                  "type": "integer",
+                  "description": "Total number of matching items.",
+                  "x-ms-summary": "Total"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/boards/{board_id}/members": {
+      "post": {
+        "operationId": "shareBoard",
+        "summary": "Share Board",
+        "description": "Invites one or more users to a board by email with a specified role.",
+        "tags": [
+          "Members"
+        ],
+        "parameters": [
+          {
+            "name": "board_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the board.",
+            "x-ms-summary": "Board ID",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "listBoards",
+              "value-path": "id",
+              "value-title": "name",
+              "value-collection": "data"
+            }
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "emails",
+                "role"
+              ],
+              "properties": {
+                "emails": {
+                  "type": "array",
+                  "description": "Email addresses to invite to the board.",
+                  "x-ms-summary": "Email Addresses",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "role": {
+                  "type": "string",
+                  "description": "Role for invited users.",
+                  "x-ms-summary": "Role",
+                  "enum": [
+                    "viewer",
+                    "commenter",
+                    "editor"
+                  ]
+                },
+                "message": {
+                  "type": "string",
+                  "description": "Optional invitation message included in the email.",
+                  "x-ms-summary": "Message",
+                  "x-ms-visibility": "advanced"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Board sharing result.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "successful": {
+                  "type": "array",
+                  "description": "Successfully invited entries.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "email": {
+                        "type": "string",
+                        "description": "Invited email.",
+                        "x-ms-summary": "Email"
+                      },
+                      "id": {
+                        "type": "string",
+                        "description": "Member ID.",
+                        "x-ms-summary": "Member ID"
+                      },
+                      "role": {
+                        "type": "string",
+                        "description": "Assigned role.",
+                        "x-ms-summary": "Role"
+                      }
+                    }
+                  }
+                },
+                "failed": {
+                  "type": "array",
+                  "description": "Entries that failed.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "email": {
+                        "type": "string",
+                        "description": "Email that failed.",
+                        "x-ms-summary": "Email"
+                      },
+                      "reason": {
+                        "type": "string",
+                        "description": "Reason for failure.",
+                        "x-ms-summary": "Reason"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/boards/{board_id}/frames": {
+      "post": {
+        "operationId": "createFrame",
+        "summary": "Create Frame",
+        "description": "Creates a frame on a board to visually group and organize items.",
+        "tags": [
+          "Items"
+        ],
+        "parameters": [
+          {
+            "name": "board_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the board.",
+            "x-ms-summary": "Board ID",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "listBoards",
+              "value-path": "id",
+              "value-title": "name",
+              "value-collection": "data"
+            }
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "description": "Frame content data.",
+                  "properties": {
+                    "title": {
+                      "type": "string",
+                      "description": "Title displayed on the frame.",
+                      "x-ms-summary": "Frame Title"
+                    },
+                    "format": {
+                      "type": "string",
+                      "description": "Frame format.",
+                      "x-ms-summary": "Format",
+                      "enum": [
+                        "custom",
+                        "freeform"
+                      ],
+                      "x-ms-visibility": "advanced"
+                    }
+                  }
+                },
+                "style": {
+                  "type": "object",
+                  "description": "Visual style settings.",
+                  "x-ms-visibility": "advanced",
+                  "properties": {
+                    "fillColor": {
+                      "type": "string",
+                      "description": "Background fill color as hex or named color.",
+                      "x-ms-summary": "Fill Color"
+                    }
+                  }
+                },
+                "position": {
+                  "type": "object",
+                  "description": "Position on the board.",
+                  "x-ms-visibility": "advanced",
+                  "properties": {
+                    "x": {
+                      "type": "number",
+                      "description": "X coordinate on the board.",
+                      "x-ms-summary": "X Position"
+                    },
+                    "y": {
+                      "type": "number",
+                      "description": "Y coordinate on the board.",
+                      "x-ms-summary": "Y Position"
+                    }
+                  }
+                },
+                "geometry": {
+                  "type": "object",
+                  "description": "Frame dimensions.",
+                  "x-ms-visibility": "advanced",
+                  "properties": {
+                    "width": {
+                      "type": "number",
+                      "description": "Frame width in pixels.",
+                      "x-ms-summary": "Width"
+                    },
+                    "height": {
+                      "type": "number",
+                      "description": "Frame height in pixels.",
+                      "x-ms-summary": "Height"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Frame created successfully.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Frame ID. Use as parent.id when creating items inside.",
+                  "x-ms-summary": "Frame ID"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "Item type. Always frame.",
+                  "x-ms-summary": "Type"
+                },
+                "data": {
+                  "type": "object",
+                  "description": "Frame data.",
+                  "properties": {
+                    "title": {
+                      "type": "string",
+                      "description": "Frame title.",
+                      "x-ms-summary": "Frame Title"
+                    }
+                  }
+                },
+                "position": {
+                  "$ref": "#/definitions/Position"
+                },
+                "geometry": {
+                  "type": "object",
+                  "description": "Frame dimensions.",
+                  "properties": {
+                    "width": {
+                      "type": "number",
+                      "description": "Width in pixels.",
+                      "x-ms-summary": "Width"
+                    },
+                    "height": {
+                      "type": "number",
+                      "description": "Height in pixels.",
+                      "x-ms-summary": "Height"
+                    }
+                  }
+                },
+                "createdAt": {
+                  "type": "string",
+                  "description": "ISO 8601 creation timestamp.",
+                  "x-ms-summary": "Created At"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/boards/{board_id}/texts": {
+      "post": {
+        "operationId": "createText",
+        "summary": "Create Text",
+        "description": "Creates a text item on a board with the specified content.",
+        "tags": [
+          "Items"
+        ],
+        "parameters": [
+          {
+            "name": "board_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the board.",
+            "x-ms-summary": "Board ID",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "listBoards",
+              "value-path": "id",
+              "value-title": "name",
+              "value-collection": "data"
+            }
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "data"
+              ],
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "content"
+                  ],
+                  "description": "Text content data.",
+                  "properties": {
+                    "content": {
+                      "type": "string",
+                      "description": "Text content. Supports HTML tags like p, b, i, a, ul, li.",
+                      "x-ms-summary": "Content"
+                    }
+                  }
+                },
+                "style": {
+                  "type": "object",
+                  "description": "Text style settings.",
+                  "x-ms-visibility": "advanced",
+                  "properties": {
+                    "color": {
+                      "type": "string",
+                      "description": "Text color as hex value.",
+                      "x-ms-summary": "Text Color"
+                    },
+                    "fontSize": {
+                      "type": "string",
+                      "description": "Font size value.",
+                      "x-ms-summary": "Font Size"
+                    },
+                    "textAlign": {
+                      "type": "string",
+                      "description": "Text alignment.",
+                      "x-ms-summary": "Text Align",
+                      "enum": [
+                        "left",
+                        "center",
+                        "right"
+                      ]
+                    }
+                  }
+                },
+                "position": {
+                  "type": "object",
+                  "description": "Position on the board.",
+                  "x-ms-visibility": "advanced",
+                  "properties": {
+                    "x": {
+                      "type": "number",
+                      "description": "X coordinate on the board.",
+                      "x-ms-summary": "X Position"
+                    },
+                    "y": {
+                      "type": "number",
+                      "description": "Y coordinate on the board.",
+                      "x-ms-summary": "Y Position"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Text item created successfully.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Unique identifier of the text item.",
+                  "x-ms-summary": "Item ID"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "Item type. Always text.",
+                  "x-ms-summary": "Type"
+                },
+                "data": {
+                  "type": "object",
+                  "description": "Text content.",
+                  "properties": {
+                    "content": {
+                      "type": "string",
+                      "description": "Text content.",
+                      "x-ms-summary": "Content"
+                    }
+                  }
+                },
+                "position": {
+                  "$ref": "#/definitions/Position"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "description": "ISO 8601 creation timestamp.",
+                  "x-ms-summary": "Created At"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/boards/{board_id}/connectors": {
+      "post": {
+        "operationId": "createConnector",
+        "summary": "Create Connector",
+        "description": "Creates a line connecting two items on a board.",
+        "tags": [
+          "Connectors"
+        ],
+        "parameters": [
+          {
+            "name": "board_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the board.",
+            "x-ms-summary": "Board ID",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "listBoards",
+              "value-path": "id",
+              "value-title": "name",
+              "value-collection": "data"
+            }
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "startItem",
+                "endItem"
+              ],
+              "properties": {
+                "startItem": {
+                  "type": "object",
+                  "required": [
+                    "id"
+                  ],
+                  "description": "Start item for the connector.",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID of the item where the connector starts.",
+                      "x-ms-summary": "Start Item ID"
+                    }
+                  }
+                },
+                "endItem": {
+                  "type": "object",
+                  "required": [
+                    "id"
+                  ],
+                  "description": "End item for the connector.",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID of the item where the connector ends.",
+                      "x-ms-summary": "End Item ID"
+                    }
+                  }
+                },
+                "captions": {
+                  "type": "array",
+                  "description": "Caption labels on the connector line.",
+                  "x-ms-visibility": "advanced",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "content": {
+                        "type": "string",
+                        "description": "Caption text.",
+                        "x-ms-summary": "Caption Text"
+                      }
+                    }
+                  }
+                },
+                "style": {
+                  "type": "object",
+                  "description": "Connector visual style.",
+                  "x-ms-visibility": "advanced",
+                  "properties": {
+                    "strokeColor": {
+                      "type": "string",
+                      "description": "Line color as hex value.",
+                      "x-ms-summary": "Stroke Color"
+                    },
+                    "strokeWidth": {
+                      "type": "string",
+                      "description": "Line width.",
+                      "x-ms-summary": "Stroke Width"
+                    },
+                    "strokeStyle": {
+                      "type": "string",
+                      "description": "Line style.",
+                      "x-ms-summary": "Stroke Style",
+                      "enum": [
+                        "normal",
+                        "dashed",
+                        "dotted"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Connector created successfully.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Unique connector identifier.",
+                  "x-ms-summary": "Connector ID"
+                },
+                "startItem": {
+                  "type": "object",
+                  "description": "Start item reference.",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Start item ID.",
+                      "x-ms-summary": "Start Item ID"
+                    }
+                  }
+                },
+                "endItem": {
+                  "type": "object",
+                  "description": "End item reference.",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "End item ID.",
+                      "x-ms-summary": "End Item ID"
+                    }
+                  }
+                },
+                "captions": {
+                  "type": "array",
+                  "description": "Caption labels on the connector.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "content": {
+                        "type": "string",
+                        "description": "Caption text.",
+                        "x-ms-summary": "Caption"
+                      }
+                    }
+                  }
+                },
+                "style": {
+                  "type": "object",
+                  "description": "Connector visual style.",
+                  "properties": {
+                    "strokeColor": {
+                      "type": "string",
+                      "description": "Line color.",
+                      "x-ms-summary": "Stroke Color"
+                    },
+                    "strokeWidth": {
+                      "type": "string",
+                      "description": "Line width.",
+                      "x-ms-summary": "Stroke Width"
+                    },
+                    "strokeStyle": {
+                      "type": "string",
+                      "description": "Line style.",
+                      "x-ms-summary": "Stroke Style"
+                    }
+                  }
+                },
+                "createdAt": {
+                  "type": "string",
+                  "description": "ISO 8601 creation timestamp.",
+                  "x-ms-summary": "Created At"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/boards/{board_id}/items/{item_id}": {
+      "get": {
+        "operationId": "getItem",
+        "summary": "Get Item",
+        "description": "Retrieves details for a specific item on a board by its ID.",
+        "tags": [
+          "Items"
+        ],
+        "parameters": [
+          {
+            "name": "board_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the board.",
+            "x-ms-summary": "Board ID",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "listBoards",
+              "value-path": "id",
+              "value-title": "name",
+              "value-collection": "data"
+            }
+          },
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the item.",
+            "x-ms-summary": "Item ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Item details retrieved successfully.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Unique item identifier.",
+                  "x-ms-summary": "Item ID"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "Item type.",
+                  "x-ms-summary": "Type"
+                },
+                "data": {
+                  "type": "object",
+                  "description": "Item-type-specific data.",
+                  "properties": {
+                    "content": {
+                      "type": "string",
+                      "description": "Text content for sticky notes and text items.",
+                      "x-ms-summary": "Content"
+                    },
+                    "title": {
+                      "type": "string",
+                      "description": "Title for cards and frames.",
+                      "x-ms-summary": "Title"
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Description for cards.",
+                      "x-ms-summary": "Description"
+                    }
+                  }
+                },
+                "position": {
+                  "$ref": "#/definitions/Position"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "description": "ISO 8601 creation timestamp.",
+                  "x-ms-summary": "Created At"
+                },
+                "modifiedAt": {
+                  "type": "string",
+                  "description": "ISO 8601 last modified timestamp.",
+                  "x-ms-summary": "Modified At"
+                },
+                "createdBy": {
+                  "$ref": "#/definitions/CreatedBy"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "BoardOwner": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of the board owner.",
+          "x-ms-summary": "Owner ID"
+        },
+        "type": {
+          "type": "string",
+          "description": "Type of owner.",
+          "x-ms-summary": "Owner Type"
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name of the board owner.",
+          "x-ms-summary": "Owner Name"
+        }
+      }
+    },
+    "TeamInfo": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of the team.",
+          "x-ms-summary": "Team ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the team.",
+          "x-ms-summary": "Team Name"
+        }
+      }
+    },
+    "CreatedBy": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of the creator.",
+          "x-ms-summary": "Creator ID"
+        },
+        "type": {
+          "type": "string",
+          "description": "Type of creator.",
+          "x-ms-summary": "Creator Type"
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name of the creator.",
+          "x-ms-summary": "Creator Name"
+        }
+      }
+    },
+    "Position": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "number",
+          "description": "X coordinate on the board.",
+          "x-ms-summary": "X Position"
+        },
+        "y": {
+          "type": "number",
+          "description": "Y coordinate on the board.",
+          "x-ms-summary": "Y Position"
+        },
+        "origin": {
+          "type": "string",
+          "description": "Origin point for coordinates.",
+          "x-ms-summary": "Origin"
+        }
+      }
+    },
+    "Board": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique board identifier.",
+          "x-ms-summary": "Board ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the board.",
+          "x-ms-summary": "Board Name"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the board.",
+          "x-ms-summary": "Board Description"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO 8601 creation timestamp.",
+          "x-ms-summary": "Created At"
+        },
+        "modifiedAt": {
+          "type": "string",
+          "description": "ISO 8601 last modification timestamp.",
+          "x-ms-summary": "Modified At"
+        },
+        "viewLink": {
+          "type": "string",
+          "description": "URL to view the board in Miro.",
+          "x-ms-summary": "View Link"
+        },
+        "owner": {
+          "$ref": "#/definitions/BoardOwner"
+        },
+        "team": {
+          "$ref": "#/definitions/TeamInfo"
+        }
+      }
+    },
+    "BoardDetail": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique board identifier.",
+          "x-ms-summary": "Board ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the board.",
+          "x-ms-summary": "Board Name"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the board.",
+          "x-ms-summary": "Board Description"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO 8601 creation timestamp.",
+          "x-ms-summary": "Created At"
+        },
+        "modifiedAt": {
+          "type": "string",
+          "description": "ISO 8601 last modification timestamp.",
+          "x-ms-summary": "Modified At"
+        },
+        "viewLink": {
+          "type": "string",
+          "description": "URL to view the board in Miro.",
+          "x-ms-summary": "View Link"
+        },
+        "owner": {
+          "$ref": "#/definitions/BoardOwner"
+        },
+        "team": {
+          "$ref": "#/definitions/TeamInfo"
+        },
+        "policy": {
+          "type": "object",
+          "description": "Board sharing and permissions policy.",
+          "x-ms-summary": "Policy",
+          "properties": {
+            "permissionsPolicy": {
+              "type": "object",
+              "description": "Permissions policy settings.",
+              "properties": {
+                "sharingAccess": {
+                  "type": "string",
+                  "description": "Sharing access level.",
+                  "x-ms-summary": "Sharing Access"
+                },
+                "collaborationToolsStartAccess": {
+                  "type": "string",
+                  "description": "Collaboration tools start access.",
+                  "x-ms-summary": "Collab Tools Access"
+                }
+              }
+            },
+            "sharingPolicy": {
+              "type": "object",
+              "description": "Sharing policy settings.",
+              "properties": {
+                "access": {
+                  "type": "string",
+                  "description": "Access level for the board.",
+                  "x-ms-summary": "Access"
+                },
+                "inviteToAccountAndBoardLinkAccess": {
+                  "type": "string",
+                  "description": "Invite link access level.",
+                  "x-ms-summary": "Invite Link Access"
+                }
+              }
+            }
+          }
+        },
+        "currentUserMembership": {
+          "type": "object",
+          "description": "Current user membership details.",
+          "x-ms-summary": "Current User Membership",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Membership ID.",
+              "x-ms-summary": "Membership ID"
+            },
+            "role": {
+              "type": "string",
+              "description": "Current user role on this board.",
+              "x-ms-summary": "Role"
+            },
+            "name": {
+              "type": "string",
+              "description": "User display name.",
+              "x-ms-summary": "User Name"
+            }
+          }
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {}
+}
