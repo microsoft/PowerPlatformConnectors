@@ -1,0 +1,1515 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Basecamp",
+    "description": "Basecamp is a project management and team communication platform by 37signals. Manage projects, to-dos, messages, schedule entries, and comments.",
+    "version": "1.0",
+    "contact": {
+      "name": "Aaron Mah",
+      "url": "https://github.com/microsoft/PowerPlatformConnectors",
+      "email": "aaronmah@microsoft.com"
+    }
+  },
+  "host": "3.basecampapi.com",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/projects.json": {
+      "get": {
+        "operationId": "listProjects",
+        "summary": "List Projects",
+        "description": "Lists all active projects in the Basecamp account.",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Status",
+            "description": "Filter by status. Values: archived, trashed. Omit for active projects only.",
+            "enum": [
+              "archived",
+              "trashed"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of projects.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ProjectSummary"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{project_id}.json": {
+      "get": {
+        "operationId": "getProject",
+        "summary": "Get Project",
+        "description": "Gets details of a specific project, including its dock with tool IDs.",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-ms-summary": "Project ID",
+            "description": "The ID of the project to retrieve.",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Project details.",
+            "schema": {
+              "$ref": "#/definitions/ProjectDetail"
+            }
+          }
+        }
+      }
+    },
+    "/todosets/{todoset_id}/todolists.json": {
+      "get": {
+        "operationId": "listTodoLists",
+        "summary": "List To-do Lists",
+        "description": "Lists all to-do lists in a project's to-do set.",
+        "parameters": [
+          {
+            "name": "todoset_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-ms-summary": "To-do Set ID",
+            "description": "The to-do set ID from the project dock where name is todoset.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Status",
+            "description": "Filter by status. Values: archived, trashed. Omit for active lists.",
+            "enum": [
+              "archived",
+              "trashed"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of to-do lists.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TodoList"
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createTodoList",
+        "summary": "Create To-do List",
+        "description": "Creates a new to-do list in a project's to-do set.",
+        "parameters": [
+          {
+            "name": "todoset_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-ms-summary": "To-do Set ID",
+            "description": "The to-do set ID from the project dock where name is todoset.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "x-ms-summary": "Name",
+                  "description": "The name of the to-do list."
+                },
+                "description": {
+                  "type": "string",
+                  "x-ms-summary": "Description",
+                  "description": "List description (rich text HTML supported)."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The created to-do list.",
+            "schema": {
+              "$ref": "#/definitions/TodoList"
+            }
+          }
+        }
+      }
+    },
+    "/todolists/{todolist_id}/todos.json": {
+      "get": {
+        "operationId": "listTodos",
+        "summary": "List To-dos",
+        "description": "Lists to-do items in a specific to-do list.",
+        "parameters": [
+          {
+            "name": "todolist_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-ms-summary": "To-do List ID",
+            "description": "The to-do list ID to retrieve items from.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Status",
+            "description": "Filter by recording status. Values: archived, trashed. Omit for active to-dos.",
+            "enum": [
+              "archived",
+              "trashed"
+            ]
+          },
+          {
+            "name": "completed",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "x-ms-summary": "Completed",
+            "description": "Filter by completion. true = completed only, false = incomplete only."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of to-do items.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TodoItem"
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createTodo",
+        "summary": "Create To-do",
+        "description": "Creates a new to-do item in a specific to-do list.",
+        "parameters": [
+          {
+            "name": "todolist_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-ms-summary": "To-do List ID",
+            "description": "The to-do list ID to add this item to.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "content"
+              ],
+              "properties": {
+                "content": {
+                  "type": "string",
+                  "x-ms-summary": "Content",
+                  "description": "The title of the to-do item."
+                },
+                "description": {
+                  "type": "string",
+                  "x-ms-summary": "Description",
+                  "description": "Detailed description (rich text HTML supported)."
+                },
+                "assignee_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "x-ms-summary": "Assignee IDs",
+                  "description": "Array of person IDs to assign this to-do to.",
+                  "x-ms-visibility": "advanced"
+                },
+                "due_on": {
+                  "type": "string",
+                  "x-ms-summary": "Due Date",
+                  "description": "Due date in YYYY-MM-DD format."
+                },
+                "starts_on": {
+                  "type": "string",
+                  "x-ms-summary": "Start Date",
+                  "description": "Start date in YYYY-MM-DD format.",
+                  "x-ms-visibility": "advanced"
+                },
+                "notify": {
+                  "type": "boolean",
+                  "x-ms-summary": "Notify Assignees",
+                  "description": "Whether to notify assignees. Defaults to false.",
+                  "x-ms-visibility": "advanced"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The created to-do item.",
+            "schema": {
+              "$ref": "#/definitions/TodoItem"
+            }
+          }
+        }
+      }
+    },
+    "/todos/{todo_id}.json": {
+      "get": {
+        "operationId": "getTodo",
+        "summary": "Get To-do",
+        "description": "Gets the full details of a specific to-do item by its ID.",
+        "parameters": [
+          {
+            "name": "todo_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-ms-summary": "To-do ID",
+            "description": "The ID of the to-do item.",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "To-do item details.",
+            "schema": {
+              "$ref": "#/definitions/TodoItemDetail"
+            }
+          }
+        }
+      }
+    },
+    "/todos/{todo_id}/completion.json": {
+      "post": {
+        "operationId": "completeTodo",
+        "summary": "Complete To-do",
+        "description": "Marks a to-do item as complete.",
+        "parameters": [
+          {
+            "name": "todo_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-ms-summary": "To-do ID",
+            "description": "The ID of the to-do item to complete.",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "To-do marked as complete."
+          },
+          "default": {
+            "description": "To-do marked as complete."
+          }
+        }
+      }
+    },
+    "/message_boards/{message_board_id}/messages.json": {
+      "get": {
+        "operationId": "listMessages",
+        "summary": "List Messages",
+        "description": "Lists all messages on a project's message board.",
+        "parameters": [
+          {
+            "name": "message_board_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-ms-summary": "Message Board ID",
+            "description": "The message board ID from the project dock where name is message_board.",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of messages.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Message"
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createMessage",
+        "summary": "Create Message",
+        "description": "Posts a new message to a project's message board.",
+        "parameters": [
+          {
+            "name": "message_board_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-ms-summary": "Message Board ID",
+            "description": "The message board ID to post to.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "subject",
+                "content"
+              ],
+              "properties": {
+                "subject": {
+                  "type": "string",
+                  "x-ms-summary": "Subject",
+                  "description": "The message subject line."
+                },
+                "content": {
+                  "type": "string",
+                  "x-ms-summary": "Content",
+                  "description": "The message body (rich text HTML supported)."
+                },
+                "category_id": {
+                  "type": "integer",
+                  "format": "int64",
+                  "x-ms-summary": "Category ID",
+                  "description": "Message category/type ID (if the board has categories).",
+                  "x-ms-visibility": "advanced"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The created message.",
+            "schema": {
+              "$ref": "#/definitions/MessageDetail"
+            }
+          }
+        }
+      }
+    },
+    "/messages/{message_id}.json": {
+      "get": {
+        "operationId": "getMessage",
+        "summary": "Get Message",
+        "description": "Gets the full details of a specific message by its ID.",
+        "parameters": [
+          {
+            "name": "message_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-ms-summary": "Message ID",
+            "description": "The ID of the message.",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message details.",
+            "schema": {
+              "$ref": "#/definitions/MessageDetail"
+            }
+          }
+        }
+      }
+    },
+    "/schedules/{schedule_id}/entries.json": {
+      "get": {
+        "operationId": "listScheduleEntries",
+        "summary": "List Schedule Entries",
+        "description": "Lists all entries on a project's schedule.",
+        "parameters": [
+          {
+            "name": "schedule_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-ms-summary": "Schedule ID",
+            "description": "The schedule ID from the project dock where name is schedule.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Status",
+            "description": "Filter by recording status. Values: archived, trashed. Omit for active entries.",
+            "enum": [
+              "archived",
+              "trashed"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of schedule entries.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ScheduleEntry"
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createScheduleEntry",
+        "summary": "Create Schedule Entry",
+        "description": "Creates a new event on a project's schedule.",
+        "parameters": [
+          {
+            "name": "schedule_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-ms-summary": "Schedule ID",
+            "description": "The schedule ID to add the event to.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "summary",
+                "starts_at",
+                "ends_at"
+              ],
+              "properties": {
+                "summary": {
+                  "type": "string",
+                  "x-ms-summary": "Summary",
+                  "description": "The event title."
+                },
+                "starts_at": {
+                  "type": "string",
+                  "x-ms-summary": "Starts At",
+                  "description": "Start date and time in ISO 8601 format (e.g., 2025-03-15T09:00:00Z)."
+                },
+                "ends_at": {
+                  "type": "string",
+                  "x-ms-summary": "Ends At",
+                  "description": "End date and time in ISO 8601 format (e.g., 2025-03-15T10:00:00Z)."
+                },
+                "description": {
+                  "type": "string",
+                  "x-ms-summary": "Description",
+                  "description": "Event description (rich text HTML supported)."
+                },
+                "participant_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "x-ms-summary": "Participant IDs",
+                  "description": "Array of person IDs to add as participants.",
+                  "x-ms-visibility": "advanced"
+                },
+                "all_day": {
+                  "type": "boolean",
+                  "x-ms-summary": "All Day",
+                  "description": "Set to true for an all-day event. Defaults to false.",
+                  "x-ms-visibility": "advanced"
+                },
+                "notify": {
+                  "type": "boolean",
+                  "x-ms-summary": "Notify Participants",
+                  "description": "Whether to notify participants. Defaults to false.",
+                  "x-ms-visibility": "advanced"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The created schedule entry.",
+            "schema": {
+              "$ref": "#/definitions/ScheduleEntry"
+            }
+          }
+        }
+      }
+    },
+    "/schedule_entries/{entry_id}.json": {
+      "get": {
+        "operationId": "getScheduleEntry",
+        "summary": "Get Schedule Entry",
+        "description": "Gets the full details of a specific schedule entry by its ID.",
+        "parameters": [
+          {
+            "name": "entry_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-ms-summary": "Entry ID",
+            "description": "The ID of the schedule entry.",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Schedule entry details.",
+            "schema": {
+              "$ref": "#/definitions/ScheduleEntryDetail"
+            }
+          }
+        }
+      }
+    },
+    "/recordings/{recording_id}/comments.json": {
+      "post": {
+        "operationId": "createComment",
+        "summary": "Create Comment",
+        "description": "Adds a comment to any Basecamp recording (to-do, message, schedule entry, etc.).",
+        "parameters": [
+          {
+            "name": "recording_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-ms-summary": "Recording ID",
+            "description": "The ID of the recording to comment on (to-do ID, message ID, schedule entry ID, etc.).",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "content"
+              ],
+              "properties": {
+                "content": {
+                  "type": "string",
+                  "x-ms-summary": "Content",
+                  "description": "Comment body (rich text HTML supported)."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The created comment.",
+            "schema": {
+              "$ref": "#/definitions/Comment"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "ProjectSummary": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Project ID (also called bucket_id).",
+          "x-ms-summary": "ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Project name.",
+          "x-ms-summary": "Name"
+        },
+        "description": {
+          "type": "string",
+          "description": "Project description (plain text).",
+          "x-ms-summary": "Description"
+        },
+        "purpose": {
+          "type": "string",
+          "description": "Purpose classification.",
+          "x-ms-summary": "Purpose"
+        },
+        "created_at": {
+          "type": "string",
+          "description": "ISO 8601 creation timestamp.",
+          "x-ms-summary": "Created At"
+        },
+        "updated_at": {
+          "type": "string",
+          "description": "ISO 8601 last update timestamp.",
+          "x-ms-summary": "Updated At"
+        },
+        "bookmark_url": {
+          "type": "string",
+          "description": "URL to bookmark the project.",
+          "x-ms-summary": "Bookmark URL"
+        },
+        "url": {
+          "type": "string",
+          "description": "API URL for this project.",
+          "x-ms-summary": "URL"
+        },
+        "app_url": {
+          "type": "string",
+          "description": "Web URL for this project.",
+          "x-ms-summary": "App URL"
+        }
+      }
+    },
+    "DockItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Tool instance ID (e.g., the todoset ID, message_board ID).",
+          "x-ms-summary": "ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Tool type name: todoset, message_board, schedule, vault, chat.",
+          "x-ms-summary": "Name"
+        },
+        "title": {
+          "type": "string",
+          "description": "Display title (e.g., To-dos, Message Board).",
+          "x-ms-summary": "Title"
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether this tool is enabled on the project.",
+          "x-ms-summary": "Enabled"
+        },
+        "url": {
+          "type": "string",
+          "description": "API URL for the tool instance.",
+          "x-ms-summary": "URL"
+        }
+      }
+    },
+    "ProjectDetail": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Project ID.",
+          "x-ms-summary": "ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Project name.",
+          "x-ms-summary": "Name"
+        },
+        "description": {
+          "type": "string",
+          "description": "Project description.",
+          "x-ms-summary": "Description"
+        },
+        "created_at": {
+          "type": "string",
+          "description": "ISO 8601 creation timestamp.",
+          "x-ms-summary": "Created At"
+        },
+        "updated_at": {
+          "type": "string",
+          "description": "ISO 8601 last update timestamp.",
+          "x-ms-summary": "Updated At"
+        },
+        "url": {
+          "type": "string",
+          "description": "API URL for this project.",
+          "x-ms-summary": "URL"
+        },
+        "app_url": {
+          "type": "string",
+          "description": "Web URL for this project.",
+          "x-ms-summary": "App URL"
+        },
+        "dock": {
+          "type": "array",
+          "description": "Array of dock tool objects with IDs for to-do sets, message boards, schedules.",
+          "x-ms-summary": "Dock",
+          "items": {
+            "$ref": "#/definitions/DockItem"
+          }
+        }
+      }
+    },
+    "TodoList": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "description": "To-do list ID.",
+          "x-ms-summary": "ID"
+        },
+        "title": {
+          "type": "string",
+          "description": "List name.",
+          "x-ms-summary": "Title"
+        },
+        "description": {
+          "type": "string",
+          "description": "List description (rich text HTML).",
+          "x-ms-summary": "Description"
+        },
+        "completed": {
+          "type": "boolean",
+          "description": "Whether all items are complete.",
+          "x-ms-summary": "Completed"
+        },
+        "completed_ratio": {
+          "type": "string",
+          "description": "Completion ratio (e.g., 3/5).",
+          "x-ms-summary": "Completed Ratio"
+        },
+        "comments_count": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Number of comments on this list.",
+          "x-ms-summary": "Comments Count"
+        },
+        "todos_url": {
+          "type": "string",
+          "description": "API URL to list to-dos in this list.",
+          "x-ms-summary": "Todos URL"
+        },
+        "app_url": {
+          "type": "string",
+          "description": "Web URL for this list.",
+          "x-ms-summary": "App URL"
+        },
+        "created_at": {
+          "type": "string",
+          "description": "ISO 8601 creation timestamp.",
+          "x-ms-summary": "Created At"
+        },
+        "updated_at": {
+          "type": "string",
+          "description": "ISO 8601 last update timestamp.",
+          "x-ms-summary": "Updated At"
+        }
+      }
+    },
+    "Person": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Person ID.",
+          "x-ms-summary": "ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Person's full name.",
+          "x-ms-summary": "Name"
+        },
+        "email_address": {
+          "type": "string",
+          "description": "Person's email.",
+          "x-ms-summary": "Email Address"
+        },
+        "avatar_url": {
+          "type": "string",
+          "description": "URL to person's avatar image.",
+          "x-ms-summary": "Avatar URL"
+        }
+      }
+    },
+    "Creator": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Creator's person ID.",
+          "x-ms-summary": "ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Creator's full name.",
+          "x-ms-summary": "Name"
+        }
+      }
+    },
+    "TodoItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "description": "To-do item ID.",
+          "x-ms-summary": "ID"
+        },
+        "content": {
+          "type": "string",
+          "description": "To-do title text.",
+          "x-ms-summary": "Content"
+        },
+        "description": {
+          "type": "string",
+          "description": "To-do description (rich text HTML).",
+          "x-ms-summary": "Description"
+        },
+        "completed": {
+          "type": "boolean",
+          "description": "Whether the to-do is marked complete.",
+          "x-ms-summary": "Completed"
+        },
+        "due_on": {
+          "type": "string",
+          "description": "Due date in YYYY-MM-DD format, or null.",
+          "x-ms-summary": "Due On"
+        },
+        "starts_on": {
+          "type": "string",
+          "description": "Start date in YYYY-MM-DD format, or null.",
+          "x-ms-summary": "Starts On"
+        },
+        "comments_count": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Number of comments on this to-do.",
+          "x-ms-summary": "Comments Count"
+        },
+        "assignees": {
+          "type": "array",
+          "description": "Array of assignee objects.",
+          "x-ms-summary": "Assignees",
+          "items": {
+            "$ref": "#/definitions/Person"
+          }
+        },
+        "creator": {
+          "description": "Creator of this to-do.",
+          "x-ms-summary": "Creator",
+          "$ref": "#/definitions/Creator"
+        },
+        "created_at": {
+          "type": "string",
+          "description": "ISO 8601 creation timestamp.",
+          "x-ms-summary": "Created At"
+        },
+        "updated_at": {
+          "type": "string",
+          "description": "ISO 8601 last update timestamp.",
+          "x-ms-summary": "Updated At"
+        },
+        "app_url": {
+          "type": "string",
+          "description": "Web URL for this to-do.",
+          "x-ms-summary": "App URL"
+        },
+        "completion_url": {
+          "type": "string",
+          "description": "API URL to complete this to-do (POST).",
+          "x-ms-summary": "Completion URL"
+        }
+      }
+    },
+    "ParentRef": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Parent resource ID.",
+          "x-ms-summary": "ID"
+        },
+        "title": {
+          "type": "string",
+          "description": "Parent resource title.",
+          "x-ms-summary": "Title"
+        },
+        "url": {
+          "type": "string",
+          "description": "API URL for the parent resource.",
+          "x-ms-summary": "URL"
+        }
+      }
+    },
+    "BucketRef": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Project ID.",
+          "x-ms-summary": "ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Project name.",
+          "x-ms-summary": "Name"
+        }
+      }
+    },
+    "TodoItemDetail": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "description": "To-do item ID.",
+          "x-ms-summary": "ID"
+        },
+        "content": {
+          "type": "string",
+          "description": "To-do title text.",
+          "x-ms-summary": "Content"
+        },
+        "description": {
+          "type": "string",
+          "description": "To-do description (rich text HTML).",
+          "x-ms-summary": "Description"
+        },
+        "completed": {
+          "type": "boolean",
+          "description": "Whether the to-do is marked complete.",
+          "x-ms-summary": "Completed"
+        },
+        "due_on": {
+          "type": "string",
+          "description": "Due date in YYYY-MM-DD format, or null.",
+          "x-ms-summary": "Due On"
+        },
+        "starts_on": {
+          "type": "string",
+          "description": "Start date in YYYY-MM-DD format, or null.",
+          "x-ms-summary": "Starts On"
+        },
+        "comments_count": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Number of comments on this to-do.",
+          "x-ms-summary": "Comments Count"
+        },
+        "assignees": {
+          "type": "array",
+          "description": "Array of assignee objects.",
+          "x-ms-summary": "Assignees",
+          "items": {
+            "$ref": "#/definitions/Person"
+          }
+        },
+        "creator": {
+          "description": "Creator of this to-do.",
+          "x-ms-summary": "Creator",
+          "$ref": "#/definitions/Creator"
+        },
+        "created_at": {
+          "type": "string",
+          "description": "ISO 8601 creation timestamp.",
+          "x-ms-summary": "Created At"
+        },
+        "updated_at": {
+          "type": "string",
+          "description": "ISO 8601 last update timestamp.",
+          "x-ms-summary": "Updated At"
+        },
+        "app_url": {
+          "type": "string",
+          "description": "Web URL for this to-do.",
+          "x-ms-summary": "App URL"
+        },
+        "completion_url": {
+          "type": "string",
+          "description": "API URL to complete this to-do (POST).",
+          "x-ms-summary": "Completion URL"
+        },
+        "parent": {
+          "description": "Parent to-do list.",
+          "x-ms-summary": "Parent",
+          "$ref": "#/definitions/ParentRef"
+        },
+        "bucket": {
+          "description": "Parent project.",
+          "x-ms-summary": "Bucket",
+          "$ref": "#/definitions/BucketRef"
+        },
+        "subscription_url": {
+          "type": "string",
+          "description": "API URL to manage subscriptions.",
+          "x-ms-summary": "Subscription URL"
+        },
+        "comments_url": {
+          "type": "string",
+          "description": "API URL to list comments on this to-do.",
+          "x-ms-summary": "Comments URL"
+        }
+      }
+    },
+    "Message": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Message ID.",
+          "x-ms-summary": "ID"
+        },
+        "subject": {
+          "type": "string",
+          "description": "Message subject line.",
+          "x-ms-summary": "Subject"
+        },
+        "content": {
+          "type": "string",
+          "description": "Message body (rich text HTML).",
+          "x-ms-summary": "Content"
+        },
+        "created_at": {
+          "type": "string",
+          "description": "ISO 8601 creation timestamp.",
+          "x-ms-summary": "Created At"
+        },
+        "updated_at": {
+          "type": "string",
+          "description": "ISO 8601 last update timestamp.",
+          "x-ms-summary": "Updated At"
+        },
+        "comments_count": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Number of comments on this message.",
+          "x-ms-summary": "Comments Count"
+        },
+        "creator": {
+          "description": "Creator of this message.",
+          "x-ms-summary": "Creator",
+          "$ref": "#/definitions/Person"
+        },
+        "app_url": {
+          "type": "string",
+          "description": "Web URL for this message.",
+          "x-ms-summary": "App URL"
+        }
+      }
+    },
+    "MessageDetail": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Message ID.",
+          "x-ms-summary": "ID"
+        },
+        "subject": {
+          "type": "string",
+          "description": "Message subject line.",
+          "x-ms-summary": "Subject"
+        },
+        "content": {
+          "type": "string",
+          "description": "Message body (rich text HTML).",
+          "x-ms-summary": "Content"
+        },
+        "created_at": {
+          "type": "string",
+          "description": "ISO 8601 creation timestamp.",
+          "x-ms-summary": "Created At"
+        },
+        "updated_at": {
+          "type": "string",
+          "description": "ISO 8601 last update timestamp.",
+          "x-ms-summary": "Updated At"
+        },
+        "comments_count": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Number of comments on this message.",
+          "x-ms-summary": "Comments Count"
+        },
+        "creator": {
+          "description": "Creator of this message.",
+          "x-ms-summary": "Creator",
+          "$ref": "#/definitions/Person"
+        },
+        "app_url": {
+          "type": "string",
+          "description": "Web URL for this message.",
+          "x-ms-summary": "App URL"
+        },
+        "bucket": {
+          "description": "Parent project.",
+          "x-ms-summary": "Bucket",
+          "$ref": "#/definitions/BucketRef"
+        },
+        "parent": {
+          "description": "Parent message board.",
+          "x-ms-summary": "Parent",
+          "$ref": "#/definitions/ParentRef"
+        },
+        "subscription_url": {
+          "type": "string",
+          "description": "API URL to manage subscriptions.",
+          "x-ms-summary": "Subscription URL"
+        },
+        "comments_url": {
+          "type": "string",
+          "description": "API URL to list comments on this message.",
+          "x-ms-summary": "Comments URL"
+        }
+      }
+    },
+    "ScheduleEntry": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Schedule entry ID.",
+          "x-ms-summary": "ID"
+        },
+        "summary": {
+          "type": "string",
+          "description": "Event title.",
+          "x-ms-summary": "Summary"
+        },
+        "description": {
+          "type": "string",
+          "description": "Event description (rich text HTML).",
+          "x-ms-summary": "Description"
+        },
+        "starts_at": {
+          "type": "string",
+          "description": "ISO 8601 start datetime.",
+          "x-ms-summary": "Starts At"
+        },
+        "ends_at": {
+          "type": "string",
+          "description": "ISO 8601 end datetime.",
+          "x-ms-summary": "Ends At"
+        },
+        "all_day": {
+          "type": "boolean",
+          "description": "Whether this is an all-day event.",
+          "x-ms-summary": "All Day"
+        },
+        "comments_count": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Number of comments on this entry.",
+          "x-ms-summary": "Comments Count"
+        },
+        "participants": {
+          "type": "array",
+          "description": "Array of participant objects.",
+          "x-ms-summary": "Participants",
+          "items": {
+            "$ref": "#/definitions/Person"
+          }
+        },
+        "creator": {
+          "description": "Creator of this entry.",
+          "x-ms-summary": "Creator",
+          "$ref": "#/definitions/Creator"
+        },
+        "created_at": {
+          "type": "string",
+          "description": "ISO 8601 creation timestamp.",
+          "x-ms-summary": "Created At"
+        },
+        "updated_at": {
+          "type": "string",
+          "description": "ISO 8601 last update timestamp.",
+          "x-ms-summary": "Updated At"
+        },
+        "app_url": {
+          "type": "string",
+          "description": "Web URL for this entry.",
+          "x-ms-summary": "App URL"
+        }
+      }
+    },
+    "ScheduleEntryDetail": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Schedule entry ID.",
+          "x-ms-summary": "ID"
+        },
+        "summary": {
+          "type": "string",
+          "description": "Event title.",
+          "x-ms-summary": "Summary"
+        },
+        "description": {
+          "type": "string",
+          "description": "Event description (rich text HTML).",
+          "x-ms-summary": "Description"
+        },
+        "starts_at": {
+          "type": "string",
+          "description": "ISO 8601 start datetime.",
+          "x-ms-summary": "Starts At"
+        },
+        "ends_at": {
+          "type": "string",
+          "description": "ISO 8601 end datetime.",
+          "x-ms-summary": "Ends At"
+        },
+        "all_day": {
+          "type": "boolean",
+          "description": "Whether this is an all-day event.",
+          "x-ms-summary": "All Day"
+        },
+        "comments_count": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Number of comments on this entry.",
+          "x-ms-summary": "Comments Count"
+        },
+        "participants": {
+          "type": "array",
+          "description": "Array of participant objects.",
+          "x-ms-summary": "Participants",
+          "items": {
+            "$ref": "#/definitions/Person"
+          }
+        },
+        "creator": {
+          "description": "Creator of this entry.",
+          "x-ms-summary": "Creator",
+          "$ref": "#/definitions/Creator"
+        },
+        "created_at": {
+          "type": "string",
+          "description": "ISO 8601 creation timestamp.",
+          "x-ms-summary": "Created At"
+        },
+        "updated_at": {
+          "type": "string",
+          "description": "ISO 8601 last update timestamp.",
+          "x-ms-summary": "Updated At"
+        },
+        "app_url": {
+          "type": "string",
+          "description": "Web URL for this entry.",
+          "x-ms-summary": "App URL"
+        },
+        "bucket": {
+          "description": "Parent project.",
+          "x-ms-summary": "Bucket",
+          "$ref": "#/definitions/BucketRef"
+        },
+        "parent": {
+          "description": "Parent schedule.",
+          "x-ms-summary": "Parent",
+          "$ref": "#/definitions/ParentRef"
+        },
+        "recurrence_schedule": {
+          "description": "Recurrence info if this is a recurring event.",
+          "x-ms-summary": "Recurrence Schedule",
+          "$ref": "#/definitions/RecurrenceSchedule"
+        },
+        "comments_url": {
+          "type": "string",
+          "description": "API URL to list comments on this entry.",
+          "x-ms-summary": "Comments URL"
+        }
+      }
+    },
+    "RecurrenceSchedule": {
+      "type": "object",
+      "properties": {
+        "frequency": {
+          "type": "string",
+          "description": "Recurrence frequency (e.g., weekly, monthly).",
+          "x-ms-summary": "Frequency"
+        },
+        "days": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "description": "Days of the week for recurrence.",
+          "x-ms-summary": "Days"
+        },
+        "hour": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Hour of recurrence.",
+          "x-ms-summary": "Hour"
+        },
+        "minute": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Minute of recurrence.",
+          "x-ms-summary": "Minute"
+        },
+        "start_date": {
+          "type": "string",
+          "description": "Recurrence start date.",
+          "x-ms-summary": "Start Date"
+        },
+        "end_date": {
+          "type": "string",
+          "description": "Recurrence end date.",
+          "x-ms-summary": "End Date"
+        }
+      }
+    },
+    "Comment": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Comment ID.",
+          "x-ms-summary": "ID"
+        },
+        "content": {
+          "type": "string",
+          "description": "Comment body (rich text HTML).",
+          "x-ms-summary": "Content"
+        },
+        "created_at": {
+          "type": "string",
+          "description": "ISO 8601 creation timestamp.",
+          "x-ms-summary": "Created At"
+        },
+        "updated_at": {
+          "type": "string",
+          "description": "ISO 8601 last update timestamp.",
+          "x-ms-summary": "Updated At"
+        },
+        "creator": {
+          "description": "Creator of this comment.",
+          "x-ms-summary": "Creator",
+          "$ref": "#/definitions/Person"
+        },
+        "parent": {
+          "description": "Parent recording.",
+          "x-ms-summary": "Parent",
+          "$ref": "#/definitions/CommentParentRef"
+        },
+        "bucket": {
+          "description": "Parent project.",
+          "x-ms-summary": "Bucket",
+          "$ref": "#/definitions/BucketRef"
+        }
+      }
+    },
+    "CommentParentRef": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Parent recording ID.",
+          "x-ms-summary": "ID"
+        },
+        "title": {
+          "type": "string",
+          "description": "Parent recording title.",
+          "x-ms-summary": "Title"
+        },
+        "url": {
+          "type": "string",
+          "description": "API URL for the parent recording.",
+          "x-ms-summary": "URL"
+        },
+        "type": {
+          "type": "string",
+          "description": "Type of the parent recording (e.g., Todo, Message).",
+          "x-ms-summary": "Type"
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "oauth2-auth": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://launchpad.37signals.com/authorization/new?type=web_server",
+      "tokenUrl": "https://launchpad.37signals.com/authorization/token?type=web_server",
+      "scopes": {}
+    }
+  },
+  "security": [
+    {
+      "oauth2-auth": []
+    }
+  ],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://basecamp.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://basecamp.com/about/policies/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Business Management;Productivity"
+    }
+  ]
+}
