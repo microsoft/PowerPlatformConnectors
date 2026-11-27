@@ -1,0 +1,286 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "OFAC Sanctions List",
+    "description": "The U.S. Treasury Office of Foreign Assets Control (OFAC) publishes the Specially Designated Nationals (SDN) List and the Consolidated Sanctions List through its Sanctions List Service. This connector lists the sanctions lists and programs OFAC publishes, downloads the published data files as CSV, XML or compressed archives, and retrieves the latest list of changes so a flow can react when a designation changes. It returns files as published and does not perform name screening.",
+    "version": "1.0",
+    "contact": {
+      "name": "OFAC Sanctions List Service",
+      "url": "https://ofac.treasury.gov/sanctions-list-service"
+    }
+  },
+  "host": "sanctionslistservice.ofac.treas.gov",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/sanctions-lists": {
+      "get": {
+        "tags": [
+          "Reference"
+        ],
+        "summary": "List sanctions lists",
+        "description": "Returns the names of the sanctions lists that OFAC publishes through the Sanctions List Service, such as the SDN List and the Consolidated List, as a plain list of text values. Use this to discover the current list names rather than relying on fixed values, because OFAC can change them.",
+        "operationId": "ListSanctionsLists",
+        "x-ms-visibility": "important",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The sanctions list names were returned.",
+            "schema": {
+              "$ref": "#/definitions/NameList"
+            }
+          },
+          "500": {
+            "description": "The service encountered an internal error."
+          }
+        }
+      }
+    },
+    "/sanctions-programs": {
+      "get": {
+        "tags": [
+          "Reference"
+        ],
+        "summary": "List sanctions programs",
+        "description": "Returns the sanctions program codes that OFAC uses to tag entries on its lists, such as CUBA, IRAN, LIBYA2 or UKRAINE-EO13662, as a plain list of text values. Use a returned code to filter downloaded list data to a single program.",
+        "operationId": "ListSanctionsPrograms",
+        "x-ms-visibility": "important",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The sanctions program codes were returned.",
+            "schema": {
+              "$ref": "#/definitions/NameList"
+            }
+          },
+          "500": {
+            "description": "The service encountered an internal error."
+          }
+        }
+      }
+    },
+    "/api/download/{fileName}": {
+      "get": {
+        "tags": [
+          "Downloads"
+        ],
+        "summary": "Download a sanctions list file",
+        "description": "Downloads one of the published sanctions list data files from the Sanctions List Service and returns its contents. The service always returns the most recently published version of the file. The request is answered with a redirect to a time limited storage link, which the connector follows automatically. Files range in size from a few hundred kilobytes to several megabytes, so allow for the response size and timeout limits of your flow. The connector returns the file as it is published and does not parse it.",
+        "operationId": "DownloadSanctionsFile",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "fileName",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "File",
+            "x-ms-visibility": "important",
+            "x-ms-url-encoding": "single",
+            "description": "The published file to download. CSV files hold the flat legacy format, legacy XML files hold the older XML structure, advanced XML files hold the richer global standard format, fixed-width files hold the FF format, and ZIP files hold a compressed copy of the matching XML file. Primary files hold the main names; the alternate, address and comment files hold related detail that joins back to the primary file.",
+            "enum": [
+              "SDN.CSV",
+              "SDN.XML",
+              "SDN.FF",
+              "SDN_ADVANCED.XML",
+              "SDN_XML.ZIP",
+              "SDN_ADVANCED.ZIP",
+              "ALT.CSV",
+              "ADD.CSV",
+              "SDN_COMMENTS.CSV",
+              "CONSOLIDATED.XML",
+              "CONS_ADVANCED.XML",
+              "CONS_PRIM.CSV",
+              "CONS_ADD.CSV",
+              "CONS_ALT.CSV",
+              "CONS_COMMENTS.CSV"
+            ],
+            "x-ms-enum-values": [
+              { "displayName": "SDN primary names (CSV)", "value": "SDN.CSV" },
+              { "displayName": "SDN primary names (legacy XML)", "value": "SDN.XML" },
+              { "displayName": "SDN primary names (fixed-width)", "value": "SDN.FF" },
+              { "displayName": "SDN full detail (advanced XML)", "value": "SDN_ADVANCED.XML" },
+              { "displayName": "SDN legacy XML (ZIP)", "value": "SDN_XML.ZIP" },
+              { "displayName": "SDN advanced XML (ZIP)", "value": "SDN_ADVANCED.ZIP" },
+              { "displayName": "SDN alternate names and AKAs (CSV)", "value": "ALT.CSV" },
+              { "displayName": "SDN addresses (CSV)", "value": "ADD.CSV" },
+              { "displayName": "SDN remarks overflow (CSV)", "value": "SDN_COMMENTS.CSV" },
+              { "displayName": "Consolidated primary names (legacy XML)", "value": "CONSOLIDATED.XML" },
+              { "displayName": "Consolidated full detail (advanced XML)", "value": "CONS_ADVANCED.XML" },
+              { "displayName": "Consolidated primary names (CSV)", "value": "CONS_PRIM.CSV" },
+              { "displayName": "Consolidated addresses (CSV)", "value": "CONS_ADD.CSV" },
+              { "displayName": "Consolidated alternate names and AKAs (CSV)", "value": "CONS_ALT.CSV" },
+              { "displayName": "Consolidated remarks overflow (CSV)", "value": "CONS_COMMENTS.CSV" }
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The file contents were returned.",
+            "schema": {
+              "type": "string",
+              "format": "binary"
+            }
+          },
+          "404": {
+            "description": "The requested file name is not one that the service publishes."
+          },
+          "500": {
+            "description": "The service encountered an internal error."
+          }
+        }
+      }
+    },
+    "/changes/latest": {
+      "get": {
+        "tags": [
+          "Changes"
+        ],
+        "summary": "Get the latest list changes",
+        "description": "Returns the most recent delta file published by the Sanctions List Service. The delta file is an XML document that lists the entries added to, changed on, or removed from the sanctions lists in the latest publication. The request is answered with a redirect to a time limited storage link, which the connector follows automatically. Run this on a schedule to detect new or amended designations.",
+        "operationId": "GetLatestChanges",
+        "x-ms-visibility": "important",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The latest delta file was returned as an XML document.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "500": {
+            "description": "The service encountered an internal error."
+          }
+        }
+      }
+    },
+    "/changes/history/{year}/{month}/{day}": {
+      "get": {
+        "tags": [
+          "Changes"
+        ],
+        "summary": "Get list changes for a date",
+        "description": "Returns the delta publications that OFAC issued on the given date in a publications array. Each item carries a publication identifier and the date and time it was published. The array is empty when OFAC published nothing on that date. Use this to locate historic changes.",
+        "operationId": "GetChangeHistory",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Year",
+            "x-ms-visibility": "important",
+            "x-ms-url-encoding": "single",
+            "description": "The four digit year of the publication date, for example 2026."
+          },
+          {
+            "name": "month",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Month",
+            "x-ms-visibility": "important",
+            "x-ms-url-encoding": "single",
+            "description": "The month of the publication date as one or two digits, for example 8 or 08."
+          },
+          {
+            "name": "day",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Day",
+            "x-ms-visibility": "important",
+            "x-ms-url-encoding": "single",
+            "description": "The day of the publication date as one or two digits, for example 7 or 07."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The delta publications for the given date were returned. The publications array is empty when nothing was published on that date.",
+            "schema": {
+              "$ref": "#/definitions/PublicationHistory"
+            }
+          },
+          "404": {
+            "description": "No delta files were published on the given date."
+          },
+          "500": {
+            "description": "The service encountered an internal error."
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "NameList": {
+      "type": "array",
+      "description": "A plain list of text values returned by the service.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "PublicationHistory": {
+      "type": "object",
+      "description": "The delta publications OFAC issued on a given date.",
+      "properties": {
+        "publications": {
+          "type": "array",
+          "description": "The delta publications for the requested date. Empty when OFAC published nothing that day.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "publicationID": {
+                "type": "integer",
+                "format": "int32",
+                "x-ms-summary": "Publication ID",
+                "description": "The identifier OFAC assigned to the delta publication."
+              },
+              "datePublished": {
+                "type": "string",
+                "x-ms-summary": "Date published",
+                "description": "The date and time the delta was published, as an ISO 8601 string with no time zone offset, for example 2026-01-16T10:01:44.740051."
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Reference",
+      "description": "Discover the sanctions lists and sanctions programs that OFAC publishes."
+    },
+    {
+      "name": "Downloads",
+      "description": "Download the published sanctions list data files."
+    },
+    {
+      "name": "Changes",
+      "description": "Retrieve the changes OFAC has made to its sanctions lists."
+    }
+  ],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://ofac.treasury.gov/sanctions-list-service"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://home.treasury.gov/footer/privacy-act"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Data;Business Intelligence"
+    }
+  ]
+}
