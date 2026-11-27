@@ -1,5 +1,5 @@
 # AccuWeather
-AccuWeather is a service that provides commercial weather forecasting services worldwide.
+AccuWeather is a service that provides commercial weather forecasting services worldwide
 
 ## Publisher
 ### Ahmad Najjar
