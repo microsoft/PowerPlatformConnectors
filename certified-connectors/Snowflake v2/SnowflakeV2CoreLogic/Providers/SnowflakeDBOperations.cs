@@ -141,7 +141,9 @@ namespace SnowflakeV2CoreLogic.Providers
 
             var fieldsToSelect = "*";
             string? orderBy = null;
-            var top = "51";
+
+            // The statement reads one row past the page, which tells the caller whether another page follows.
+            var top = (Constants.DefaultNumberOfRowsToReturn + 1).ToString();
             var skip = "0";
             var filter = string.Empty;
 
@@ -154,7 +156,8 @@ namespace SnowflakeV2CoreLogic.Providers
                     queryOptions = QueryOptions.Parse(options);
                     fieldsToSelect = queryOptions.Select != null ? queryOptions.Select.EnsureValidSelectClause("Select") : "*";
                     orderBy = options.OrderBy != null ? options.OrderBy.RawValue.EnsureValidOrderByClause("Order By") : null;
-                    top = queryOptions.IsTopSet ? queryOptions.Top.ToString() : Constants.DefaultNumberOfRowsToReturn.ToString();
+                    long pageSize = SnowflakeToODataHelper.GetPageSize(options);
+                    top = (pageSize > 0 ? pageSize + 1 : 0).ToString(CultureInfo.InvariantCulture);
                     skip = queryOptions.Skip.ToString();
                     filter = ConvertODataFilterToSql(options, connectionParameters?.UseCaseInsensitiveFilters ?? false);
                 }
