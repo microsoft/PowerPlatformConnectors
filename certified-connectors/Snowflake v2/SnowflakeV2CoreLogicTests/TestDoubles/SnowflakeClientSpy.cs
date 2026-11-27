@@ -33,13 +33,19 @@ namespace SnowflakeV2CoreLogic.Tests.TestDoubles
     internal sealed class SnowflakeClientSpy : ISnowflakeClient
     {
         private readonly Func<RecordedStatement, SnowflakeTableData> responder;
+        private readonly Func<int, SnowflakeAPIResponseModel>? partitionResponder;
 
-        public SnowflakeClientSpy(Func<RecordedStatement, SnowflakeTableData> responder)
+        public SnowflakeClientSpy(
+            Func<RecordedStatement, SnowflakeTableData> responder,
+            Func<int, SnowflakeAPIResponseModel>? partitionResponder = null)
         {
             this.responder = responder;
+            this.partitionResponder = partitionResponder;
         }
 
         public List<RecordedStatement> Statements { get; } = new List<RecordedStatement>();
+
+        public List<(string StatementHandle, int Partition)> PartitionRequests { get; } = new List<(string StatementHandle, int Partition)>();
 
         public Task<SnowflakeTableData> CallAPIAsync(
             HttpClient? client,
@@ -59,7 +65,20 @@ namespace SnowflakeV2CoreLogic.Tests.TestDoubles
             => throw new NotImplementedException();
 
         public Task<SnowflakeAPIResponseModel> GetResultsAsync(HttpClient? client, string statementHandle, HeaderParameters headerParameters, QueryParameters queryParams)
-            => throw new NotImplementedException();
+        {
+            if (partitionResponder == null)
+            {
+                throw new NotImplementedException();
+            }
+
+            int partition = queryParams.Partition ?? 0;
+            lock (PartitionRequests)
+            {
+                PartitionRequests.Add((statementHandle, partition));
+            }
+
+            return Task.FromResult(partitionResponder(partition));
+        }
 
         public Task<SnowflakeAPIResponseModel> CancelRequestAsync(HttpClient? client, string statementHandle, HeaderParameters headerParameters, QueryParameters queryParams)
             => throw new NotImplementedException();
@@ -114,11 +133,59 @@ namespace SnowflakeV2CoreLogic.Tests.TestDoubles
                 new[] { ("number of rows updated", "fixed", (int?)0), ("number of multi-joined rows updated", "fixed", (int?)0) },
                 new[] { count.ToString(), "0" });
 
-        public static SnowflakeTableData Rows(int count)
+        public static SnowflakeTableData Rows(int count) => Rows(1, count);
+
+        /// <summary>
+        /// ID and NAME rows with consecutive IDs starting at <paramref name="firstId"/>.
+        /// </summary>
+        public static SnowflakeTableData Rows(int firstId, int count)
         {
-            var rows = Enumerable.Range(1, count).Select(i => new string?[] { i.ToString(), $"name {i}" }).ToArray();
+            var rows = Enumerable.Range(firstId, count).Select(i => new string?[] { i.ToString(), $"name {i}" }).ToArray();
             return Table(new[] { ("ID", "fixed", (int?)0), ("NAME", "text", (int?)null) }, rows);
         }
+
+        /// <summary>
+        /// The first partition of a statement whose result Snowflake split into partitions of the given row counts.
+        /// </summary>
+        public static SnowflakeTableData FirstPartition(string statementHandle, params int[] partitionRowCounts)
+        {
+            var response = Rows(1, partitionRowCounts[0]);
+            response.StatementHandle = statementHandle;
+            response.ResultSetMetaData!.NumRows = partitionRowCounts.Sum();
+            response.ResultSetMetaData.PartitionInfo = partitionRowCounts.Select(count => new PartitionInfo { RowCount = count }).ToList();
+            return response;
+        }
+
+        public static SnowflakeTableData Count(long count)
+            => Table(new[] { ("COUNT(*)", "fixed", (int?)0) }, new[] { count.ToString() });
+    }
+
+    /// <summary>
+    /// Connection parameters provider for a connection to one Snowflake server, called through the given URL.
+    /// </summary>
+    internal sealed class ServerConnectionParametersProvider : IConnectionParametersProvider
+    {
+        private const string Server = "account.snowflakecomputing.com";
+        private readonly Uri referrerUri;
+
+        public ServerConnectionParametersProvider(Uri referrerUri)
+        {
+            this.referrerUri = referrerUri;
+        }
+
+        public T GetProperty<T>(string key) => PropertyExists(key) ? (T)(object)Server : throw new KeyNotFoundException(key);
+
+        public bool PropertyExists(string key) => key == Constants.Server;
+
+        public bool TryGetProperty<T>(string key, out T value)
+        {
+            value = default!;
+            return false;
+        }
+
+        public IToken GetToken() => null!;
+
+        public Uri GetReferrerUri() => referrerUri;
     }
 
     /// <summary>

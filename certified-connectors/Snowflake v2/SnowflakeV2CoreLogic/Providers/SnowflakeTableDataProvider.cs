@@ -9,15 +9,19 @@ namespace SnowflakeV2CoreLogic.Providers
     using System.Collections.Specialized;
     using System.Globalization;
     using System.Linq;
+    using System.Net;
     using System.Net.Http;
     using System.Threading.Tasks;
     using System.Web;
+    using System.Web.Http;
     using System.Web.OData.Extensions;
     using System.Web.OData.Query;
     using Microsoft.Azure.Connectors.SnowflakeV2Contracts.Interfaces;
     using Microsoft.Azure.Connectors.SnowflakeV2Contracts.Models;
     using Microsoft.Extensions.Logging;
+    using Microsoft.OData.Core;
     using SnowflakeV2CoreLogic;
+    using SnowflakeV2CoreLogic.Exceptions;
     using SnowflakeV2CoreLogic.Models;
     using SnowflakeV2CoreLogic.Models.SnowflakeAPIModels;
     using SnowflakeV2CoreLogic.Utilities;
@@ -27,6 +31,8 @@ namespace SnowflakeV2CoreLogic.Providers
     /// </summary>
     public class SnowflakeTableDataProvider : ITableDataProvider<Item>
     {
+        private const string InvalidSkipTokenMessage = "The $skiptoken does not refer to a partition of the statement.";
+
         private readonly SnowflakeDBOperations snowflakeDBOperations;
         private readonly SnowflakeConnectionParametersProvider snowflakeConnectionParametersProvider;
         private readonly ILogger logger;
@@ -79,10 +85,16 @@ namespace SnowflakeV2CoreLogic.Providers
             string? skipToken = queryParams["$skiptoken"];
 
             bool isPartitionFollowUp = SnowflakeToODataHelper.TryParsePartitionSkipToken(
-                skipToken, out string? sfStatementHandle, out int partitionIndex, out int totalPartitions);
+                skipToken, out string? sfStatementHandle, out int partitionIndex);
 
             if (isPartitionFollowUp)
             {
+                EnsureValidQueryOptions(options);
+                if (partitionIndex < 1)
+                {
+                    throw CreateBadRequestException(InvalidSkipTokenMessage);
+                }
+
                 logger.LogInformation($"Fetching partition {partitionIndex} for statement handle");
 
                 var partitionResponse = await snowflakeDBOperations.FetchPartitionAsync(sfStatementHandle!, partitionIndex, connectionParameters).ConfigureAwait(true);
@@ -93,18 +105,7 @@ namespace SnowflakeV2CoreLogic.Providers
                     return new List<Item>();
                 }
 
-                int rowsReturnedInPartition = partitionResponse.Data?.Count ?? 0;
-
-                Uri? nextUrl = SnowflakeToODataHelper.GeneratePartitionNextLink(
-                    snowflakeConnectionParametersProvider.GetReferralUrl(),
-                    options,
-                    sfStatementHandle!,
-                    partitionIndex + 1,
-                    totalPartitions,
-                    rowsReturnedInPartition);
-                request.ODataProperties().NextLink = nextUrl;
-
-                return partitionResponse.ToListOfItems();
+                return ToItemsWithNextLink(request, options, partitionResponse, sfStatementHandle, partitionIndex);
             }
 
             bool countRequested = options.Count?.RawValue?.Equals("true", StringComparison.InvariantCultureIgnoreCase) == true;
@@ -123,23 +124,6 @@ namespace SnowflakeV2CoreLogic.Providers
                 return new List<Item>();
             }
 
-            int partitionCount = queryResponse.ResultSetMetaData?.PartitionInfo?.Count ?? 1;
-            string? statementHandle = queryResponse.StatementHandle;
-
-            if (partitionCount > 1 && statementHandle != null && statementHandle.Length > 0)
-            {
-                int rowsReturnedInPartition = queryResponse.Data?.Count ?? 0;
-
-                Uri? nextUrl = SnowflakeToODataHelper.GeneratePartitionNextLink(
-                    snowflakeConnectionParametersProvider.GetReferralUrl(),
-                    options,
-                    statementHandle,
-                    1,
-                    partitionCount,
-                    rowsReturnedInPartition);
-                  request.ODataProperties().NextLink = nextUrl;
-            }
-
             if (countRequested && countTask != null)
             {
                 var numberOfRecordsResponse = await countTask.ConfigureAwait(true);
@@ -147,7 +131,7 @@ namespace SnowflakeV2CoreLogic.Providers
                 request.ODataProperties().TotalCount = numberOfRecordsAvailable;
             }
 
-            return queryResponse.ToListOfItems();
+            return ToItemsWithNextLink(request, options, queryResponse, queryResponse.StatementHandle, 0);
         }
 
         /// <inheritdoc />
@@ -282,6 +266,85 @@ namespace SnowflakeV2CoreLogic.Providers
 
             // Now that we have a primary key, we can construct the delete query
             await snowflakeDBOperations.DeleteItemAsync(table, itemKey, connectionParameters, "DELETE datasets/{dataset}/tables/{table}/items/{id}").ConfigureAwait(true);
+        }
+
+        /// <summary>
+        /// Converts one partition of the statement that reads a page into items, and links to what follows.
+        /// While the page continues in the statement's next partition, the link reads that partition, or the rows
+        /// after this one when the statement has no handle. Once the page is complete, the link reads the next page
+        /// if the statement found more rows than fit in the page.
+        /// </summary>
+        /// <param name="request">The request, which receives the next link.</param>
+        /// <param name="options">The OData options of the request.</param>
+        /// <param name="partition">The rows of the partition, with the metadata of the whole statement.</param>
+        /// <param name="statementHandle">The handle of the statement.</param>
+        /// <param name="partitionIndex">The index of the partition.</param>
+        /// <returns>The items of the partition that belong to the page.</returns>
+        private List<Item> ToItemsWithNextLink(
+            HttpRequestMessage request,
+            ODataQueryOptions options,
+            SnowflakeTableData partition,
+            string? statementHandle,
+            int partitionIndex)
+        {
+            Uri referrerUri = snowflakeConnectionParametersProvider.GetReferralUrl();
+            List<PartitionInfo>? partitionInfo = partition.ResultSetMetaData?.PartitionInfo;
+            int totalPartitions = partitionInfo?.Count ?? 1;
+            bool isLastPartition = partitionIndex + 1 >= totalPartitions;
+            int rowsInPartition = partition.Data?.Count ?? 0;
+            long statementRows = partition.ResultSetMetaData?.NumRows ?? 0;
+            long rowsBefore = partitionInfo?.Take(partitionIndex).Sum(p => (long)p.RowCount) ?? 0;
+            long pageSize = SnowflakeToODataHelper.GetPageSize(options);
+            long skip = options.Skip?.Value ?? 0;
+
+            if (!isLastPartition && rowsBefore + rowsInPartition < pageSize)
+            {
+                if (!string.IsNullOrEmpty(statementHandle))
+                {
+                    request.ODataProperties().NextLink = SnowflakeToODataHelper.GeneratePartitionNextLink(
+                        referrerUri, options, skip, statementHandle!, partitionIndex + 1, totalPartitions);
+                }
+                else if (rowsBefore + rowsInPartition > 0)
+                {
+                    // A link that does not move past any row would lead back to this request.
+                    request.ODataProperties().NextLink = SnowflakeToODataHelper.GenerateNextPageLink(
+                        referrerUri, options, skip + rowsBefore + rowsInPartition);
+                }
+
+                return partition.ToListOfItems();
+            }
+
+            // The page ends in this partition. Rows past it are the statement's look-ahead row, which only shows that another page follows.
+            int rowsInPage = (int)Math.Max(0, Math.Min(rowsInPartition, pageSize - rowsBefore));
+            if (partition.Data != null && rowsInPage < partition.Data.Count)
+            {
+                partition.Data.RemoveRange(rowsInPage, partition.Data.Count - rowsInPage);
+            }
+
+            if (pageSize > 0 && statementRows > pageSize)
+            {
+                request.ODataProperties().NextLink = SnowflakeToODataHelper.GenerateNextPageLink(referrerUri, options, skip + pageSize);
+            }
+
+            return partition.ToListOfItems();
+        }
+
+        private static void EnsureValidQueryOptions(ODataQueryOptions options)
+        {
+            var settings = new ODataValidationSettings { AllowedQueryOptions = AllowedQueryOptions.Supported | AllowedQueryOptions.SkipToken };
+            try
+            {
+                options.Validate(settings);
+            }
+            catch (ODataException ex)
+            {
+                throw CreateBadRequestException(ex.Message);
+            }
+        }
+
+        private static HttpResponseException CreateBadRequestException(string message)
+        {
+            return new HttpResponseException(SnowflakeHttpException.CreateHttpResponseMessage(HttpStatusCode.BadRequest, message));
         }
 
         private static string DescribeKeyColumns(IReadOnlyList<(string Column, string Value)> itemKey)

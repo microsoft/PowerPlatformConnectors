@@ -7,7 +7,6 @@ namespace SnowflakeV2CoreLogic.Utilities
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
     using System.Web.OData.Query;
     using Microsoft.Azure.Connectors.SnowflakeV2Contracts.Constants;
     using Microsoft.Azure.Connectors.SnowflakeV2Contracts.Models;
@@ -218,85 +217,54 @@ namespace SnowflakeV2CoreLogic.Utilities
             return tableCapabilitiesMetadata;
         }
 
-        public static Uri? GeneratePartitionNextLink(
-            Uri referrerUri,
-            ODataQueryOptions optionsFromRequest,
-            string statementHandle,
-            int nextPartitionIndex,
-            int totalPartitions,
-            int rowsReturnedInCurrentPartition)
+        /// <summary>
+        /// Number of rows in one page of items: $top when present, otherwise the default page size.
+        /// </summary>
+        /// <param name="optionsFromRequest">The OData options of the request.</param>
+        /// <returns>The page size.</returns>
+        public static long GetPageSize(ODataQueryOptions optionsFromRequest)
         {
-            if (nextPartitionIndex >= totalPartitions)
-            {
-                return null;
-            }
-
-            string? filter = optionsFromRequest?.Filter?.RawValue;
-            string endpointUrl = referrerUri.GetLeftPart(UriPartial.Path);
-            string? orderBy = optionsFromRequest?.OrderBy?.RawValue;
-            string? select = optionsFromRequest?.SelectExpand?.RawSelect;
-
-            int? topValue = null;
-            if (optionsFromRequest?.Top != null && int.TryParse(optionsFromRequest.Top.RawValue, out int parsedTop))
-            {
-                topValue = parsedTop - rowsReturnedInCurrentPartition;
-                if (topValue <= 0)
-                {
-                    return null;
-                }
-            }
-
-            StringBuilder nextUrl = new StringBuilder();
-            bool firstOption = true;
-
-            if (endpointUrl != null)
-            {
-                nextUrl.Append(endpointUrl);
-                nextUrl.Append("?");
-            }
-
-            void AppendParam(string key, string value)
-            {
-                if (!firstOption)
-                {
-                    nextUrl.Append("&");
-                }
-
-                nextUrl.Append($"{key}={value}");
-                firstOption = false;
-            }
-
-            if (orderBy != null)
-            {
-                AppendParam("$orderby", orderBy);
-            }
-
-            if (select != null)
-            {
-                AppendParam("$select", select);
-            }
-
-            if (topValue != null)
-            {
-                AppendParam("$top", topValue.Value.ToString());
-            }
-
-            if (filter != null)
-            {
-                AppendParam("$filter", filter);
-            }
-
-            string skipToken = $"{statementHandle}{SkipTokenSeparator}{nextPartitionIndex}{SkipTokenSeparator}{totalPartitions}";
-            AppendParam("$skiptoken", skipToken);
-
-            return new Uri(nextUrl.ToString());
+            return optionsFromRequest.Top != null ? optionsFromRequest.Top.Value : Constants.DefaultNumberOfRowsToReturn;
         }
 
-        public static bool TryParsePartitionSkipToken(string? skipToken, out string? statementHandle, out int partitionIndex, out int totalPartitions)
+        /// <summary>
+        /// Builds the link to the next partition of the statement that reads the current page, which starts at <paramref name="skip"/>.
+        /// </summary>
+        /// <returns>The link.</returns>
+        public static Uri GeneratePartitionNextLink(
+            Uri referrerUri,
+            ODataQueryOptions optionsFromRequest,
+            long skip,
+            string statementHandle,
+            int nextPartitionIndex,
+            int totalPartitions)
+        {
+            string skipToken = $"{statementHandle}{SkipTokenSeparator}{nextPartitionIndex}{SkipTokenSeparator}{totalPartitions}";
+            return GenerateNextLink(referrerUri, optionsFromRequest, skip, skipToken);
+        }
+
+        /// <summary>
+        /// Builds the link to the page after the current one, which runs a new statement starting at <paramref name="nextSkip"/>.
+        /// </summary>
+        /// <returns>The link.</returns>
+        public static Uri GenerateNextPageLink(
+            Uri referrerUri,
+            ODataQueryOptions optionsFromRequest,
+            long nextSkip)
+        {
+            return GenerateNextLink(referrerUri, optionsFromRequest, nextSkip, null);
+        }
+
+        /// <summary>
+        /// Reads a $skiptoken made by <see cref="GeneratePartitionNextLink"/>. Its partition count is not returned:
+        /// the statement's own metadata is the source of truth for it. The statement handle must be a UUID,
+        /// because it becomes part of the path of an authenticated Snowflake request.
+        /// </summary>
+        /// <returns>Whether the token refers to a partition of a statement.</returns>
+        public static bool TryParsePartitionSkipToken(string? skipToken, out string? statementHandle, out int partitionIndex)
         {
             statementHandle = null;
             partitionIndex = 0;
-            totalPartitions = 0;
 
             if (skipToken == null || skipToken.Length == 0)
             {
@@ -309,10 +277,14 @@ namespace SnowflakeV2CoreLogic.Utilities
                 return false;
             }
 
+            if (!Guid.TryParseExact(parts[0], "D", out _))
+            {
+                return false;
+            }
+
             statementHandle = parts[0];
-            return !string.IsNullOrEmpty(statementHandle)
-                && int.TryParse(parts[1], out partitionIndex)
-                && int.TryParse(parts[2], out totalPartitions);
+            return int.TryParse(parts[1], out partitionIndex)
+                && int.TryParse(parts[2], out _);
         }
 
         /// <summary>
@@ -468,6 +440,47 @@ namespace SnowflakeV2CoreLogic.Utilities
             var ticks = nanoseconds / 100;
             var parsedDateTimeWithFractionalSeconds = dateTime.AddTicks(ticks);
             return parsedDateTimeWithFractionalSeconds;
+        }
+
+        private static Uri GenerateNextLink(
+            Uri referrerUri,
+            ODataQueryOptions optionsFromRequest,
+            long skip,
+            string? skipToken)
+        {
+            var parameters = new List<string>();
+
+            if (optionsFromRequest.OrderBy != null)
+            {
+                parameters.Add($"$orderby={Uri.EscapeDataString(optionsFromRequest.OrderBy.RawValue)}");
+            }
+
+            if (optionsFromRequest.SelectExpand?.RawSelect != null)
+            {
+                parameters.Add($"$select={Uri.EscapeDataString(optionsFromRequest.SelectExpand.RawSelect)}");
+            }
+
+            if (optionsFromRequest.Top != null)
+            {
+                parameters.Add($"$top={Uri.EscapeDataString(optionsFromRequest.Top.RawValue)}");
+            }
+
+            if (skip > 0)
+            {
+                parameters.Add($"$skip={skip}");
+            }
+
+            if (optionsFromRequest.Filter != null)
+            {
+                parameters.Add($"$filter={Uri.EscapeDataString(optionsFromRequest.Filter.RawValue)}");
+            }
+
+            if (skipToken != null)
+            {
+                parameters.Add($"$skiptoken={Uri.EscapeDataString(skipToken)}");
+            }
+
+            return new Uri($"{referrerUri.GetLeftPart(UriPartial.Path)}?{string.Join("&", parameters)}");
         }
     }
 }

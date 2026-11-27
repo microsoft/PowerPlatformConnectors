@@ -352,10 +352,7 @@ namespace SnowflakeTestApp.Tests.Data
         }
 
         /// <summary>
-        /// Test that fetching items with $top returns the correct number of items
-        /// and that the response includes partition-based NextLink when more data is available.
-        /// Note: For small datasets, Snowflake may return all results in a single partition,
-        /// so NextLink with sfStatementHandle may not appear. This test validates the basic $top behavior.
+        /// Test that fetching items with $top returns the correct number of items.
         /// </summary>
         [TestMethod]
         public async Task GetItemsEndpoint_WithTop_ReturnsLimitedResults()
@@ -751,7 +748,7 @@ namespace SnowflakeTestApp.Tests.Data
         /// Snowflake result partitions, then iterates all pages via @odata.nextLink.
         /// Validates:
         ///   - NextLink contains $skiptoken in handle~partition~total format
-        ///   - $top decreases as rows are consumed across pages
+        ///   - $top is kept unchanged in every NextLink
         ///   - All 1000 rows are retrieved with unique, contiguous IDs
         /// </summary>
         [TestMethod]
@@ -760,21 +757,7 @@ namespace SnowflakeTestApp.Tests.Data
             const string tableName = "PAGINATION_TEST";
             const int totalRows = 1000;
 
-            string createTableSQL = "CREATE OR REPLACE TABLE " + tableName + " (" +
-                                    "  ID NUMBER(38,0) NOT NULL," +
-                                    "  LABEL VARCHAR(255) NOT NULL," +
-                                    "  PADDING VARCHAR(16777216)," +
-                                    "  PRIMARY KEY (ID)" +
-                                    ");";
-            DataSeeder.ExecuteSqlStatement(createTableSQL).GetAwaiter().GetResult();
-
-            string insertSQL = "INSERT INTO " + tableName + " (ID, LABEL, PADDING) " +
-                               "SELECT " +
-                               "  ROW_NUMBER() OVER (ORDER BY SEQ4()) AS ID, " +
-                               "  'Row_' || ROW_NUMBER() OVER (ORDER BY SEQ4()) AS LABEL, " +
-                               "  REPEAT(MD5(RANDOM()::VARCHAR), 1563) AS PADDING " +
-                               "FROM TABLE(GENERATOR(ROWCOUNT => " + totalRows + "));";
-            DataSeeder.ExecuteSqlStatement(insertSQL).GetAwaiter().GetResult();
+            CreatePaginationTable(tableName, totalRows);
 
             var testToken = GetTestToken();
             HttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {testToken}");
@@ -851,11 +834,85 @@ namespace SnowflakeTestApp.Tests.Data
             Assert.IsTrue(partitionIndex > 0 && partitionIndex < totalPartitions,
                 $"Partition index ({partitionIndex}) should be between 1 and {totalPartitions - 1}");
 
-            var topParam = queryParams["$top"];
-            Assert.IsNotNull(topParam, $"NextLink on page {pageNumber} should contain $top");
-            Assert.IsTrue(int.TryParse(topParam, out int topValue), "$top should be a valid integer");
-            Assert.IsTrue(topValue > 0 && topValue < originalTop,
-                $"$top ({topValue}) should be between 1 and {originalTop - 1}");
+            Assert.AreEqual(originalTop.ToString(), queryParams["$top"],
+                $"NextLink on page {pageNumber} should keep the original $top");
+        }
+
+        /// <summary>
+        /// Following @odata.nextLink must reach every matching row when the request has no $top,
+        /// or a $top smaller than the result: each page links to the next one once its partitions are read.
+        /// </summary>
+        [TestMethod]
+        public async Task GetItemsEndpoint_LargeDataset_NextLinksReachEveryRow()
+        {
+            const string tableName = "PAGINATION_TEST";
+            const int totalRows = 1000;
+
+            CreatePaginationTable(tableName, totalRows);
+
+            var testToken = GetTestToken();
+            HttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {testToken}");
+            HttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            string itemsUrl = $"{BaseUrl}/datasets('{TestDataset}')/tables('{tableName}')/items";
+            int partitionLinks = 0;
+            int pageLinks = 0;
+            foreach (var (query, expectedRows) in new[] { ("?$orderby=ID", totalRows), ("?$orderby=ID&$filter=ID le 300", 300), ("?$orderby=ID&$top=200", totalRows) })
+            {
+                var ids = new List<int>();
+                int pageCount = 0;
+                string url = itemsUrl + query;
+
+                while (url != null)
+                {
+                    pageCount++;
+                    Assert.IsTrue(pageCount <= totalRows, $"[{query}] Safety limit: too many pages, possible infinite loop");
+
+                    var response = await HttpClient.GetAsync(url);
+                    var content = await response.Content.ReadAsStringAsync();
+                    Assert.AreEqual(HttpStatusCode.OK, response.StatusCode, $"[{query}] Page {pageCount} should return OK. Response: {content}");
+
+                    var json = JObject.Parse(content);
+                    ids.AddRange(((JArray)json["value"]).Select(item => (int)item["ID"]));
+                    url = json["@odata.nextLink"]?.ToString();
+                    if (url != null)
+                    {
+                        if (HttpUtility.ParseQueryString(new Uri(url).Query)["$skiptoken"] != null)
+                        {
+                            partitionLinks++;
+                        }
+                        else
+                        {
+                            pageLinks++;
+                        }
+                    }
+                }
+
+                Assert.AreEqual(expectedRows, ids.Count, $"[{query}] Should retrieve all {expectedRows} rows across {pageCount} page(s)");
+                CollectionAssert.AreEqual(Enumerable.Range(1, expectedRows).ToList(), ids, $"[{query}] Every row should appear exactly once, in order");
+            }
+
+            Assert.IsTrue(partitionLinks > 0, "Some page should span several partitions, so that partition links are followed");
+            Assert.IsTrue(pageLinks > 0, "Next page links should be followed");
+        }
+
+        private static void CreatePaginationTable(string tableName, int totalRows)
+        {
+            string createTableSQL = "CREATE OR REPLACE TABLE " + tableName + " (" +
+                                    "  ID NUMBER(38,0) NOT NULL," +
+                                    "  LABEL VARCHAR(255) NOT NULL," +
+                                    "  PADDING VARCHAR(16777216)," +
+                                    "  PRIMARY KEY (ID)" +
+                                    ");";
+            DataSeeder.ExecuteSqlStatement(createTableSQL).GetAwaiter().GetResult();
+
+            string insertSQL = "INSERT INTO " + tableName + " (ID, LABEL, PADDING) " +
+                               "SELECT " +
+                               "  ROW_NUMBER() OVER (ORDER BY SEQ4()) AS ID, " +
+                               "  'Row_' || ROW_NUMBER() OVER (ORDER BY SEQ4()) AS LABEL, " +
+                               "  REPEAT(MD5(RANDOM()::VARCHAR), 1563) AS PADDING " +
+                               "FROM TABLE(GENERATOR(ROWCOUNT => " + totalRows + "));";
+            DataSeeder.ExecuteSqlStatement(insertSQL).GetAwaiter().GetResult();
         }
 
         /// <summary>
