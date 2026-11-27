@@ -105,6 +105,11 @@ def load_arguments(self, command):
             default=False,
             const=True,
             help='Override a previous login, if exists.')
+        arg_context.argument(
+            'interactive',
+            options_list=['--interactive', '-int'],
+            action='store_true',
+            help='Use interactive browser authentication instead of device code.')
 
     with ArgumentsContext(self, _DOWNLOAD) as arg_context:
         arg_context.argument(
