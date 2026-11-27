@@ -1,0 +1,541 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Whale Alert",
+    "description": "Monitor crypto market trends and large transactions with Whale Alert. Set personalized alerts, view live price updates and analyze crypto data.",
+    "version": "1.0",
+    "contact": {
+      "name": "Fördős András",
+      "email": "fordosa90+ipc_whale@gmail.com"
+    }
+  },
+  "host": "leviathan.whale-alert.io",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [],
+  "produces": [],
+  "paths": {
+    "/status": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "title": "Blockchain",
+                "description": "Supported blockchain.",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Name of the blockchain.",
+                    "title": "Name"
+                  },
+                  "symbols": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Array of supported currencies by the blockchain.",
+                    "title": "Symbols"
+                  },
+                  "height": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Height of the blockchain.",
+                    "title": "Height"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Check status",
+        "operationId": "Status",
+        "description": "Returns a full overview of the supported blockchains and currencies available per blockchain.",
+        "parameters": []
+      }
+    },
+    "/{blockchain}/status": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "title": "Blockchain",
+              "description": "Overview of the blockchain.",
+              "properties": {
+                "start_height": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Height of the available starting block.",
+                  "title": "Start height"
+                },
+                "end_height": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Height of the available ending block.",
+                  "title": "End height"
+                },
+                "block_count": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Count of blocks.",
+                  "title": "Block count"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Check blockchain status",
+        "operationId": "BlockchainStatus",
+        "parameters": [
+          {
+            "$ref": "#/parameters/blockchainParam"
+          }
+        ],
+        "description": "Returns the heights of the newest and oldest available blocks of a specific blockchain. Older blocks are available at request."
+      }
+    },
+    "/{blockchain}/transaction/{hash}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/transactionRef"
+              }
+            }
+          }
+        },
+        "summary": "Get transaction",
+        "operationId": "GetTransaction",
+        "description": "Returns a specific transaction for a blockchain.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/blockchainParam"
+          },
+          {
+            "$ref": "#/parameters/hashParam"
+          }
+        ]
+      }
+    },
+    "/{blockchain}/transactions": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "height": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "The height of the block at which to start retrieving transactions from.",
+                  "title": "Height"
+                },
+                "hash": {
+                  "type": "string",
+                  "description": "Hash of a block at the specified height.",
+                  "title": "Hash"
+                },
+                "timestamp": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Timestamp of a block at the specified height.",
+                  "title": "Timestamp"
+                },
+                "transactions": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/transactionRef"
+                  },
+                  "description": "Array of transactions.",
+                  "title": "Transactions"
+                }
+              }
+            }
+          }
+        },
+        "summary": "List transactions",
+        "operationId": "ListTransactions",
+        "parameters": [
+          {
+            "$ref": "#/parameters/blockchainParam"
+          },
+          {
+            "$ref": "#/parameters/limitParam"
+          },
+          {
+            "$ref": "#/parameters/startheightParam"
+          },
+          {
+            "$ref": "#/parameters/symbolParam"
+          },
+          {
+            "name": "transaction_type",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Transaction type",
+            "description": "Retrieve sub-transactions for a specific type only.",
+            "enum": [
+              "transfer",
+              "mint",
+              "burn",
+              "freeze",
+              "unfreeze",
+              "lock",
+              "unlock"
+            ]
+          },
+          {
+            "$ref": "#/parameters/startindexParam"
+          },
+          {
+            "$ref": "#/parameters/orderParam"
+          }
+        ],
+        "description": "Returns all transactions for a blockchain since the specified start height. If the start height is not available due to age the first available height is retrieved."
+      }
+    },
+    "/{blockchain}/address/{hash}/transactions": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "next": {
+                  "type": "string",
+                  "description": "Pager URL in case there are more results found.",
+                  "title": "Next"
+                },
+                "address": {
+                  "type": "string",
+                  "description": "Hash of an address.",
+                  "title": "Address"
+                },
+                "transactions": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/transactionRef"
+                  },
+                  "description": "Array of transactions.",
+                  "title": "Transactions"
+                }
+              }
+            }
+          }
+        },
+        "summary": "List address transactions",
+        "operationId": "ListAddressTransactions",
+        "description": "Returns the transactions for an address for the last 30 days.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/blockchainParam"
+          },
+          {
+            "$ref": "#/parameters/hashParam"
+          },
+          {
+            "$ref": "#/parameters/limitParam"
+          },
+          {
+            "$ref": "#/parameters/startheightParam"
+          },
+          {
+            "$ref": "#/parameters/symbolParam"
+          },
+          {
+            "$ref": "#/parameters/startindexParam"
+          },
+          {
+            "$ref": "#/parameters/orderParam"
+          }
+        ]
+      }
+    },
+    "/{blockchain}/address/{hash}/owner_attributions": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Name of the owner.",
+                    "title": "Name"
+                  },
+                  "confidence": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "Confidence score ranging from 0 to 1, indicating level of certainty (1 = 100%).",
+                    "title": "Confidence"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get owner",
+        "operationId": "GetOwner",
+        "description": "Returns the owners of the specified address. A single address might have multiple owners, especially in cases where it's linked to a white label exchange or when the ownership becomes ambiguous due to obfuscation techniques.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/blockchainParam"
+          },
+          {
+            "$ref": "#/parameters/hashParam"
+          }
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "addressRef": {
+      "type": "object",
+      "title": "Address",
+      "description": "Address.",
+      "properties": {
+        "amount": {
+          "type": "string",
+          "description": "The amount of currency by which the address balance is altered.",
+          "title": "Amount"
+        },
+        "address": {
+          "type": "string",
+          "description": "The hash of the address.",
+          "title": "Address"
+        },
+        "balance": {
+          "type": "string",
+          "description": "The balance of the address after the transaction was concluded.",
+          "title": "Balance"
+        },
+        "locked": {
+          "type": "string",
+          "description": "The amount locked at the address.",
+          "title": "Locked"
+        },
+        "is_frozen": {
+          "type": "boolean",
+          "description": "True if the address has been frozen. A frozen address cannot transfer any current or future balance of this address.",
+          "title": "Is frozen?"
+        },
+        "owner": {
+          "type": "string",
+          "description": "The entity to which the address has been attributed. Empty when no owner data is available.",
+          "title": "Owner"
+        },
+        "owner_type": {
+          "type": "string",
+          "description": "The type of the entity to which the address has been attributed.",
+          "title": "Owner type"
+        },
+        "address_type": {
+          "type": "string",
+          "description": "The type of the address.",
+          "title": "Address type"
+        }
+      }
+    },
+    "subtransactionRef": {
+      "type": "object",
+      "title": "Sub-transaction",
+      "description": "A sub-transactions that can change the balance of address(es) for a certain symbol for a transaction.",
+      "properties": {
+        "symbol": {
+          "type": "string",
+          "description": "The symbol of the currency. A sub-transaction can only have one single symbol.",
+          "title": "Symbol"
+        },
+        "unit_price_usd": {
+          "type": "number",
+          "format": "float",
+          "description": "The price in USD per single unit of the currency at the block time. Based on the weighted average of exchange prices.",
+          "title": "Unit price"
+        },
+        "transaction_type": {
+          "type": "string",
+          "description": "Possible values: \"transfer\", \"mint\", \"burn\", \"freeze\", \"unfreeze\", \"lock\", \"unlock\".",
+          "title": "Transaction type"
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/addressRef"
+          },
+          "description": "The inputs of a transaction or the FROM.",
+          "title": "Inputs"
+        },
+        "outputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/addressRef"
+          },
+          "description": "The outputs of a transaction or the TO.",
+          "title": "Outputs"
+        }
+      }
+    },
+    "transactionRef": {
+      "type": "object",
+      "description": "Details of a transaction.",
+      "title": "Transaction",
+      "properties": {
+        "height": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The block height at which the transaction was included.",
+          "title": "Height"
+        },
+        "index_in_block": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The index at which the transaction can be found in the block.",
+          "title": "Index in block"
+        },
+        "timestamp": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The UNIX timestamp of the block containing the transaction.",
+          "title": "Timestamp"
+        },
+        "hash": {
+          "type": "string",
+          "description": "The hash of the transaction.",
+          "title": "Hash"
+        },
+        "fee": {
+          "type": "string",
+          "description": "The amount paid by the initiator of the transaction.",
+          "title": "Fee"
+        },
+        "fee_symbol": {
+          "type": "string",
+          "description": "The currency in which the fee was paid.",
+          "title": "Fee symbol"
+        },
+        "fee_symbol_price": {
+          "type": "number",
+          "format": "float",
+          "description": "The price in USD per single unit of the currency at the block time. Based on the weighted average of exchange prices.",
+          "title": "Fee symbol price"
+        },
+        "sub_transaction": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/subtransactionRef"
+          }
+        }
+      }
+    }
+  },
+  "parameters": {
+    "blockchainParam": {
+      "name": "blockchain",
+      "in": "path",
+      "required": true,
+      "type": "string",
+      "description": "Unique name of blockchain, such as \"bitcoin\".",
+      "x-ms-summary": "Blockchain",
+      "x-ms-visibility": "important",
+      "x-ms-url-encoding": "single"
+    },
+    "hashParam": {
+      "name": "hash",
+      "in": "path",
+      "required": true,
+      "type": "string",
+      "x-ms-summary": "Hash",
+      "x-ms-visibility": "important",
+      "description": "Hash of an address.",
+      "x-ms-url-encoding": "single"
+    },
+    "limitParam": {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "type": "integer",
+      "x-ms-summary": "Limit",
+      "description": "The maximum number of transactions to be retrieved in the request. Default 256, maximum dependent on subscription type."
+    },
+    "startheightParam": {
+      "name": "start_height",
+      "in": "query",
+      "required": true,
+      "type": "integer",
+      "x-ms-summary": "Start height",
+      "description": "The height of the block at which to start retrieving transactions from."
+    },
+    "symbolParam": {
+      "name": "symbol",
+      "in": "query",
+      "required": false,
+      "type": "string",
+      "x-ms-summary": "Symbol",
+      "description": "Only retrieve those txs that have at least one sub-transaction for a specific symbol (BTC, ETH, TRX etc.). Full list of available symbols can be retrieved using the /status endpoint."
+    },
+    "startindexParam": {
+      "name": "start_index",
+      "in": "query",
+      "required": false,
+      "type": "integer",
+      "x-ms-summary": "Start index",
+      "description": "Automatically included in the \"next\" field of the response."
+    },
+    "orderParam": {
+      "name": "order",
+      "in": "query",
+      "required": false,
+      "type": "string",
+      "x-ms-summary": "Order",
+      "description": "List transactions in ascending or descending order.",
+      "enum": [
+        "asc",
+        "desc"
+      ]
+    }
+  },
+  "responses": {},
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "query",
+      "name": "api_key"
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://whale-alert.io/"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://whale-alert.io/privacy.html"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Data;Finance"
+    }
+  ]
+}
