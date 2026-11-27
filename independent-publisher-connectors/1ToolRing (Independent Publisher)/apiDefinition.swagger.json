@@ -1,0 +1,916 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "1ToolRing",
+    "description": "1ToolRing is a pay per call tool catalog for AI agents and flows. Find a tool for a job, read its exact price, run it with one key and one prepaid balance, and see what each run cost. Failed runs are not charged.",
+    "contact": {
+      "name": "Khairul Muhtadin",
+      "url": "https://1toolring.com",
+      "email": "hello@1toolring.com"
+    },
+    "version": "1.0"
+  },
+  "host": "api.1toolring.com",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/v1/tools/discover": {
+      "post": {
+        "operationId": "DiscoverTools",
+        "summary": "Discover tools",
+        "description": "Find tools for a job described in plain words, with their ids and prices. This call is free.",
+        "x-ms-visibility": "important",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "query"
+              ],
+              "properties": {
+                "query": {
+                  "type": "string",
+                  "description": "The job to do, in plain words, for example google search results for a keyword.",
+                  "title": "Query",
+                  "x-ms-visibility": "important"
+                },
+                "limit": {
+                  "type": "integer",
+                  "format": "int32",
+                  "minimum": 1,
+                  "maximum": 20,
+                  "default": 10,
+                  "description": "How many tools to return, from 1 to 20.",
+                  "title": "Limit"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "query": {
+                      "type": "string",
+                      "description": "The query that was searched.",
+                      "title": "Query"
+                    },
+                    "count": {
+                      "type": "integer",
+                      "format": "int32",
+                      "description": "How many tools were found.",
+                      "title": "Count"
+                    },
+                    "results": {
+                      "type": "array",
+                      "description": "The matching tools.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "The tool id to pass to Inspect tool and Run tool.",
+                            "title": "Tool ID"
+                          },
+                          "provider": {
+                            "type": "string",
+                            "description": "The provider id.",
+                            "title": "Provider"
+                          },
+                          "provider_name": {
+                            "type": "string",
+                            "description": "The provider display name.",
+                            "title": "Provider name"
+                          },
+                          "endpoint": {
+                            "type": "string",
+                            "description": "The provider endpoint the tool calls.",
+                            "title": "Endpoint"
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "What the tool does.",
+                            "title": "Description"
+                          },
+                          "price": {
+                            "type": "object",
+                            "description": "The price of the tool.",
+                            "properties": {
+                              "model": {
+                                "type": "string",
+                                "description": "Pricing model: per_call, per_result, per_unit, tiered or free.",
+                                "title": "Price model"
+                              },
+                              "amount": {
+                                "type": "object",
+                                "description": "The price of one call, result or unit.",
+                                "properties": {
+                                  "usd": {
+                                    "type": "number",
+                                    "format": "double",
+                                    "description": "Amount in US dollars.",
+                                    "title": "USD"
+                                  },
+                                  "idr": {
+                                    "type": "integer",
+                                    "format": "int64",
+                                    "description": "Amount in whole rupiah.",
+                                    "title": "IDR"
+                                  }
+                                },
+                                "title": "Amount"
+                              },
+                              "unit_label": {
+                                "type": "string",
+                                "description": "What one unit is, when the model is per unit or per result.",
+                                "title": "Unit label"
+                              },
+                              "flat": {
+                                "type": "object",
+                                "description": "A fixed fee per run on top of the unit price, when the tool has one.",
+                                "properties": {
+                                  "usd": {
+                                    "type": "number",
+                                    "format": "double",
+                                    "description": "Amount in US dollars.",
+                                    "title": "USD"
+                                  },
+                                  "idr": {
+                                    "type": "integer",
+                                    "format": "int64",
+                                    "description": "Amount in whole rupiah.",
+                                    "title": "IDR"
+                                  }
+                                },
+                                "title": "Flat fee"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tools/inspect": {
+      "post": {
+        "operationId": "InspectTool",
+        "summary": "Inspect tool",
+        "description": "Read the input schema, exact price, notes and health of one tool before running it. This call is free.",
+        "x-ms-visibility": "important",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "tool"
+              ],
+              "properties": {
+                "tool": {
+                  "type": "string",
+                  "description": "The tool id returned by Discover tools, for example 1toolring/fx/latest.",
+                  "title": "Tool ID",
+                  "x-ms-visibility": "important"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The tool id to pass to Inspect tool and Run tool.",
+                      "title": "Tool ID"
+                    },
+                    "provider": {
+                      "type": "string",
+                      "description": "The provider id.",
+                      "title": "Provider"
+                    },
+                    "provider_name": {
+                      "type": "string",
+                      "description": "The provider display name.",
+                      "title": "Provider name"
+                    },
+                    "endpoint": {
+                      "type": "string",
+                      "description": "The provider endpoint the tool calls.",
+                      "title": "Endpoint"
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "What the tool does.",
+                      "title": "Description"
+                    },
+                    "price": {
+                      "type": "object",
+                      "description": "The price of the tool.",
+                      "properties": {
+                        "model": {
+                          "type": "string",
+                          "description": "Pricing model: per_call, per_result, per_unit, tiered or free.",
+                          "title": "Price model"
+                        },
+                        "amount": {
+                          "type": "object",
+                          "description": "The price of one call, result or unit.",
+                          "properties": {
+                            "usd": {
+                              "type": "number",
+                              "format": "double",
+                              "description": "Amount in US dollars.",
+                              "title": "USD"
+                            },
+                            "idr": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Amount in whole rupiah.",
+                              "title": "IDR"
+                            }
+                          },
+                          "title": "Amount"
+                        },
+                        "unit_label": {
+                          "type": "string",
+                          "description": "What one unit is, when the model is per unit or per result.",
+                          "title": "Unit label"
+                        },
+                        "flat": {
+                          "type": "object",
+                          "description": "A fixed fee per run on top of the unit price, when the tool has one.",
+                          "properties": {
+                            "usd": {
+                              "type": "number",
+                              "format": "double",
+                              "description": "Amount in US dollars.",
+                              "title": "USD"
+                            },
+                            "idr": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Amount in whole rupiah.",
+                              "title": "IDR"
+                            }
+                          },
+                          "title": "Flat fee"
+                        }
+                      }
+                    },
+                    "summary": {
+                      "type": "string",
+                      "description": "A short summary of what the tool returns.",
+                      "title": "Summary"
+                    },
+                    "method": {
+                      "type": "string",
+                      "description": "The HTTP method of the provider endpoint.",
+                      "title": "Method"
+                    },
+                    "input_schema": {
+                      "type": "object",
+                      "description": "The JSON schemas for the body, query and path inputs of the tool.",
+                      "title": "Input schema",
+                      "properties": {
+                        "body": {
+                          "type": "object",
+                          "description": "JSON schema of the request body.",
+                          "title": "Body schema"
+                        },
+                        "queryParams": {
+                          "type": "object",
+                          "description": "JSON schema of the query parameters.",
+                          "title": "Query parameters schema"
+                        },
+                        "pathParams": {
+                          "type": "object",
+                          "description": "JSON schema of the path parameters.",
+                          "title": "Path parameters schema"
+                        }
+                      }
+                    },
+                    "notes": {
+                      "type": "array",
+                      "description": "Notes about using the tool.",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "categories": {
+                      "type": "array",
+                      "description": "Catalog categories of the tool.",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "tags": {
+                      "type": "array",
+                      "description": "Tags of the tool.",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "doc_url": {
+                      "type": "string",
+                      "description": "Link to the provider documentation.",
+                      "title": "Documentation URL"
+                    },
+                    "health": {
+                      "type": "object",
+                      "description": "Recent health of the tool.",
+                      "title": "Health",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "description": "Health status.",
+                          "title": "Health status"
+                        },
+                        "p50_ms": {
+                          "type": "integer",
+                          "format": "int32",
+                          "description": "Median latency in milliseconds.",
+                          "title": "Median latency"
+                        },
+                        "p95_ms": {
+                          "type": "integer",
+                          "format": "int32",
+                          "description": "95th percentile latency in milliseconds.",
+                          "title": "P95 latency"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tools/run": {
+      "post": {
+        "operationId": "RunTool",
+        "summary": "Run tool",
+        "description": "Run a tool with its inputs. The run is charged at the price shown by Inspect tool, and a failed run is not charged.",
+        "x-ms-visibility": "important",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "tool",
+                "input"
+              ],
+              "properties": {
+                "tool": {
+                  "type": "string",
+                  "description": "The tool id to run.",
+                  "title": "Tool ID",
+                  "x-ms-visibility": "important"
+                },
+                "input": {
+                  "type": "object",
+                  "description": "The tool inputs, shaped by the input schema from Inspect tool.",
+                  "title": "Input",
+                  "x-ms-visibility": "important",
+                  "properties": {
+                    "body": {
+                      "type": "object",
+                      "description": "The JSON body for the tool, when its input schema declares one.",
+                      "title": "Body"
+                    },
+                    "queryParams": {
+                      "type": "object",
+                      "description": "The query parameters for the tool, when its input schema declares them.",
+                      "title": "Query parameters"
+                    },
+                    "pathParams": {
+                      "type": "object",
+                      "description": "The path parameters for the tool, when its input schema declares them.",
+                      "title": "Path parameters"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The run finished.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "run_id": {
+                      "type": "string",
+                      "description": "The run id.",
+                      "title": "Run ID"
+                    },
+                    "tool": {
+                      "type": "string",
+                      "description": "The tool id that ran.",
+                      "title": "Tool"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "The run status: running, completed or failed.",
+                      "title": "Status"
+                    },
+                    "output": {
+                      "description": "The answer from the tool, passed through as is. Its shape depends on the tool.",
+                      "title": "Output"
+                    },
+                    "provider_status": {
+                      "type": "integer",
+                      "format": "int32",
+                      "description": "The HTTP status the provider returned.",
+                      "title": "Provider status"
+                    },
+                    "provider_error": {
+                      "type": "string",
+                      "description": "A short reason when the provider failed.",
+                      "title": "Provider error"
+                    },
+                    "cost": {
+                      "type": "object",
+                      "description": "The amount actually charged. It is zero while running and on failure.",
+                      "properties": {
+                        "usd": {
+                          "type": "number",
+                          "format": "double",
+                          "description": "Amount in US dollars.",
+                          "title": "USD"
+                        },
+                        "idr": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Amount in whole rupiah.",
+                          "title": "IDR"
+                        }
+                      },
+                      "title": "Cost"
+                    },
+                    "held": {
+                      "type": "object",
+                      "description": "The amount held while the run is in flight.",
+                      "properties": {
+                        "usd": {
+                          "type": "number",
+                          "format": "double",
+                          "description": "Amount in US dollars.",
+                          "title": "USD"
+                        },
+                        "idr": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Amount in whole rupiah.",
+                          "title": "IDR"
+                        }
+                      },
+                      "title": "Held"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "When the run started.",
+                      "title": "Created at"
+                    },
+                    "completed_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "When the run finished.",
+                      "title": "Completed at"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "The run is still running. Poll it with Get tool run.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "run_id": {
+                      "type": "string",
+                      "description": "The run id.",
+                      "title": "Run ID"
+                    },
+                    "tool": {
+                      "type": "string",
+                      "description": "The tool id that ran.",
+                      "title": "Tool"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "The run status: running, completed or failed.",
+                      "title": "Status"
+                    },
+                    "output": {
+                      "description": "The answer from the tool, passed through as is. Its shape depends on the tool.",
+                      "title": "Output"
+                    },
+                    "provider_status": {
+                      "type": "integer",
+                      "format": "int32",
+                      "description": "The HTTP status the provider returned.",
+                      "title": "Provider status"
+                    },
+                    "provider_error": {
+                      "type": "string",
+                      "description": "A short reason when the provider failed.",
+                      "title": "Provider error"
+                    },
+                    "cost": {
+                      "type": "object",
+                      "description": "The amount actually charged. It is zero while running and on failure.",
+                      "properties": {
+                        "usd": {
+                          "type": "number",
+                          "format": "double",
+                          "description": "Amount in US dollars.",
+                          "title": "USD"
+                        },
+                        "idr": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Amount in whole rupiah.",
+                          "title": "IDR"
+                        }
+                      },
+                      "title": "Cost"
+                    },
+                    "held": {
+                      "type": "object",
+                      "description": "The amount held while the run is in flight.",
+                      "properties": {
+                        "usd": {
+                          "type": "number",
+                          "format": "double",
+                          "description": "Amount in US dollars.",
+                          "title": "USD"
+                        },
+                        "idr": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Amount in whole rupiah.",
+                          "title": "IDR"
+                        }
+                      },
+                      "title": "Held"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "When the run started.",
+                      "title": "Created at"
+                    },
+                    "completed_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "When the run finished.",
+                      "title": "Completed at"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tools/runs/{run_id}": {
+      "get": {
+        "operationId": "GetToolRun",
+        "summary": "Get tool run",
+        "description": "Get the status and result of one of your runs. Use it to poll a run that answered with status running. This call is free.",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The run id returned by Run tool.",
+            "x-ms-summary": "Run ID",
+            "x-ms-url-encoding": "single",
+            "x-ms-visibility": "important"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "run_id": {
+                      "type": "string",
+                      "description": "The run id.",
+                      "title": "Run ID"
+                    },
+                    "tool": {
+                      "type": "string",
+                      "description": "The tool id that ran.",
+                      "title": "Tool"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "The run status: running, completed or failed.",
+                      "title": "Status"
+                    },
+                    "output": {
+                      "description": "The answer from the tool, passed through as is. Its shape depends on the tool.",
+                      "title": "Output"
+                    },
+                    "provider_status": {
+                      "type": "integer",
+                      "format": "int32",
+                      "description": "The HTTP status the provider returned.",
+                      "title": "Provider status"
+                    },
+                    "provider_error": {
+                      "type": "string",
+                      "description": "A short reason when the provider failed.",
+                      "title": "Provider error"
+                    },
+                    "cost": {
+                      "type": "object",
+                      "description": "The amount actually charged. It is zero while running and on failure.",
+                      "properties": {
+                        "usd": {
+                          "type": "number",
+                          "format": "double",
+                          "description": "Amount in US dollars.",
+                          "title": "USD"
+                        },
+                        "idr": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Amount in whole rupiah.",
+                          "title": "IDR"
+                        }
+                      },
+                      "title": "Cost"
+                    },
+                    "held": {
+                      "type": "object",
+                      "description": "The amount held while the run is in flight.",
+                      "properties": {
+                        "usd": {
+                          "type": "number",
+                          "format": "double",
+                          "description": "Amount in US dollars.",
+                          "title": "USD"
+                        },
+                        "idr": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Amount in whole rupiah.",
+                          "title": "IDR"
+                        }
+                      },
+                      "title": "Held"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "When the run started.",
+                      "title": "Created at"
+                    },
+                    "completed_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "When the run finished.",
+                      "title": "Completed at"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/pricing/tools/search": {
+      "get": {
+        "operationId": "SearchPricing",
+        "summary": "Search price list",
+        "description": "Search the public price list of tools by words. This call is free.",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "description": "Words to search for, for example exchange rate.",
+            "x-ms-summary": "Search words",
+            "x-ms-visibility": "important"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "query": {
+                      "type": "string",
+                      "description": "The words that were searched.",
+                      "title": "Query"
+                    },
+                    "results": {
+                      "type": "array",
+                      "description": "The matching tools.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "The tool id to pass to Inspect tool and Run tool.",
+                            "title": "Tool ID"
+                          },
+                          "provider": {
+                            "type": "string",
+                            "description": "The provider id.",
+                            "title": "Provider"
+                          },
+                          "provider_name": {
+                            "type": "string",
+                            "description": "The provider display name.",
+                            "title": "Provider name"
+                          },
+                          "endpoint": {
+                            "type": "string",
+                            "description": "The provider endpoint the tool calls.",
+                            "title": "Endpoint"
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "What the tool does.",
+                            "title": "Description"
+                          },
+                          "price": {
+                            "type": "object",
+                            "description": "The price of the tool.",
+                            "properties": {
+                              "model": {
+                                "type": "string",
+                                "description": "Pricing model: per_call, per_result, per_unit, tiered or free.",
+                                "title": "Price model"
+                              },
+                              "amount": {
+                                "type": "object",
+                                "description": "The price of one call, result or unit.",
+                                "properties": {
+                                  "usd": {
+                                    "type": "number",
+                                    "format": "double",
+                                    "description": "Amount in US dollars.",
+                                    "title": "USD"
+                                  },
+                                  "idr": {
+                                    "type": "integer",
+                                    "format": "int64",
+                                    "description": "Amount in whole rupiah.",
+                                    "title": "IDR"
+                                  }
+                                },
+                                "title": "Amount"
+                              },
+                              "unit_label": {
+                                "type": "string",
+                                "description": "What one unit is, when the model is per unit or per result.",
+                                "title": "Unit label"
+                              },
+                              "flat": {
+                                "type": "object",
+                                "description": "A fixed fee per run on top of the unit price, when the tool has one.",
+                                "properties": {
+                                  "usd": {
+                                    "type": "number",
+                                    "format": "double",
+                                    "description": "Amount in US dollars.",
+                                    "title": "USD"
+                                  },
+                                  "idr": {
+                                    "type": "integer",
+                                    "format": "int64",
+                                    "description": "Amount in whole rupiah.",
+                                    "title": "IDR"
+                                  }
+                                },
+                                "title": "Flat fee"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {},
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "x-api-key"
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://1toolring.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://1toolring.com/privacy/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "AI;Data"
+    }
+  ]
+}
