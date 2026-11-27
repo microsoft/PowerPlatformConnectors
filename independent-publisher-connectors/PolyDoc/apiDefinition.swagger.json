@@ -471,8 +471,8 @@
         },
         "profile": {
           "type": "string",
-          "enum": ["minimum", "basicwl", "basic", "en16931", "extended"],
-          "description": "Data granularity profile to validate against.",
+          "enum": ["basic", "en16931", "extended"],
+          "description": "Data granularity profile to validate against. Minimum and Basic WL were retired in 2026-09: neither carries invoice lines, so neither is an EN 16931 e-invoice.",
           "x-ms-summary": "Profile"
         },
         "verify": {
@@ -494,9 +494,11 @@
         "number": { "type": "string", "x-ms-summary": "Invoice number" },
         "issueDate": { "type": "string", "description": "Issue date, YYYY-MM-DD.", "x-ms-summary": "Issue date" },
         "dueDate": { "type": "string", "description": "Due date, YYYY-MM-DD. Provide this or Payment terms (EN 16931 rule BR-CO-25).", "x-ms-summary": "Due date" },
+        "deliveryDate": { "type": "string", "description": "Actual delivery date (BT-72), YYYY-MM-DD. Reaches the XML at every profile. When empty, the issue date is written as the delivery date.", "x-ms-summary": "Delivery date" },
         "currencyCode": { "type": "string", "description": "ISO 4217 currency code, e.g. EUR.", "x-ms-summary": "Currency" },
         "seller": { "$ref": "#/definitions/Party" },
         "buyer": { "$ref": "#/definitions/Party" },
+        "deliverTo": { "$ref": "#/definitions/DeliverTo" },
         "lines": { "type": "array", "items": { "$ref": "#/definitions/InvoiceLine" }, "x-ms-summary": "Lines" },
         "taxSummary": { "type": "array", "items": { "$ref": "#/definitions/TaxSummary" }, "x-ms-summary": "Tax summary" },
         "paymentTerms": { "type": "string", "description": "Free-text payment terms. Provide this or Due date.", "x-ms-summary": "Payment terms" },
@@ -505,7 +507,8 @@
         "totalTaxAmount": { "type": "number", "x-ms-summary": "Total tax" },
         "totalGrossAmount": { "type": "number", "description": "Must equal net + tax.", "x-ms-summary": "Total gross" },
         "note": { "type": "string", "x-ms-summary": "Note" },
-        "buyerReference": { "type": "string", "description": "Buyer reference / Leitweg-ID for public-sector invoices.", "x-ms-summary": "Buyer reference" }
+        "buyerReference": { "type": "string", "description": "Buyer reference / Leitweg-ID for public-sector invoices.", "x-ms-summary": "Buyer reference" },
+        "orderReference": { "type": "string", "description": "Purchase order number (BT-13).", "x-ms-summary": "Order reference" }
       }
     },
     "Party": {
@@ -516,8 +519,19 @@
         "name": { "type": "string", "x-ms-summary": "Name" },
         "address": { "$ref": "#/definitions/Address" },
         "taxId": { "type": "string", "description": "VAT identifier. Required for the seller when a line uses VAT category S.", "x-ms-summary": "Tax ID" },
-        "email": { "type": "string", "x-ms-summary": "Email" },
-        "phone": { "type": "string", "x-ms-summary": "Phone" }
+        "email": { "type": "string", "description": "Contact email (BT-43 seller, BT-58 buyer). Reaches the XML with profile EN 16931 or Extended.", "x-ms-summary": "Email" },
+        "phone": { "type": "string", "description": "Contact phone (BT-42 seller, BT-57 buyer). Reaches the XML with profile EN 16931 or Extended.", "x-ms-summary": "Phone" },
+        "contactName": { "type": "string", "description": "Contact person (BT-41 seller, BT-56 buyer). Reaches the XML with profile EN 16931 or Extended.", "x-ms-summary": "Contact name" },
+        "electronicAddress": { "$ref": "#/definitions/ElectronicAddress" }
+      }
+    },
+    "ElectronicAddress": {
+      "type": "object",
+      "description": "Electronic address the party receives invoices at (BT-34 seller, BT-49 buyer). Reaches the XML at every profile. Send both parts or neither.",
+      "required": ["schemeId", "id"],
+      "properties": {
+        "schemeId": { "type": "string", "description": "CEF EAS code list value, e.g. 0088 (GLN), 0204 (Leitweg-ID), EM (email address).", "x-ms-summary": "Scheme ID" },
+        "id": { "type": "string", "description": "The address itself, e.g. a GLN or an email address.", "x-ms-summary": "Address" }
       }
     },
     "Address": {
@@ -531,11 +545,32 @@
         "countryCode": { "type": "string", "description": "ISO 3166-1 alpha-2 country code, e.g. DE.", "x-ms-summary": "Country code" }
       }
     },
+    "DeliverTo": {
+      "type": "object",
+      "description": "Where the goods or services are delivered, when that differs from the buyer (BG-13). Reaches the XML at every profile. Leave it empty to write nothing.",
+      "properties": {
+        "name": { "type": "string", "description": "Deliver-to party name (BT-70).", "x-ms-summary": "Deliver-to name" },
+        "address": { "$ref": "#/definitions/DeliveryAddress" }
+      }
+    },
+    "DeliveryAddress": {
+      "type": "object",
+      "description": "Deliver-to address (BG-15). Only the country code is required (EN 16931 rule BR-57).",
+      "required": ["countryCode"],
+      "properties": {
+        "line1": { "type": "string", "description": "Street and house number (BT-75).", "x-ms-summary": "Deliver-to address line 1" },
+        "line2": { "type": "string", "description": "Additional address line (BT-76).", "x-ms-summary": "Deliver-to address line 2" },
+        "city": { "type": "string", "description": "City (BT-77).", "x-ms-summary": "Deliver-to city" },
+        "postalCode": { "type": "string", "description": "Postal or ZIP code (BT-78).", "x-ms-summary": "Deliver-to postal code" },
+        "countryCode": { "type": "string", "description": "ISO 3166-1 alpha-2 country code (BT-80), e.g. DE. Required whenever any deliver-to address field is sent.", "x-ms-summary": "Deliver-to country code" }
+      }
+    },
     "InvoiceLine": {
       "type": "object",
       "required": ["description", "quantity", "unitPrice", "lineTotal"],
       "properties": {
-        "description": { "type": "string", "x-ms-summary": "Description" },
+        "description": { "type": "string", "description": "Item name (BT-153).", "x-ms-summary": "Description" },
+        "buyerItemId": { "type": "string", "description": "The buyer's own article number for this item (BT-156). Reaches the XML with profile EN 16931 or Extended.", "x-ms-summary": "Buyer item ID" },
         "quantity": { "type": "number", "x-ms-summary": "Quantity" },
         "unitCode": { "type": "string", "description": "UN/ECE unit code, e.g. C62 (piece).", "x-ms-summary": "Unit code" },
         "unitPrice": { "type": "number", "x-ms-summary": "Unit price" },
